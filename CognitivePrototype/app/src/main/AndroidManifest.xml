@@ -16,6 +16,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ShowSuccessionNumbersStart"
+            android:label="@string/title_activity_show_succession_numbers" >
+        </activity>
+        <activity
+            android:name=".ShowSuccessionNumbersMain"
+            android:label="@string/title_activity_show_succession_numbers_main" >
+        </activity>
+        <activity
+            android:name=".ShowSuccessionNumbersInput"
+            android:label="@string/title_activity_show_succession_numbers_input" >
+        </activity>
+        <activity
+            android:name=".ShowSuccessionNumbersResult"
+            android:label="@string/title_activity_show_succession_numbers_result" >
+        </activity>
     </application>
 
 </manifest>
