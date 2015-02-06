@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -23,6 +24,9 @@ public class ShowSuccessionNumbersInput extends ActionBarActivity {
         setContentView(R.layout.activity_show_succession_numbers_input);
 
         EditText succession_numbers_input = (EditText)findViewById(R.id.succession_numbers_input);
+        // pop open keyboard
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
         final Bundle bundle = getIntent().getExtras();
         if (bundle == null)
             getIntent().putExtras(new Bundle());
