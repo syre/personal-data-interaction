@@ -11,6 +11,9 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 
 public class ShowSuccessionNumbersInput extends ActionBarActivity {
 
@@ -20,8 +23,7 @@ public class ShowSuccessionNumbersInput extends ActionBarActivity {
         setContentView(R.layout.activity_show_succession_numbers_input);
 
         EditText succession_numbers_input = (EditText)findViewById(R.id.succession_numbers_input);
-        final String correct_numbers = getIntent().getExtras().getString("succession_numbers").trim();
-        Bundle bundle = getIntent().getExtras();
+        final Bundle bundle = getIntent().getExtras();
         if (bundle == null)
             getIntent().putExtras(new Bundle());
         boolean has_successful_tries = bundle.containsKey("successful_tries");
@@ -35,10 +37,19 @@ public class ShowSuccessionNumbersInput extends ActionBarActivity {
                 boolean handled;
                 String user_input = v.getText().toString();
                 Integer successful_tries = getIntent().getExtras().getInt("successful_tries");
+                ArrayList<Integer> succession_numbers_list = getIntent().getExtras().getIntegerArrayList("succession_numbers_list");
+
+                String correct_numbers = "";
+                for (Integer number : succession_numbers_list)
+                {
+                    correct_numbers += number.toString();
+                }
+
                     if (user_input.equals(correct_numbers))
                     {
                         Intent intent = new Intent(v.getContext(), ShowSuccessionNumbersMain.class);
                         intent.putExtra("successful_tries",++successful_tries);
+                        intent.putExtra("succession_numbers_list", succession_numbers_list);
                         startActivity(intent);
                         handled = true;
                     }
