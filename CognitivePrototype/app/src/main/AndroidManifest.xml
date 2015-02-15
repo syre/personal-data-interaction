@@ -17,10 +17,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ShowSuccessionNumbersStart"
-            android:label="@string/title_activity_show_succession_numbers">
-        </activity>
-        <activity
             android:name=".ShowSuccessionNumbersMain"
             android:label="@string/title_activity_show_succession_numbers_main" >
         </activity>

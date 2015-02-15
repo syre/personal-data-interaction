@@ -1,6 +1,8 @@
 package com.example.syre.cognitiveprototype;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -61,6 +63,18 @@ public class ShowSuccessionNumbersInput extends ActionBarActivity {
                     {
                         Intent intent = new Intent(v.getContext(), ShowSuccessionNumbersResult.class);
                         intent.putExtra("successful_tries", successful_tries);
+                        // save result in database
+                        ScoresDbHelper dbHelper = new ScoresDbHelper(getApplicationContext());
+                        SQLiteDatabase db = dbHelper.getWritableDatabase();
+                        ContentValues values = new ContentValues();
+                        values.put(DatabaseContract.ScoresTable.COLUMN_NAME_COL1, successful_tries);
+                        values.put(DatabaseContract.ScoresTable.COLUMN_NAME_COL2, succession_numbers_list.get(succession_numbers_list.size()-1));
+                        values.put(DatabaseContract.ScoresTable.COLUMN_NAME_COL4, correct_numbers);
+                        db.insert(
+                                DatabaseContract.ScoresTable.TABLE_NAME,
+                                "null",
+                                values);
+
                         startActivity(intent);
                         handled = true;
                     }

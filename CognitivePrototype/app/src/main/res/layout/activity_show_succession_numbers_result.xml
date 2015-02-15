@@ -19,10 +19,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="5/5 Correct!"
-        android:id="@+id/result_text"
+        android:id="@+id/successful_tries_text"
         android:layout_marginTop="129dp"
         android:layout_centerHorizontal="true"
         android:textColor="#e5e5e5" />
 
+    <com.github.mikephil.charting.charts.BarChart
+        android:id="@+id/result_chart"
+        android:layout_width="wrap_content"
+        android:layout_height="177dp"
+        android:layout_below="@+id/successful_tries_text"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="78dp" />
 </RelativeLayout>

@@ -14,13 +14,13 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_show_succession_numbers_start);
 
-        final Button button = (Button)findViewById(R.id.show_numbers_start_button);
+        final Button button = (Button)findViewById(R.id.show_numbers_screen_start_button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), ShowSuccessionNumbersStart.class);
+                Intent intent = new Intent(v.getContext(), ShowSuccessionNumbersMain.class);
                 startActivity(intent);
             }
         });
@@ -30,7 +30,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_show_succession_numbers, menu);
         return true;
     }
 

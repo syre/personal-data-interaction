@@ -6,7 +6,7 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_show_numbers">ShowNumbersActivity</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="show_numbers_description">You will be shown numbers from 0-9 in succession, after each sequence you need to input them back to us</string>
+    <string name="show_numbers_description">You will be shown numbers from 0-9 in sequence, after each sequence has been shown, you need to input them back to us.</string>
     <string name="title_activity_show_succession_numbers">ShowSuccessionNumbers</string>
     <string name="title_activity_show_succession_numbers_main">ShowSuccessionNumbersMain</string>
     <string name="title_activity_show_succession_numbers_input">ShowSuccessionNumbersInput</string>
