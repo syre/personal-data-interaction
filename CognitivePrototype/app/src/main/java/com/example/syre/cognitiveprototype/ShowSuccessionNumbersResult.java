@@ -31,6 +31,7 @@ public class ShowSuccessionNumbersResult extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_succession_numbers_result);
         TextView successful_tries_text = (TextView)findViewById(R.id.successful_tries_text);
+        TextView personal_best_text = (TextView)findViewById(R.id.personal_best_text);
         BarChart result_chart = (BarChart)findViewById(R.id.result_chart);
         result_chart.setDrawBarShadow(false);
         result_chart.setDrawVerticalGrid(false);
@@ -61,16 +62,16 @@ public class ShowSuccessionNumbersResult extends ActionBarActivity {
                 null,
                 null,
                 null,
-                "_id DESC limit 4"
+                "_id DESC"
         );
 
         ArrayList<BarDataSet> dataSets = new ArrayList<BarDataSet>();
         ArrayList<String> xvals = new ArrayList<String>();
         // get just measured score
         c.moveToNext();
-        Integer current_score = c.getInt(0);
+        Integer personal_best = 0;
         ArrayList<BarEntry> current_yval = new ArrayList<BarEntry>();
-        current_yval.add(new BarEntry(current_score, 0));
+        current_yval.add(new BarEntry(successful_tries, 0));
         xvals.add(c.getString(1).split("\\s")[0]);
         BarDataSet current_set = new BarDataSet(current_yval, "Current");
         current_set.setColors(ColorTemplate.JOYFUL_COLORS);
@@ -78,16 +79,27 @@ public class ShowSuccessionNumbersResult extends ActionBarActivity {
         // get next 3 newest scores
         ArrayList<BarEntry> previous_yvals = new ArrayList<>();
         Integer counter = 1;
+        Integer NUMBER_OF_GRAPH_ITEMS = 4;
         while (c.moveToNext()) {
-            previous_yvals.add(new BarEntry(c.getInt(0), counter));
-            xvals.add(c.getString(1).split("\\s")[0]);
-
+            if (counter < NUMBER_OF_GRAPH_ITEMS)
+            {
+                previous_yvals.add(new BarEntry(c.getInt(0), counter));
+                xvals.add(c.getString(1).split("\\s")[0]);
+            }
+            if (c.getInt(0) > personal_best)
+                    personal_best = c.getInt(0);
             counter += 1;
         }
-        BarDataSet previous_set = new BarDataSet(previous_yvals, "Previous");
+        BarDataSet previous_set = new BarDataSet(previous_yvals, "Three previous");
         dataSets.add(previous_set);
         BarData data = new BarData(xvals, dataSets);
         result_chart.setData(data);
+        if (personal_best-successful_tries > 0)
+            personal_best_text.setText("You were "+(personal_best-successful_tries)+ " from your personal best");
+        else if (personal_best-successful_tries < 0)
+            personal_best_text.setText("Congratulations!\n you just beat your personal best by "+(successful_tries-personal_best));
+        else
+            personal_best_text.setText("You just tied your personal best of ");
     }
 
 
