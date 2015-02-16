@@ -11,5 +11,6 @@
     <string name="title_activity_show_succession_numbers_main">ShowSuccessionNumbersMain</string>
     <string name="title_activity_show_succession_numbers_input">ShowSuccessionNumbersInput</string>
     <string name="title_activity_show_succession_numbers_result">ShowSuccessionNumbersResult</string>
+    <string name="title_activity_show_succession_number_long_term_result">ShowSuccessionNumberLongTermResult</string>
 
 </resources>

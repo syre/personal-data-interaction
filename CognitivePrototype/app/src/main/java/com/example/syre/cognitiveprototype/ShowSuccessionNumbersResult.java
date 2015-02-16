@@ -1,5 +1,6 @@
 package com.example.syre.cognitiveprototype;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.ContactsContract;
@@ -7,6 +8,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -30,9 +33,21 @@ public class ShowSuccessionNumbersResult extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_succession_numbers_result);
+        // initialize views and barchart
         TextView successful_tries_text = (TextView)findViewById(R.id.successful_tries_text);
         TextView personal_best_text = (TextView)findViewById(R.id.personal_best_text);
         BarChart result_chart = (BarChart)findViewById(R.id.result_chart);
+        Button result_next_button = (Button)findViewById(R.id.result_next_button);
+
+        result_next_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(), ShowSuccessionNumberLongTermResult.class);
+                startActivity(intent);
+            }
+        });
+
+
         result_chart.setDrawBarShadow(false);
         result_chart.setDrawVerticalGrid(false);
         result_chart.setDescription("");
@@ -46,9 +61,10 @@ public class ShowSuccessionNumbersResult extends ActionBarActivity {
         XLabels xLabels = result_chart.getXLabels();
         xLabels.setPosition(XLabels.XLabelPosition.BOTTOM);
         xLabels.setSpaceBetweenLabels(0);
+        // get just completed score
         Integer successful_tries = getIntent().getExtras().getInt("successful_tries");
         successful_tries_text.setText("You managed " + successful_tries + " consecutive tries");
-
+        // query database for all results
         ScoresDbHelper dbHelper = new ScoresDbHelper(getApplicationContext());
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String[] projection = {
@@ -67,6 +83,7 @@ public class ShowSuccessionNumbersResult extends ActionBarActivity {
 
         ArrayList<BarDataSet> dataSets = new ArrayList<BarDataSet>();
         ArrayList<String> xvals = new ArrayList<String>();
+
         // get just measured score
         c.moveToNext();
         Integer personal_best = 0;
@@ -76,6 +93,7 @@ public class ShowSuccessionNumbersResult extends ActionBarActivity {
         BarDataSet current_set = new BarDataSet(current_yval, "Current");
         current_set.setColors(ColorTemplate.JOYFUL_COLORS);
         dataSets.add(current_set);
+
         // get next 3 newest scores
         ArrayList<BarEntry> previous_yvals = new ArrayList<>();
         Integer counter = 1;
@@ -94,12 +112,13 @@ public class ShowSuccessionNumbersResult extends ActionBarActivity {
         dataSets.add(previous_set);
         BarData data = new BarData(xvals, dataSets);
         result_chart.setData(data);
+        // set personal best text
         if (personal_best-successful_tries > 0)
             personal_best_text.setText("You were "+(personal_best-successful_tries)+ " from your personal best");
         else if (personal_best-successful_tries < 0)
             personal_best_text.setText("Congratulations!\n you just beat your personal best by "+(successful_tries-personal_best));
         else
-            personal_best_text.setText("You just tied your personal best of ");
+            personal_best_text.setText("You just tied your personal best of "+personal_best);
     }
 
 

@@ -28,6 +28,10 @@
             android:name=".ShowSuccessionNumbersResult"
             android:label="@string/title_activity_show_succession_numbers_result" >
         </activity>
+        <activity
+            android:name=".ShowSuccessionNumberLongTermResult"
+            android:label="@string/title_activity_show_succession_number_long_term_result" >
+        </activity>
     </application>
 
 </manifest>

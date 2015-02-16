@@ -9,7 +9,7 @@
 
     <TextView android:text="Result" android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="50dp"
+        android:textSize="30dp"
         android:id="@+id/s"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
@@ -43,4 +43,14 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="38dp"
         android:textColor="#e5e5e5" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Next"
+        android:id="@+id/result_next_button"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>
