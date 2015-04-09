@@ -5,6 +5,7 @@ import android.content.Context;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -37,7 +38,6 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -52,6 +52,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                                                       MqttCallback {
     List<Friend> listItems = new ArrayList<Friend>();
     ListView friendListView;
+    ArrayAdapter friendListAdapter;
     MapView friendmapview;
     GoogleApiClient mGoogleApiClient;
     Boolean broadcastingEnabled;
@@ -70,8 +71,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendmapview.onCreate(savedInstanceState);
 
         friendListView = (ListView)findViewById(R.id.friendListView);
-
-        friendListView.setAdapter(new ArrayAdapter<Friend>(this, android.R.layout.simple_list_item_1, listItems));
+        friendListAdapter = new ArrayAdapter<Friend>(this, android.R.layout.simple_list_item_1, listItems);
+        friendListView.setAdapter(friendListAdapter);
 
         MapsInitializer.initialize(this);
         friendmapview.getMapAsync(this);
@@ -245,7 +246,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     }
 
-    private int findFriendIndex(String id)
+    private int findFriendIndexById(String id)
     {
         for (Friend f: listItems)
         {
@@ -264,31 +265,36 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         try {
             command = json_obj.getString("command");
             id = json_obj.getString("id");
-            if (command.equals("loc_update"))
-            {
+            if (command.equals("loc_update")) {
                 Double lat = json_obj.getDouble("lat");
                 Double lng = json_obj.getDouble("lng");
-                int friend_index = findFriendIndex(id);
-                if (friend_index != -1)
+                if (findFriendIndexById(id) == -1)
                 {
-                    Friend obj = listItems.get(friend_index);
-                    obj.setLat(lat);
-                    obj.setLng(lng);
+                    listItems.add(new Friend(id, lat, lng));
                 }
                 else
                 {
-                    listItems.add(new Friend(id, lat, lng ));
+                    listItems.get(findFriendIndexById(id)).setLat(lat);
+                    listItems.get(findFriendIndexById(id)).setLng(lng);
                 }
-                friendListView.invalidate();
+                // update list view on UI thread
+                runOnUiThread(new Runnable() {
 
+                    @Override
+                    public void run() {
+                        friendListAdapter.notifyDataSetChanged();
+                    }
+
+                });
             }
 
 
         }
-        catch(JSONException except) {
+        catch(Exception except) {
             Log.d("MainActivity", "MessageArrived exception: " + except.getMessage());
         }
     }
+
     @Override
     public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
         String msg = new java.lang.String(mqttMessage.getPayload());
@@ -300,7 +306,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 parseCommand(json_obj);
 
         }
-        catch(JSONException except) {
+        catch(Exception except) {
             Log.d("MainActivity", "MessageArrived exception: " + except.getMessage());
         }
     }
