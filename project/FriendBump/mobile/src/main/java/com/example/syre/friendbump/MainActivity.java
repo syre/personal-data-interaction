@@ -34,18 +34,22 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 
+//import friend;
 
 public class MainActivity extends Activity implements OnMapReadyCallback, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    ArrayList<String> listItems = new ArrayList<String>();
+    ArrayList<friend> listItems = new ArrayList<friend>();
     MapView friendmapview;
     GoogleApiClient mGoogleApiClient;
     Boolean broadcastingEnabled;
     ImageButton toggleBroadcastingButton;
     MqttClient mqttClient;
     MemoryPersistence persistence;
+    GoogleMap mMap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,9 +59,11 @@ public class MainActivity extends Activity implements OnMapReadyCallback, Locati
         friendmapview.onCreate(savedInstanceState);
 
         ListView friendListView = (ListView)findViewById(R.id.friendListView);
-        listItems.add("Søren Howe Gersager");
-        listItems.add("Anders Rahbek");
-        friendListView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listItems));
+
+
+        listItems.add(new friend("Søren Howe Gersager", 55.83049, 12.42641));
+        listItems.add(new friend("Anders Rahbek", 55.83049+0.002, 12.42641+0.002));
+        friendListView.setAdapter(new ArrayAdapter<friend>(this, android.R.layout.simple_list_item_1, listItems));
 
         MapsInitializer.initialize(this);
         friendmapview.getMapAsync(this);
@@ -75,17 +81,14 @@ public class MainActivity extends Activity implements OnMapReadyCallback, Locati
             MqttConnectOptions options = new MqttConnectOptions();
             options.setKeepAliveInterval(60);
             mqttClient.connect();
-            MqttMessage message = new MqttMessage("blablabla".getBytes());
-            message.setQos(1);
-            MqttDeliveryToken token = topic.publish(message);
-            token.waitForCompletion();
-            Log.d("MainActivity", "message sent!");
+
             mqttClient.disconnect();
             }
         catch(MqttException except)
         {
             Log.d("MainActivity mqtt:", except.getMessage());
         }
+
     }
     @Override
     public void onPause() {
@@ -103,6 +106,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback, Locati
     public void onDestroy() {
         super.onDestroy();
         friendmapview.onDestroy();
+        mqttClient.disconnect();
     }
 
     @Override
@@ -144,11 +148,17 @@ public class MainActivity extends Activity implements OnMapReadyCallback, Locati
         CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(last_known.getLatitude(), last_known.getLongitude()));
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
         // enables location marker
-        map.setMyLocationEnabled(true);
-        map.getUiSettings().setAllGesturesEnabled(false);
-        map.moveCamera(center);
-        map.animateCamera(zoom);
-
+        mMap = map;
+        mMap.setMyLocationEnabled(true);
+        mMap.getUiSettings().setAllGesturesEnabled(false);
+        mMap.moveCamera(center);
+        mMap.animateCamera(zoom);
+        for(int i = 0; i<listItems.size();i++)
+        {
+                mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(listItems.get(i).getLat(), listItems.get(i).getLng()))
+                        .title(listItems.get(i).getName()));
+        }
     }
     @Override
     public void onLocationChanged(Location loc)
