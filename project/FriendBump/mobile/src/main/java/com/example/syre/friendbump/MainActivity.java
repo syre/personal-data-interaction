@@ -6,6 +6,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,6 +27,13 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttTopic;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.util.ArrayList;
 
@@ -36,6 +44,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback, Locati
     GoogleApiClient mGoogleApiClient;
     Boolean broadcastingEnabled;
     ImageButton toggleBroadcastingButton;
+    MqttClient mqttClient;
+    MemoryPersistence persistence;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +67,25 @@ public class MainActivity extends Activity implements OnMapReadyCallback, Locati
                             .addApi(LocationServices.API)
                             .build();
         broadcastingEnabled = true;
+        try {
+            persistence = new MemoryPersistence();
+            mqttClient = new MqttClient("tcp://192.168.1.220:1883","1", persistence);
+            MqttTopic topic = mqttClient.getTopic("friendbump");
+            
+            MqttConnectOptions options = new MqttConnectOptions();
+            options.setKeepAliveInterval(60);
+            mqttClient.connect();
+            MqttMessage message = new MqttMessage("blablabla".getBytes());
+            message.setQos(1);
+            MqttDeliveryToken token = topic.publish(message);
+            token.waitForCompletion();
+            Log.d("MainActivity", "message sent!");
+            mqttClient.disconnect();
+            }
+        catch(MqttException except)
+        {
+            Log.d("MainActivity mqtt:", except.getMessage());
+        }
     }
     @Override
     public void onPause() {
@@ -141,12 +170,12 @@ public class MainActivity extends Activity implements OnMapReadyCallback, Locati
         locationrequest.setFastestInterval(5000);
         locationrequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,locationrequest, this);
-        Toast.makeText(this, "Connection successful", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Connection successful", Toast.LENGTH_LONG).show();
     }
 
     @Override public void onConnectionFailed(ConnectionResult result)
     {
-        Toast.makeText(this, "Connection failed", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Connection failed", Toast.LENGTH_LONG).show();
     }
     public void toggleBroadcasting(View v)
     {
