@@ -27,28 +27,39 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttToken;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.List;
 
-//import friend;
-
-public class MainActivity extends Activity implements OnMapReadyCallback, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    ArrayList<friend> listItems = new ArrayList<friend>();
+public class MainActivity extends Activity implements OnMapReadyCallback,
+                                                      LocationListener,
+                                                      GoogleApiClient.ConnectionCallbacks,
+                                                      GoogleApiClient.OnConnectionFailedListener,
+                                                      MqttCallback {
+    List<Friend> listItems = new ArrayList<Friend>();
+    ListView friendListView;
     MapView friendmapview;
     GoogleApiClient mGoogleApiClient;
     Boolean broadcastingEnabled;
     ImageButton toggleBroadcastingButton;
     MqttClient mqttClient;
-    MemoryPersistence persistence;
     GoogleMap mMap;
+    MemoryPersistence persistence;
+    String clientId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,12 +69,9 @@ public class MainActivity extends Activity implements OnMapReadyCallback, Locati
         toggleBroadcastingButton = (ImageButton)findViewById(R.id.toggleBroadcastingButton);
         friendmapview.onCreate(savedInstanceState);
 
-        ListView friendListView = (ListView)findViewById(R.id.friendListView);
+        friendListView = (ListView)findViewById(R.id.friendListView);
 
-
-        listItems.add(new friend("Søren Howe Gersager", 55.83049, 12.42641));
-        listItems.add(new friend("Anders Rahbek", 55.83049+0.002, 12.42641+0.002));
-        friendListView.setAdapter(new ArrayAdapter<friend>(this, android.R.layout.simple_list_item_1, listItems));
+        friendListView.setAdapter(new ArrayAdapter<Friend>(this, android.R.layout.simple_list_item_1, listItems));
 
         MapsInitializer.initialize(this);
         friendmapview.getMapAsync(this);
@@ -73,22 +81,29 @@ public class MainActivity extends Activity implements OnMapReadyCallback, Locati
                             .addApi(LocationServices.API)
                             .build();
         broadcastingEnabled = true;
+        persistence = new MemoryPersistence();
+        clientId = "client" + ((int) (10000*Math.random()));
         try {
-            persistence = new MemoryPersistence();
-            mqttClient = new MqttClient("tcp://192.168.1.220:1883","1", persistence);
-            MqttTopic topic = mqttClient.getTopic("friendbump");
+            mqttClient = new MqttClient("tcp://syrelyre.dk:1883",clientId,persistence);
             
             MqttConnectOptions options = new MqttConnectOptions();
             options.setKeepAliveInterval(60);
+            mqttClient.setCallback(this);
             mqttClient.connect();
-
-            mqttClient.disconnect();
+            mqttClient.subscribe("friendbump");
             }
         catch(MqttException except)
         {
             Log.d("MainActivity mqtt:", except.getMessage());
+            Toast.makeText(getApplicationContext(), "MQTT Connection failed: "+except.getMessage(), Toast.LENGTH_SHORT).show();
         }
 
+    }
+    @Override
+    public void onStart()
+    {
+        super.onStart();
+        mGoogleApiClient.connect();
     }
     @Override
     public void onPause() {
@@ -106,7 +121,13 @@ public class MainActivity extends Activity implements OnMapReadyCallback, Locati
     public void onDestroy() {
         super.onDestroy();
         friendmapview.onDestroy();
-        mqttClient.disconnect();
+        try{
+            mqttClient.disconnect();
+        }
+        catch(MqttException except)
+        {
+            Log.d("MainActivity","MQTT: could not disconnect from broker");
+        }
     }
 
     @Override
@@ -163,9 +184,27 @@ public class MainActivity extends Activity implements OnMapReadyCallback, Locati
     @Override
     public void onLocationChanged(Location loc)
     {
+        Log.d("MainActivity","Location changed");
         if (broadcastingEnabled)
         {
-            // broadcast location
+            Double latitude = loc.getLatitude();
+            Double longitude = loc.getLongitude();
+            String command = "loc_update";
+            String json_string = "{id:"+clientId+
+                                  ",command:"+command+
+                                  ",lat:"+latitude+
+                                  ",lng:"+longitude+"}";
+            MqttTopic topic = mqttClient.getTopic("friendbump");
+            MqttMessage msg = new MqttMessage(json_string.getBytes());
+            msg.setQos(1);
+            try {
+                MqttToken token = topic.publish(msg);
+                token.waitForCompletion();
+            }
+            catch(MqttException except)
+            {
+                Log.d("MainActivity", "MQTT: could not send location message: "+except.getMessage());
+            }
         }
 
     }
@@ -175,6 +214,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback, Locati
     }
     @Override public void onConnected(Bundle bundle)
     {
+        Log.d("MainActivity", "device connected!");
         LocationRequest locationrequest = new LocationRequest();
         locationrequest.setInterval(10000);
         locationrequest.setFastestInterval(5000);
@@ -198,5 +238,75 @@ public class MainActivity extends Activity implements OnMapReadyCallback, Locati
             toggleBroadcastingButton.setBackgroundResource(R.mipmap.disable_broadcasting);
         }
         broadcastingEnabled = !broadcastingEnabled;
+    }
+
+    @Override
+    public void connectionLost(Throwable throwable) {
+
+    }
+
+    private int findFriendIndex(String id)
+    {
+        for (Friend f: listItems)
+        {
+            if (f.getName().equals(id))
+            {
+                return listItems.indexOf(f);
+            }
+
+        }
+        return -1;
+    }
+
+    private void parseCommand(JSONObject json_obj) {
+        String command = "";
+        String id = "";
+        try {
+            command = json_obj.getString("command");
+            id = json_obj.getString("id");
+            if (command.equals("loc_update"))
+            {
+                Double lat = json_obj.getDouble("lat");
+                Double lng = json_obj.getDouble("lng");
+                int friend_index = findFriendIndex(id);
+                if (friend_index != -1)
+                {
+                    Friend obj = listItems.get(friend_index);
+                    obj.setLat(lat);
+                    obj.setLng(lng);
+                }
+                else
+                {
+                    listItems.add(new Friend(id, lat, lng ));
+                }
+                friendListView.invalidate();
+
+            }
+
+
+        }
+        catch(JSONException except) {
+            Log.d("MainActivity", "MessageArrived exception: " + except.getMessage());
+        }
+    }
+    @Override
+    public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
+        String msg = new java.lang.String(mqttMessage.getPayload());
+        Log.d("MainActivity", "message arrived:" + msg);
+        JSONObject json_obj = null;
+        try {
+            json_obj = new JSONObject(msg);
+            if (!json_obj.getString("id").equals(clientId))
+                parseCommand(json_obj);
+
+        }
+        catch(JSONException except) {
+            Log.d("MainActivity", "MessageArrived exception: " + except.getMessage());
+        }
+    }
+
+    @Override
+    public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+
     }
 }
