@@ -7,6 +7,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,6 +41,7 @@ import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONObject;
 
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
@@ -51,6 +53,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                                                       GoogleApiClient.OnConnectionFailedListener,
                                                       MqttCallback {
     List<Friend> listItems = new ArrayList<Friend>();
+    List<Marker> markers = new ArrayList<Marker>();
     ListView friendListView;
     ArrayAdapter friendListAdapter;
     MapView friendmapview;
@@ -98,6 +101,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             Log.d("MainActivity mqtt:", except.getMessage());
             Toast.makeText(getApplicationContext(), "MQTT Connection failed: "+except.getMessage(), Toast.LENGTH_SHORT).show();
         }
+
 
     }
     @Override
@@ -177,10 +181,20 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         mMap.animateCamera(zoom);
         for(int i = 0; i<listItems.size();i++)
         {
-                mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(listItems.get(i).getLat(), listItems.get(i).getLng()))
-                        .title(listItems.get(i).getName()));
+            Marker marker = mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(listItems.get(i).getLat(), listItems.get(i).getLng()))
+                .title(listItems.get(i).getName()));
+            markers.add(marker);
         }
+        /*
+        Toast.makeText(getApplicationContext(), "Creating marker", Toast.LENGTH_SHORT).show();
+        //Marker marker = new MarkerOptions().position(new LatLng(55.83045, 12.42811)).title("hej");
+        //Marker m1 = new MarkerOptions().position(new LatLng(55.83045, 12.42811)).title("hej");;
+        mMap.addMarker(new MarkerOptions().position(new LatLng(55.83045, 12.42811)).title("hej"));
+        Toast.makeText(getApplicationContext(), "Adding marker", Toast.LENGTH_SHORT).show();
+        //markers.add(m);
+        Toast.makeText(getApplicationContext(), "Finish Adding marker", Toast.LENGTH_SHORT).show();
+        */
     }
     @Override
     public void onLocationChanged(Location loc)
@@ -261,21 +275,52 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     private void parseCommand(JSONObject json_obj) {
         String command = "";
-        String id = "";
+        //final String id = "";
         try {
             command = json_obj.getString("command");
-            id = json_obj.getString("id");
+            final String id = json_obj.getString("id");
             if (command.equals("loc_update")) {
-                Double lat = json_obj.getDouble("lat");
-                Double lng = json_obj.getDouble("lng");
+                final Double lat = json_obj.getDouble("lat");
+                final Double lng = json_obj.getDouble("lng");
                 if (findFriendIndexById(id) == -1)
                 {
+                    //Looper.prepare();
+
                     listItems.add(new Friend(id, lat, lng));
+                    Log.w("Markers", "Creating a marker");
+                    /*
+                    Toast.makeText(getApplicationContext(), "hej hej! - Creating marker", Toast.LENGTH_SHORT).show();
+                    runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            Marker marker = mMap.addMarker(new MarkerOptions()
+                                    .position(new LatLng(lat, lng))
+                                    .title(id));
+                            Log.w("Markers", "Adding the marker to markers");
+                            markers.add(marker);
+                        }
+
+                    });
+
+                    */
+
+
                 }
                 else
                 {
                     listItems.get(findFriendIndexById(id)).setLat(lat);
                     listItems.get(findFriendIndexById(id)).setLng(lng);
+                    /*
+                    if(updateMarker(id, lat, lng))
+                    {
+                        Toast.makeText(getApplicationContext(), "Update marker success", Toast.LENGTH_LONG).show();
+                    }
+                    else
+                    {
+                        Toast.makeText(getApplicationContext(), "Update marker failed", Toast.LENGTH_LONG).show();
+                    }
+                    */
                 }
                 // update list view on UI thread
                 runOnUiThread(new Runnable() {
@@ -283,6 +328,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     @Override
                     public void run() {
                         friendListAdapter.notifyDataSetChanged();
+                        updateMarker();
+
                     }
 
                 });
@@ -295,6 +342,49 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         }
     }
 
+    private void updateMarker()
+    {
+
+        for (Friend f: listItems)
+        {
+            boolean flag = false;
+            for (Marker m : markers) {
+                if (m.getTitle().equals(f.getName()))
+                {
+                    LatLng pos = new LatLng(f.getLat(), f.getLng());
+                    m.setPosition(pos);
+                    flag = true;
+                    //return listItems.indexOf(f);
+                }
+
+            }
+            if(!flag) //Marker for friend f, doesn't exist in Marker
+            {
+                Marker marker = mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(f.getLat(), f.getLng()))
+                        .title(f.getName()));
+                Log.w("Markers", "Adding the marker to markers");
+                markers.add(marker);
+            }
+        }
+        //return false;
+    }
+    /*
+    private void drawMarkers()
+    {
+        for (Marker m: markers)
+        {
+            if (m.getTitle().equals(id))
+            {
+                LatLng pos = new LatLng(lat, lng);
+                m.setPosition(pos);
+                return true;
+                //return listItems.indexOf(f);
+            }
+
+        }
+    }
+    */
     @Override
     public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
         String msg = new java.lang.String(mqttMessage.getPayload());
