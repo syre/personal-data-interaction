@@ -6,6 +6,7 @@ package com.example.syre.friendbump;
 public class Friend
 {
     private String name;
+    private String email;
     private double lat;
     private double lng;
 
@@ -14,18 +15,19 @@ public class Friend
         this.name = name;
     }
 
-    public Friend(String name, double lat, double lng)
+    public Friend(String name, double lat, double lng, String email)
     {
         this.name = name;
         this.lat = lat;
         this.lng = lng;
+        this.email = email;
     }
 
     public String getName()
     {
         return this.name;
     }
-
+    public String getEmail() { return email; }
     public double getLat()
     {
         return this.lat;
@@ -44,6 +46,7 @@ public class Friend
     {
         this.lng = lng;
     }
+    public void setEmail(String email) {this.email = email;}
 
     @Override
     public String toString()

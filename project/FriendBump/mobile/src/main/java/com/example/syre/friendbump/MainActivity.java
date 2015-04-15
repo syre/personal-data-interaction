@@ -155,7 +155,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -186,15 +185,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 .title(listItems.get(i).getName()));
             markers.add(marker);
         }
-        /*
-        Toast.makeText(getApplicationContext(), "Creating marker", Toast.LENGTH_SHORT).show();
-        //Marker marker = new MarkerOptions().position(new LatLng(55.83045, 12.42811)).title("hej");
-        //Marker m1 = new MarkerOptions().position(new LatLng(55.83045, 12.42811)).title("hej");;
-        mMap.addMarker(new MarkerOptions().position(new LatLng(55.83045, 12.42811)).title("hej"));
-        Toast.makeText(getApplicationContext(), "Adding marker", Toast.LENGTH_SHORT).show();
-        //markers.add(m);
-        Toast.makeText(getApplicationContext(), "Finish Adding marker", Toast.LENGTH_SHORT).show();
-        */
     }
     @Override
     public void onLocationChanged(Location loc)
@@ -246,11 +236,11 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     {
         if (broadcastingEnabled)
         {
-            toggleBroadcastingButton.setBackgroundResource(R.mipmap.enable_broadcasting);
+            toggleBroadcastingButton.setBackgroundResource(R.mipmap.broadcast_disabled);
         }
         else
         {
-            toggleBroadcastingButton.setBackgroundResource(R.mipmap.disable_broadcasting);
+            toggleBroadcastingButton.setBackgroundResource(R.mipmap.broadcast_enabled);
         }
         broadcastingEnabled = !broadcastingEnabled;
     }
@@ -264,7 +254,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     {
         for (Friend f: listItems)
         {
-            if (f.getName().equals(id))
+            if (f.getEmail().equals(id))
             {
                 return listItems.indexOf(f);
             }
@@ -275,7 +265,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     private void parseCommand(JSONObject json_obj) {
         String command = "";
-        //final String id = "";
         try {
             command = json_obj.getString("command");
             final String id = json_obj.getString("id");
@@ -284,43 +273,12 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 final Double lng = json_obj.getDouble("lng");
                 if (findFriendIndexById(id) == -1)
                 {
-                    //Looper.prepare();
-
-                    listItems.add(new Friend(id, lat, lng));
-                    Log.w("Markers", "Creating a marker");
-                    /*
-                    Toast.makeText(getApplicationContext(), "hej hej! - Creating marker", Toast.LENGTH_SHORT).show();
-                    runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            Marker marker = mMap.addMarker(new MarkerOptions()
-                                    .position(new LatLng(lat, lng))
-                                    .title(id));
-                            Log.w("Markers", "Adding the marker to markers");
-                            markers.add(marker);
-                        }
-
-                    });
-
-                    */
-
-
+                    listItems.add(new Friend(id,lat, lng, "testemail"));
                 }
                 else
                 {
                     listItems.get(findFriendIndexById(id)).setLat(lat);
                     listItems.get(findFriendIndexById(id)).setLng(lng);
-                    /*
-                    if(updateMarker(id, lat, lng))
-                    {
-                        Toast.makeText(getApplicationContext(), "Update marker success", Toast.LENGTH_LONG).show();
-                    }
-                    else
-                    {
-                        Toast.makeText(getApplicationContext(), "Update marker failed", Toast.LENGTH_LONG).show();
-                    }
-                    */
                 }
                 // update list view on UI thread
                 runOnUiThread(new Runnable() {
@@ -329,7 +287,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     public void run() {
                         friendListAdapter.notifyDataSetChanged();
                         updateMarker();
-
                     }
 
                 });
@@ -354,7 +311,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     LatLng pos = new LatLng(f.getLat(), f.getLng());
                     m.setPosition(pos);
                     flag = true;
-                    //return listItems.indexOf(f);
                 }
 
             }
@@ -367,24 +323,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 markers.add(marker);
             }
         }
-        //return false;
     }
-    /*
-    private void drawMarkers()
-    {
-        for (Marker m: markers)
-        {
-            if (m.getTitle().equals(id))
-            {
-                LatLng pos = new LatLng(lat, lng);
-                m.setPosition(pos);
-                return true;
-                //return listItems.indexOf(f);
-            }
 
-        }
-    }
-    */
     @Override
     public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
         String msg = new java.lang.String(mqttMessage.getPayload());

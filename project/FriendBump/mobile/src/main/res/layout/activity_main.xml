@@ -16,7 +16,7 @@
         <ImageButton
             android:id="@+id/toggleBroadcastingButton"
             android:layout_alignParentTop="true"
-            android:background="@mipmap/disable_broadcasting"
+            android:background="@mipmap/broadcast_enabled"
             android:onClick="toggleBroadcasting"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
