@@ -67,8 +67,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     HashMap<String, Friend> friendHashMap = new HashMap<String, Friend>();
     HashMap<String, Marker>  markers = new HashMap<String, Marker>();
-    //List<Friend> listItems = new ArrayList<Friend>();
-    //List<Marker> markers = new ArrayList<Marker>();
     ListView friendListView;
     ArrayAdapter friendListAdapter;
     MapView friendmapview;
@@ -90,10 +88,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendmapview.onCreate(savedInstanceState);
         friendHashMap.put("handiiandii@gmail.com", new Friend("Anders Rahbek", 0.0, 0.0, "handiiandii@gmail.com"));
         friendHashMap.put("syrelyre@gmail.com", new Friend("Søren Howe Gersager", 0.0, 0.0, "syrelyre@gmail.com"));
-        //listItems.add(new Friend("Anders Rahbek",0.0,0.0,"handiiandii@gmail.com"));
-        //listItems.add(new Friend("Søren Howe Gersager",0.0,0.0,"syrelyre@gmail.com"));
+
         friendListView = (ListView)findViewById(R.id.friendListView);
-        //Friend[] list = new Friend[];
         ArrayList<Friend> valuesList = new ArrayList<Friend>(friendHashMap.values());
         friendListAdapter = new ArrayAdapter<Friend>(this, android.R.layout.simple_list_item_1, valuesList);
         friendListView.setAdapter(friendListAdapter);
@@ -331,22 +327,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             Log.d("MainActivity", "MQTT: Connection Lost, reconnect failed: "+except.getMessage());
         }
     }
-    /*
-    private int findFriendIndexByEmail(String email)
-    {
 
-
-        for (Friend f: listItems)
-        {
-            if (f.getEmail().equals(email))
-            {
-                return listItems.indexOf(f);
-            }
-
-        }
-        return -1;
-    }
-    */
     private void parseCommand(JSONObject json_obj) {
         try {
             final String command = json_obj.getString("command");
@@ -439,7 +420,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     }
 
     @Override
-    public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
+    public void messageArrived(String s, MqttMessage mqttMessage) throws Exception
+    {
         String msg = new java.lang.String(mqttMessage.getPayload());
         Log.d("MainActivity", "message arrived:" + msg);
         try {
@@ -454,7 +436,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     }
 
     @Override
-    public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+    public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken)
+    {
 
     }
 
