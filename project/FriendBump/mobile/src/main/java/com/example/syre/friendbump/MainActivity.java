@@ -422,7 +422,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             }
             if(!flag) //Friend for Marker m, doesn't exist in Marker
             {
-              markers.remove(m);
+                m.remove();
+                markers.remove(m);
             }
         }
 
