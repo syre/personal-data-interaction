@@ -225,8 +225,14 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     private double roundtoThreeDecimals(double value)
     {
-        DecimalFormat df2 = new DecimalFormat("###.###");
-        return Double.valueOf(df2.format(value));
+        try {
+            DecimalFormat df2 = new DecimalFormat("###.###");
+            return Double.valueOf(df2.format(value));
+        } catch (NumberFormatException e)
+        {
+            DecimalFormat df2 = new DecimalFormat("###,###");
+            return Double.valueOf(df2.format(value));
+        }
     }
 
     @Override
