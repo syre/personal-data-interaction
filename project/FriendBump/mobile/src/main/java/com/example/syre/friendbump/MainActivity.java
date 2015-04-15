@@ -1,14 +1,15 @@
 package com.example.syre.friendbump;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Context;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Looper;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -44,8 +45,10 @@ import org.json.JSONObject;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class MainActivity extends Activity implements OnMapReadyCallback,
                                                       LocationListener,
@@ -63,8 +66,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     MqttClient mqttClient;
     GoogleMap mMap;
     MemoryPersistence persistence;
-    String clientId;
-
+    String client_email;
+    Location last_location;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +75,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendmapview = (MapView)findViewById(R.id.friendMapView);
         toggleBroadcastingButton = (ImageButton)findViewById(R.id.toggleBroadcastingButton);
         friendmapview.onCreate(savedInstanceState);
-
+        listItems.add(new Friend("Anders Rahbek",0.0,0.0,"handiiandii@gmail.com"));
+        listItems.add(new Friend("Søren Howe Gersager",0.0,0.0,"syrelyre@gmail.com"));
         friendListView = (ListView)findViewById(R.id.friendListView);
         friendListAdapter = new ArrayAdapter<Friend>(this, android.R.layout.simple_list_item_1, listItems);
         friendListView.setAdapter(friendListAdapter);
@@ -86,15 +90,23 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                             .build();
         broadcastingEnabled = true;
         persistence = new MemoryPersistence();
-        clientId = "client" + ((int) (10000*Math.random()));
+        // find email of first account to use as id
+        Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
+        Account[] accounts = AccountManager.get(getApplicationContext()).getAccounts();
+        for (Account account : accounts) {
+            if (emailPattern.matcher(account.name).matches()) {
+                client_email = account.name;
+                break;
+            }
+        }
+
         try {
-            mqttClient = new MqttClient("tcp://syrelyre.dk:1883",clientId,persistence);
+            mqttClient = new MqttClient("tcp://syrelyre.dk:1883",client_email,persistence);
             
             MqttConnectOptions options = new MqttConnectOptions();
             options.setKeepAliveInterval(60);
             mqttClient.setCallback(this);
             mqttClient.connect();
-            mqttClient.subscribe("friendbump");
             }
         catch(MqttException except)
         {
@@ -168,9 +180,9 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         LocationManager locationmanager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         Criteria criteria = new Criteria();
         String provider = locationmanager.getBestProvider(criteria, false);
-        Location last_known = locationmanager.getLastKnownLocation(provider);
+        last_location = locationmanager.getLastKnownLocation(provider);
 
-        CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(last_known.getLatitude(), last_known.getLongitude()));
+        CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(last_location.getLatitude(), last_location.getLongitude()));
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
         // enables location marker
         mMap = map;
@@ -186,25 +198,61 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             markers.add(marker);
         }
     }
+
+    private double roundtoThreeDecimals(double value)
+    {
+        DecimalFormat df2 = new DecimalFormat("###.###");
+        return Double.valueOf(df2.format(value));
+    }
+
     @Override
     public void onLocationChanged(Location loc)
     {
-        Log.d("MainActivity","Location changed");
+        Log.d("MainActivity","Location changed to: lat: "+loc.getLatitude()+", lng: "+loc.getLongitude());
         if (broadcastingEnabled)
-        {
+        {   // if location when converted to accuracy of 110m (3 decimal places) has changed
+            if (roundtoThreeDecimals(loc.getLatitude()) != roundtoThreeDecimals(last_location.getLatitude()) &&
+                    roundtoThreeDecimals(loc.getLongitude()) != roundtoThreeDecimals(last_location.getLongitude()))
+            {
+                String command = "loc_removal";
+                String json_string = "{email:"+client_email+
+                        ",command:"+command+"}";
+                String topic =  client_email +"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
+                MqttMessage msg = new MqttMessage(json_string.getBytes());
+                msg.setQos(1);
+                try {
+                    mqttClient.publish(topic, msg);
+                }
+                catch(MqttException except)
+                {
+                    Log.d("MainActivity", "MQTT: could not publish loc_removal message: "+except.getMessage());
+                }
+                for (Friend f: listItems)
+                {
+                    String topic_string = f.getEmail()+"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
+                    try {
+                        mqttClient.subscribe(topic_string);
+                    }
+                    catch(MqttException except)
+                    {
+                        Log.d("MainActivity", "MQTT: could not subscribe message: "+except.getMessage());
+                    }
+                }
+                last_location = loc;
+            }
             Double latitude = loc.getLatitude();
             Double longitude = loc.getLongitude();
             String command = "loc_update";
-            String json_string = "{id:"+clientId+
+            String json_string = "{email:"+client_email+
                                   ",command:"+command+
                                   ",lat:"+latitude+
                                   ",lng:"+longitude+"}";
-            MqttTopic topic = mqttClient.getTopic("friendbump");
+            String topic = client_email+"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
+            Log.d("MainActivity", "topic is: "+topic);
             MqttMessage msg = new MqttMessage(json_string.getBytes());
             msg.setQos(1);
             try {
-                MqttToken token = topic.publish(msg);
-                token.waitForCompletion();
+                mqttClient.publish(topic,msg);
             }
             catch(MqttException except)
             {
@@ -264,21 +312,22 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     }
 
     private void parseCommand(JSONObject json_obj) {
-        String command = "";
         try {
-            command = json_obj.getString("command");
-            final String id = json_obj.getString("id");
-            if (command.equals("loc_update")) {
+            final String command = json_obj.getString("command");
+            final String email = json_obj.getString("email");
+            if (command.equals("loc_update"))
+            {
                 final Double lat = json_obj.getDouble("lat");
                 final Double lng = json_obj.getDouble("lng");
-                if (findFriendIndexByEmail(id) == -1)
+                if (findFriendIndexByEmail(email) == -1)
                 {
-                    listItems.add(new Friend(id,lat, lng, id));
+                    listItems.add(new Friend(email,lat, lng, email));
                 }
                 else
                 {
-                    listItems.get(findFriendIndexByEmail(id)).setLat(lat);
-                    listItems.get(findFriendIndexByEmail(id)).setLng(lng);
+                    Friend friend = listItems.get(findFriendIndexByEmail(email));
+                    friend.setLat(lat);
+                    friend.setLng(lng);
                 }
                 // update list view on UI thread
                 runOnUiThread(new Runnable() {
@@ -290,6 +339,24 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     }
 
                 });
+            }
+            else if (command.equals("loc_removal"))
+            {
+                int index = findFriendIndexByEmail(email);
+                if (index != 1)
+                {
+                    listItems.remove(index);
+
+                    runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            friendListAdapter.notifyDataSetChanged();
+                            updateMarker();
+                        }
+
+                    });
+                }
             }
 
 
@@ -306,7 +373,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         {
             boolean flag = false;
             for (Marker m : markers) {
-                if (m.getTitle().equals(f.getName()))
+                if (m.getTitle().equals(f.getEmail()))
                 {
                     LatLng pos = new LatLng(f.getLat(), f.getLng());
                     m.setPosition(pos);
@@ -329,10 +396,9 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
         String msg = new java.lang.String(mqttMessage.getPayload());
         Log.d("MainActivity", "message arrived:" + msg);
-        JSONObject json_obj = null;
         try {
-            json_obj = new JSONObject(msg);
-            if (!json_obj.getString("id").equals(clientId))
+            JSONObject json_obj = new JSONObject(msg);
+            if (!json_obj.getString("email").equals(client_email))
                 parseCommand(json_obj);
 
         }

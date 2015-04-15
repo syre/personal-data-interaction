@@ -17,7 +17,7 @@ client.on_connect = on_connect
 client.on_message = on_message
 client.on_disconnect = on_disconnect
 client.connect("syrelyre.dk", 1883, 60)
-client.subscribe("friendbump",2)
+client.subscribe("syrelyre@gmail.com.55.784.12.519",2)
 while client.loop() == 0:
     pass
 

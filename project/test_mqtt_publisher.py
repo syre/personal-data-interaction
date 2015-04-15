@@ -18,5 +18,5 @@ client.on_connect = on_connect
 client.on_message = on_message
 client.on_disconnect = on_disconnect
 client.connect("syrelyre.dk", 1883, 60)
-msg = """{id:Anders, command: loc_update, lat: 55.82732, lng: 12.43000}""" #Anders = lat: 55.83045, lng: 12.42811, Søren = lat: 55.83274, lng: 12.42811
+msg = """{email:Anders, command: loc_update, lat: 55.82732, lng: 12.43000}""" #Anders = lat: 55.83045, lng: 12.42811, Søren = lat: 55.83274, lng: 12.42811
 client.publish("friendbump", payload=msg)
