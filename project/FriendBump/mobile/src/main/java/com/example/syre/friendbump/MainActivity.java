@@ -51,8 +51,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 //For notification
@@ -225,14 +227,9 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     private double roundtoThreeDecimals(double value)
     {
-        try {
-            DecimalFormat df2 = new DecimalFormat("###.###");
-            return Double.valueOf(df2.format(value));
-        } catch (NumberFormatException e)
-        {
-            DecimalFormat df2 = new DecimalFormat("###,###");
-            return Double.valueOf(df2.format(value));
-        }
+        DecimalFormat df2 = (DecimalFormat) NumberFormat.getNumberInstance(Locale.ENGLISH);
+        df2.applyPattern("###.###");
+        return Double.valueOf(df2.format(value));
     }
 
     @Override
