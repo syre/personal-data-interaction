@@ -321,7 +321,13 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     @Override
     public void connectionLost(Throwable throwable) {
-
+        try {
+            mqttClient.connect();
+        }
+        catch(MqttException except)
+        {
+            Log.d("MainActivity", "MQTT: Connection Lost, reconnect failed: "+except.getMessage());
+        }
     }
 
     private int findFriendIndexByEmail(String email)
