@@ -33,7 +33,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -42,8 +41,6 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.MqttToken;
-import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONObject;
 
@@ -78,7 +75,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     GoogleMap mMap;
     MemoryPersistence persistence;
     String client_email;
-    Location last_location;
+    Location last_location = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -191,7 +189,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         LocationManager locationmanager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         Criteria criteria = new Criteria();
         String provider = locationmanager.getBestProvider(criteria, false);
-        last_location = locationmanager.getLastKnownLocation(provider);
+        Location last_location = locationmanager.getLastKnownLocation(provider);
 
         CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(last_location.getLatitude(), last_location.getLongitude()));
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
@@ -201,19 +199,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         mMap.getUiSettings().setAllGesturesEnabled(false);
         mMap.moveCamera(center);
         mMap.animateCamera(zoom);
-
-
-        Location myLocation = mMap.getMyLocation();
-        if(myLocation != null) {
-            LatLng myLatLng = new LatLng(myLocation.getLatitude(),
-                    myLocation.getLongitude());
-
-            CameraPosition myPosition = new CameraPosition.Builder()
-                    .target(myLatLng).zoom(17).build();
-            mMap.animateCamera(
-                    CameraUpdateFactory.newCameraPosition(myPosition));
-        }
-
 
         for(int i = 0; i<listItems.size();i++)
         {
@@ -237,7 +222,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         Log.d("MainActivity","Location changed to: lat: "+loc.getLatitude()+", lng: "+loc.getLongitude());
         if (broadcastingEnabled)
         {   // if location when converted to accuracy of 110m (3 decimal places) has changed
-            if (roundtoThreeDecimals(loc.getLatitude()) != roundtoThreeDecimals(last_location.getLatitude()) &&
+            if (last_location == null || roundtoThreeDecimals(loc.getLatitude()) != roundtoThreeDecimals(last_location.getLatitude()) &&
                     roundtoThreeDecimals(loc.getLongitude()) != roundtoThreeDecimals(last_location.getLongitude()))
             {
                 String command = "loc_removal";
@@ -264,6 +249,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                         Log.d("MainActivity", "MQTT: could not subscribe message: "+except.getMessage());
                     }
                 }
+
                 last_location = loc;
             }
             Double latitude = loc.getLatitude();
