@@ -59,8 +59,7 @@ import java.util.regex.Pattern;
 
 //For notification
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.app.NotificationCompat.WearableExtender;
+
 
 public class MainActivity extends Activity implements OnMapReadyCallback,
                                                       LocationListener,
@@ -349,7 +348,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 if (findFriendIndexByEmail(email) == -1)
                 {
                     listItems.add(new Friend(email,lat, lng, email));
-                    notification();
+                    sendNotification();
                 }
                 else
                 {
@@ -457,7 +456,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     }
 
-    public void notification()
+    public void sendNotification()
     {
         Log.e("Notification", "Run notification() ");
         int mId = 5;

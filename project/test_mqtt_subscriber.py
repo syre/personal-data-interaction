@@ -6,9 +6,10 @@ import json
 def on_connect(client, userdata, flags, rc):
 	print("Connected with result code "+str(rc))
 
-def on_disconnect(client, userdata, flags, rc):
+def on_disconnect(client, userdata, rc):
 	if rc != 0:
 		print("Unexpected disconnection.")
+
 def on_message(client, userdata, msg):
 	print(msg.payload)
 
