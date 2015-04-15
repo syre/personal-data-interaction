@@ -250,11 +250,11 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     }
 
-    private int findFriendIndexById(String id)
+    private int findFriendIndexByEmail(String email)
     {
         for (Friend f: listItems)
         {
-            if (f.getEmail().equals(id))
+            if (f.getEmail().equals(email))
             {
                 return listItems.indexOf(f);
             }
@@ -271,14 +271,14 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             if (command.equals("loc_update")) {
                 final Double lat = json_obj.getDouble("lat");
                 final Double lng = json_obj.getDouble("lng");
-                if (findFriendIndexById(id) == -1)
+                if (findFriendIndexByEmail(id) == -1)
                 {
-                    listItems.add(new Friend(id,lat, lng, "testemail"));
+                    listItems.add(new Friend(id,lat, lng, id));
                 }
                 else
                 {
-                    listItems.get(findFriendIndexById(id)).setLat(lat);
-                    listItems.get(findFriendIndexById(id)).setLng(lng);
+                    listItems.get(findFriendIndexByEmail(id)).setLat(lat);
+                    listItems.get(findFriendIndexByEmail(id)).setLng(lng);
                 }
                 // update list view on UI thread
                 runOnUiThread(new Runnable() {
