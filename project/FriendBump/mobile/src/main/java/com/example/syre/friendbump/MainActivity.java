@@ -50,7 +50,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -63,8 +64,11 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                                                       GoogleApiClient.ConnectionCallbacks,
                                                       GoogleApiClient.OnConnectionFailedListener,
                                                       MqttCallback {
-    List<Friend> listItems = new ArrayList<Friend>();
-    List<Marker> markers = new ArrayList<Marker>();
+
+    HashMap<String, Friend> friendHashMap = new HashMap<String, Friend>();
+    HashMap<String, Marker>  markers = new HashMap<String, Marker>();
+    //List<Friend> listItems = new ArrayList<Friend>();
+    //List<Marker> markers = new ArrayList<Marker>();
     ListView friendListView;
     ArrayAdapter friendListAdapter;
     MapView friendmapview;
@@ -84,10 +88,14 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendmapview = (MapView)findViewById(R.id.friendMapView);
         toggleBroadcastingButton = (ImageButton)findViewById(R.id.toggleBroadcastingButton);
         friendmapview.onCreate(savedInstanceState);
-        listItems.add(new Friend("Anders Rahbek",0.0,0.0,"handiiandii@gmail.com"));
-        listItems.add(new Friend("Søren Howe Gersager",0.0,0.0,"syrelyre@gmail.com"));
+        friendHashMap.put("handiiandii@gmail.com", new Friend("Anders Rahbek", 0.0, 0.0, "handiiandii@gmail.com"));
+        friendHashMap.put("syrelyre@gmail.com", new Friend("Søren Howe Gersager", 0.0, 0.0, "syrelyre@gmail.com"));
+        //listItems.add(new Friend("Anders Rahbek",0.0,0.0,"handiiandii@gmail.com"));
+        //listItems.add(new Friend("Søren Howe Gersager",0.0,0.0,"syrelyre@gmail.com"));
         friendListView = (ListView)findViewById(R.id.friendListView);
-        friendListAdapter = new ArrayAdapter<Friend>(this, android.R.layout.simple_list_item_1, listItems);
+        //Friend[] list = new Friend[];
+        ArrayList<Friend> valuesList = new ArrayList<Friend>(friendHashMap.values());
+        friendListAdapter = new ArrayAdapter<Friend>(this, android.R.layout.simple_list_item_1, valuesList);
         friendListView.setAdapter(friendListAdapter);
 
         MapsInitializer.initialize(this);
@@ -200,13 +208,19 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         mMap.moveCamera(center);
         mMap.animateCamera(zoom);
 
-        for(int i = 0; i<listItems.size();i++)
+        Iterator<String> friendListIterator = friendHashMap.keySet().iterator();
+
+        while(friendListIterator.hasNext())
         {
+            String key = friendListIterator.next();
             Marker marker = mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(listItems.get(i).getLat(), listItems.get(i).getLng()))
-                .title(listItems.get(i).getName()));
-            markers.add(marker);
+                    .position(new LatLng(friendHashMap.get(key).getLat(), friendHashMap.get(key).getLng()))
+                    .title(friendHashMap.get(key).getName()));
+
+            markers.put(friendHashMap.get(key).getEmail(), marker);
+
         }
+
     }
 
     private double roundtoThreeDecimals(double value)
@@ -238,9 +252,11 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 {
                     Log.d("MainActivity", "MQTT: could not publish loc_removal message: "+except.getMessage());
                 }
-                for (Friend f: listItems)
+                Iterator<String> friendListIterator = friendHashMap.keySet().iterator();
+                while (friendListIterator.hasNext())
                 {
-                    String topic_string = f.getEmail()+"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
+                    String key = friendListIterator.next();
+                    String topic_string = friendHashMap.get(key).getEmail()+"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
                     try {
                         mqttClient.subscribe(topic_string);
                     }
@@ -315,9 +331,11 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             Log.d("MainActivity", "MQTT: Connection Lost, reconnect failed: "+except.getMessage());
         }
     }
-
+    /*
     private int findFriendIndexByEmail(String email)
     {
+
+
         for (Friend f: listItems)
         {
             if (f.getEmail().equals(email))
@@ -328,7 +346,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         }
         return -1;
     }
-
+    */
     private void parseCommand(JSONObject json_obj) {
         try {
             final String command = json_obj.getString("command");
@@ -337,14 +355,14 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             {
                 final Double lat = json_obj.getDouble("lat");
                 final Double lng = json_obj.getDouble("lng");
-                if (findFriendIndexByEmail(email) == -1)
+                if (friendHashMap.get(email) == null)
                 {
-                    listItems.add(new Friend(email,lat, lng, email));
+                    friendHashMap.put(email, new Friend(email, lat, lng, email));
                     sendNotification();
                 }
                 else
                 {
-                    Friend friend = listItems.get(findFriendIndexByEmail(email));
+                    Friend friend = friendHashMap.get(email);
                     friend.setLat(lat);
                     friend.setLng(lng);
                 }
@@ -361,10 +379,10 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             }
             else if (command.equals("loc_removal"))
             {
-                int index = findFriendIndexByEmail(email);
-                if (index != 1)
+                //int index = findFriendIndexByEmail(email);
+                if (friendHashMap.get(email) != null)
                 {
-                    listItems.remove(index);
+                    friendHashMap.remove(email);
 
                     runOnUiThread(new Runnable() {
 
@@ -388,42 +406,33 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     private void updateMarker()
     {
 
-        for (Friend f: listItems)
+        Iterator<String> friendListIterator = friendHashMap.keySet().iterator();
+        Iterator<String> markerIterator = markers.keySet().iterator();
+        while(friendListIterator.hasNext())
         {
-            boolean flag = false;
-            for (Marker m : markers) {
-                if (m.getTitle().equals(f.getEmail()))
-                {
-                    LatLng pos = new LatLng(f.getLat(), f.getLng());
-                    m.setPosition(pos);
-                    flag = true;
-                }
-
-            }
-            if(!flag) //Marker for friend f, doesn't exist in Marker
+            String key = friendListIterator.next();
+            if(markers.get(key) == null)
             {
                 Marker marker = mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(f.getLat(), f.getLng()))
-                        .title(f.getName()));
-                Log.e("Markers", "Adding the marker to markers");
-                markers.add(marker);
+                        .position(new LatLng(friendHashMap.get(key).getLat(), friendHashMap.get(key).getLng()))
+                        .title(friendHashMap.get(key).getName()));
+
+                markers.put(key, marker);
+            }
+            else
+            {
+                LatLng pos = new LatLng(friendHashMap.get(key).getLat(), friendHashMap.get(key).getLng());
+                markers.get(key).setPosition(pos);
             }
         }
 
-        for (Marker m: markers)
+        while (markerIterator.hasNext())
         {
-            boolean flag = false;
-            for (Friend f : listItems) {
-                if (m.getTitle().equals(f.getName()))
-                {
-                    flag = true;
-                }
-
-            }
-            if(!flag) //Friend for Marker m, doesn't exist in Marker
+            String key = markerIterator.next();
+            if(friendHashMap.get(key) == null) //Friend for Marker m, doesn't exist in Marker
             {
-                m.remove();
-                markers.remove(m);
+                markers.get(key).remove();
+                markers.remove(key);
             }
         }
 
