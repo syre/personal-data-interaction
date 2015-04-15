@@ -413,7 +413,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             if(friendHashMap.get(key) == null) //Friend for Marker m, doesn't exist in Marker
             {
                 markers.get(key).remove();
-                markers.remove(key);
+                markerIterator.remove();
+
             }
         }
 
