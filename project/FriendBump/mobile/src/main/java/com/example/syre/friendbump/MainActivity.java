@@ -3,11 +3,15 @@ package com.example.syre.friendbump;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.Menu;
@@ -29,6 +33,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -49,6 +54,11 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+
+//For notification
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.app.NotificationCompat.WearableExtender;
 
 public class MainActivity extends Activity implements OnMapReadyCallback,
                                                       LocationListener,
@@ -190,6 +200,20 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         mMap.getUiSettings().setAllGesturesEnabled(false);
         mMap.moveCamera(center);
         mMap.animateCamera(zoom);
+
+
+        Location myLocation = mMap.getMyLocation();
+        if(myLocation != null) {
+            LatLng myLatLng = new LatLng(myLocation.getLatitude(),
+                    myLocation.getLongitude());
+
+            CameraPosition myPosition = new CameraPosition.Builder()
+                    .target(myLatLng).zoom(17).build();
+            mMap.animateCamera(
+                    CameraUpdateFactory.newCameraPosition(myPosition));
+        }
+
+
         for(int i = 0; i<listItems.size();i++)
         {
             Marker marker = mMap.addMarker(new MarkerOptions()
@@ -322,6 +346,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 if (findFriendIndexByEmail(email) == -1)
                 {
                     listItems.add(new Friend(email,lat, lng, email));
+                    notification();
                 }
                 else
                 {
@@ -386,10 +411,27 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 Marker marker = mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(f.getLat(), f.getLng()))
                         .title(f.getName()));
-                Log.w("Markers", "Adding the marker to markers");
+                Log.e("Markers", "Adding the marker to markers");
                 markers.add(marker);
             }
         }
+
+        for (Marker m: markers)
+        {
+            boolean flag = false;
+            for (Friend f : listItems) {
+                if (m.getTitle().equals(f.getName()))
+                {
+                    flag = true;
+                }
+
+            }
+            if(!flag) //Friend for Marker m, doesn't exist in Marker
+            {
+              markers.remove(m);
+            }
+        }
+
     }
 
     @Override
@@ -410,5 +452,39 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     @Override
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
 
+    }
+
+    public void notification()
+    {
+        Log.e("Notification", "Run notification() ");
+        int mId = 5;
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.mipmap.broadcast_disabled)
+                        .setContentTitle("My notification")
+                        .setContentText("Hello World!");
+// Creates an explicit intent for an Activity in your app
+        Intent resultIntent = new Intent(this,
+                MainActivity.class);
+
+// The stack builder object will contain an artificial back stack for the
+// started Activity.
+// This ensures that navigating backward from the Activity leads out of
+// your application to the Home screen.
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+// Adds the back stack for the Intent (but not the Intent itself)
+        stackBuilder.addParentStack(MainActivity.class);
+// Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        mBuilder.setContentIntent(resultPendingIntent);
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// mId allows you to update the notification later on.
+        mNotificationManager.notify(mId, mBuilder.build());
     }
 }
