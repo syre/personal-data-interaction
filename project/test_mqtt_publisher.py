@@ -18,9 +18,9 @@ client.on_connect = on_connect
 client.on_message = on_message
 client.on_disconnect = on_disconnect
 client.connect("syrelyre.dk", 1883, 60)
-lat = 55.82732
-lng = 12.43000
-topic = "syrelyre@gmail.com.55.827.12.430"
-msg = """{email:syrelyre@gmail.com, command: loc_update, lat: {0}, lng: {1}}""".format(lat, lng)
-
+lat = 55.83000
+lng = 12.42880
+topic = "syrelyre@gmail.com.55.83.12.428"
+msg = """{email:syrelyre@gmail.com, command:loc_update, lat: %f, lng: %f}""" % (lat, lng)
+#print(msg)
 client.publish(topic, payload=msg)

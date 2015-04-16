@@ -47,6 +47,7 @@ import org.json.JSONObject;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -79,7 +80,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     String client_email;
     Location last_location = null;
     private static boolean isInForeground;
-
+    ArrayList<String> notificationList = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -145,10 +146,16 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        isInForeground = false;
+    }
+    @Override
     public void onResume() {
         super.onResume();
         friendmapview.onResume();
         isInForeground = true;
+        notificationList.clear();
     }
 
     @Override
@@ -162,6 +169,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         {
             Log.d("MainActivity","MQTT: could not disconnect from broker");
         }
+        isInForeground = false;
     }
 
     @Override
@@ -343,7 +351,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 if (friendHashMap.get(email) == null)
                 {
                     friendHashMap.put(email, new Friend(email, lat, lng, email));
-                    sendNotification();
+                    //sendNotification();
                 }
                 else
                 {
@@ -351,6 +359,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     friend.setLat(lat);
                     friend.setLng(lng);
                 }
+
                 // update list view on UI thread
                 runOnUiThread(new Runnable() {
 
@@ -358,6 +367,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     public void run() {
                         friendListAdapter.notifyDataSetChanged();
                         updateMarker();
+                        sendNotification();
                     }
 
                 });
@@ -396,18 +406,28 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         while(friendListIterator.hasNext())
         {
             String key = friendListIterator.next();
-            if(markers.get(key) == null)
+            if(markers.get(key) == null) //if there is no marker for the friend
             {
                 Marker marker = mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(friendHashMap.get(key).getLat(), friendHashMap.get(key).getLng()))
                         .title(friendHashMap.get(key).getName()));
 
                 markers.put(key, marker);
+                notificationList.add(key);
             }
             else
             {
-                LatLng pos = new LatLng(friendHashMap.get(key).getLat(), friendHashMap.get(key).getLng());
-                markers.get(key).setPosition(pos);
+                LatLng old = markers.get(key).getPosition();
+                LatLng New = new LatLng(friendHashMap.get(key).getLat(), friendHashMap.get(key).getLng());
+                markers.get(key).setPosition(New);
+                float[] result = new float[1];
+                Location.distanceBetween(old.latitude, old.longitude, New.latitude, New.longitude, result);
+                if(result[0] >100)
+                {
+                    notificationList.add(key);
+                }
+                Log.d("updateMarker", "result[0] = "+result[0] + ", name = " + friendHashMap.get(key).getName());
+                Log.d("updateMarker", "notificationList.size() = " + notificationList.size());
             }
         }
 
@@ -423,6 +443,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         }
 
     }
+
 
     @Override
     public void messageArrived(String s, MqttMessage mqttMessage) throws Exception
@@ -448,15 +469,33 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     public void sendNotification()
     {
-        if(!isInForeground)
+        Log.d("Notification", "Run notification() ");
+        if(!isInForeground && notificationList.size()>0)
         {
-            Log.e("Notification", "Run notification() ");
+            String title = "";
+            String contentText = "";
+            if(notificationList.size()==1)
+            {
+                title = "There is 1 friend near you!";
+                contentText = friendHashMap.get(notificationList.get(0)).getName() + " is near you!";
+            }
+            else
+            {
+                title = "There is several friends near you!";
+                for(int i = 0; i<3; i++)
+                {
+                    contentText += friendHashMap.get(notificationList.get(0)).getName() + ", ";
+                }
+                contentText = contentText.substring(0, contentText.length()-2);
+            }
+            notificationList.clear();
+            Log.d("Notification", "Notification send!");
             int mId = 5;
             NotificationCompat.Builder mBuilder =
                     new NotificationCompat.Builder(this)
                             .setSmallIcon(R.mipmap.broadcast_disabled)
-                            .setContentTitle("My notification")
-                            .setContentText("Hello World!");
+                            .setContentTitle(title)
+                            .setContentText(contentText);
 // Creates an explicit intent for an Activity in your app
             Intent resultIntent = new Intent(this,
                     MainActivity.class);
@@ -476,6 +515,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                             PendingIntent.FLAG_UPDATE_CURRENT
                     );
             mBuilder.setContentIntent(resultPendingIntent);
+            mBuilder.setAutoCancel(true);
             NotificationManager mNotificationManager =
                     (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 // mId allows you to update the notification later on.
@@ -483,7 +523,10 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         }
         else
         {
-            Log.e("Notification", "Activity is in forground. No notification send");
+            Log.d("Notification", "Activity is in forground. No notification send");
+            Log.d("Notification", "notificationList.size() = " +notificationList.size());
+            notificationList.clear();
         }
+        notificationList.clear();
     }
 }
