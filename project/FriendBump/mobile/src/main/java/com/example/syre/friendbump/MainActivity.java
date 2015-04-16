@@ -156,6 +156,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendmapview.onResume();
         isInForeground = true;
         notificationList.clear();
+        updateMarker();
+
     }
 
     @Override
@@ -202,11 +204,20 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     @Override
     public void onMapReady(GoogleMap map) {
         // gets last known location
+
         LocationManager locationmanager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        //LocationHelper loc = new LocationHelper();
         Criteria criteria = new Criteria();
         String provider = locationmanager.getBestProvider(criteria, false);
         Location last_location = locationmanager.getLastKnownLocation(provider);
+        if(last_location!=null)
+        {
+            onLocationChanged(last_location);
+        }
 
+        locationmanager.requestLocationUpdates(provider, 2000, 0, this);
+
+        /* MÅ IKKE SLETTES!!!!!!!!!!!!
         CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(last_location.getLatitude(), last_location.getLongitude()));
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
         // enables location marker
@@ -215,7 +226,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         mMap.getUiSettings().setAllGesturesEnabled(false);
         mMap.moveCamera(center);
         mMap.animateCamera(zoom);
-
+        */
         Iterator<String> friendListIterator = friendHashMap.keySet().iterator();
 
         while(friendListIterator.hasNext())
@@ -241,6 +252,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     @Override
     public void onLocationChanged(Location loc)
     {
+        LatLng latLng = new LatLng(loc.getLatitude(), loc.getLongitude());
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         Log.d("MainActivity","Location changed to: lat: "+loc.getLatitude()+", lng: "+loc.getLongitude());
         if (broadcastingEnabled)
         {   // if location when converted to accuracy of 110m (3 decimal places) has changed
