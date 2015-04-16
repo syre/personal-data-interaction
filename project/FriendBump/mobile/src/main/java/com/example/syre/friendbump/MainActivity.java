@@ -80,6 +80,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     MemoryPersistence persistence;
     String client_email;
     Location last_location = null;
+    private static boolean isInForeground;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,17 +139,20 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     {
         super.onStart();
         mGoogleApiClient.connect();
+        isInForeground = true;
     }
     @Override
     public void onPause() {
         super.onPause();
         friendmapview.onPause();
+        isInForeground = false;
     }
 
     @Override
     public void onResume() {
         super.onResume();
         friendmapview.onResume();
+        isInForeground = true;
     }
 
     @Override
@@ -461,35 +465,42 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     public void sendNotification()
     {
-        Log.e("Notification", "Run notification() ");
-        int mId = 5;
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.mipmap.broadcast_disabled)
-                        .setContentTitle("My notification")
-                        .setContentText("Hello World!");
+        if(!isInForeground)
+        {
+            Log.e("Notification", "Run notification() ");
+            int mId = 5;
+            NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(this)
+                            .setSmallIcon(R.mipmap.broadcast_disabled)
+                            .setContentTitle("My notification")
+                            .setContentText("Hello World!");
 // Creates an explicit intent for an Activity in your app
-        Intent resultIntent = new Intent(this,
-                MainActivity.class);
+            Intent resultIntent = new Intent(this,
+                    MainActivity.class);
 
 // The stack builder object will contain an artificial back stack for the
 // started Activity.
 // This ensures that navigating backward from the Activity leads out of
 // your application to the Home screen.
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
 // Adds the back stack for the Intent (but not the Intent itself)
-        stackBuilder.addParentStack(MainActivity.class);
+            stackBuilder.addParentStack(MainActivity.class);
 // Adds the Intent that starts the Activity to the top of the stack
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-        mBuilder.setContentIntent(resultPendingIntent);
-        NotificationManager mNotificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            stackBuilder.addNextIntent(resultIntent);
+            PendingIntent resultPendingIntent =
+                    stackBuilder.getPendingIntent(
+                            0,
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                    );
+            mBuilder.setContentIntent(resultPendingIntent);
+            NotificationManager mNotificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 // mId allows you to update the notification later on.
-        mNotificationManager.notify(mId, mBuilder.build());
+            mNotificationManager.notify(mId, mBuilder.build());
+        }
+        else
+        {
+            Log.e("Notification", "Activity is in forground. No notification send");
+        }
     }
 }
