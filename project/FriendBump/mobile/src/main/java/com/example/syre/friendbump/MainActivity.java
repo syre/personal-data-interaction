@@ -90,7 +90,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendmapview.onCreate(savedInstanceState);
         friendHashMap.put("handiiandii@gmail.com", new Friend("Anders Rahbek", 0.0, 0.0, "handiiandii@gmail.com"));
         friendHashMap.put("syrelyre@gmail.com", new Friend("Søren Howe Gersager", 0.0, 0.0, "syrelyre@gmail.com"));
-
+        Log.d("Søren", "Marker er 0.0");
         friendListView = (ListView)findViewById(R.id.friendListView);
         ArrayList<Friend> valuesList = new ArrayList<Friend>(friendHashMap.values());
         friendListAdapter = new ArrayAdapter<Friend>(this, android.R.layout.simple_list_item_1, valuesList);
@@ -156,8 +156,12 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendmapview.onResume();
         isInForeground = true;
         notificationList.clear();
-        updateMarker();
-
+        /*
+        if(friendHashMap.isEmpty()==false) {
+            Log.d("onResume", "friendHashMap is not empty");
+            updateMarker();
+        }
+        */
     }
 
     @Override
@@ -172,6 +176,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             Log.d("MainActivity","MQTT: could not disconnect from broker");
         }
         isInForeground = false;
+        Log.d("onDestroy", "Bye bye!");
     }
 
     @Override
@@ -210,14 +215,15 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         Criteria criteria = new Criteria();
         String provider = locationmanager.getBestProvider(criteria, false);
         Location last_location = locationmanager.getLastKnownLocation(provider);
+        /*
         if(last_location!=null)
         {
             onLocationChanged(last_location);
         }
 
-        locationmanager.requestLocationUpdates(provider, 2000, 0, this);
+        //locationmanager.requestLocationUpdates(provider, 2000, 0, this);
+        */
 
-        /* MÅ IKKE SLETTES!!!!!!!!!!!!
         CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(last_location.getLatitude(), last_location.getLongitude()));
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
         // enables location marker
@@ -226,7 +232,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         mMap.getUiSettings().setAllGesturesEnabled(false);
         mMap.moveCamera(center);
         mMap.animateCamera(zoom);
-        */
+
         Iterator<String> friendListIterator = friendHashMap.keySet().iterator();
 
         while(friendListIterator.hasNext())
@@ -305,7 +311,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             }
             catch(MqttException except)
             {
-                Log.d("MainActivity", "MQTT: could not send location message: "+except.getMessage());
+                Log.d("MainActivity", "MQTT: could not send location message: "+except.getMessage() +" (" +except.getReasonCode() + ")");
             }
         }
 
