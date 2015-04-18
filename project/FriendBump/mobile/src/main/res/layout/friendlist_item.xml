@@ -1,32 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <TableLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content">
-    <TableRow
-        android:id="@+id/list_item_row">
-<TableLayout
-    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:paddingTop="0dip"
-    android:layout_gravity="top"
-    android:stretchColumns="0">
-
+    android:stretchColumns="0"
+    >
 <TableRow
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:id="@+id/list_item_row">
     <LinearLayout
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:paddingLeft="10dp"
-        android:paddingStart="10dp"
         android:paddingTop="5dp"
         android:paddingBottom="5dp">
         <ImageView
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:scaleType="fitCenter"
-            android:layout_gravity="start|top"
             android:id="@+id/friend_image"
             android:src="@drawable/person_placeholder"
             android:contentDescription="Profile picture of Friend">
@@ -38,25 +30,22 @@
         android:paddingTop="0dip"
         android:layout_gravity="top"
         android:stretchColumns="0">
-    <TableRow>
+    <TableRow android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
         <TextView
             android:id="@+id/friend_name"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:layout_weight="1"
             android:layout_gravity="start|center_vertical"
-            android:layout_marginLeft="10dip"
-            android:layout_marginStart="10dip"
             android:layout_marginTop="4dip"
             android:layout_span="1"/>
         </TableRow>
-        <TableRow>
+        <TableRow android:layout_width="wrap_content">
             <TextView
                 android:id="@+id/friend_distance"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:layout_marginLeft="10dip"
-                android:layout_marginStart="10dip"
                 android:layout_marginTop="4dip"/>
         </TableRow>
     </TableLayout>
@@ -64,29 +53,34 @@
     <ImageView
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:scaleType="fitCenter"
-        android:layout_marginLeft="10dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
         android:layout_gravity="left"
         android:id="@+id/friend_social_network_image"
         android:src="@drawable/twitter"
         android:contentDescription="Social Network of the Friend" />
     </TableRow>
+    <TableRow
+        android:layout_gravity="center_horizontal"
+        android:gravity="left"
+        android:id="@+id/toolbar_row"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:paddingTop="10dp"
+        android:visibility="gone">
+        <ImageView
+            android:id="@+id/phone_button"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/phone"/>
+        <ImageView
+            android:id="@+id/chat_button"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/chat"/>
+        <ImageView
+            android:id="@+id/nudge_button"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/finger"/>
 
-</TableLayout>
-        <TableRow
-            android:id="@+id/toolbar_row"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="50dp"
-            android:visibility="gone">
-            <ImageView
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:src="@drawable/linkedin">
-
-            </ImageView>
-        </TableRow>
     </TableRow>
-    </TableLayout>
+</TableLayout>

@@ -3,6 +3,7 @@ package com.example.syre.friendbump;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,6 +67,12 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
             holder.distance = (TextView) view.findViewById(R.id.friend_distance);
             holder.socialNetworkImage = (ImageView) view.findViewById(R.id.friend_social_network_image);
             holder.toolbar = (TableRow) view.findViewById(R.id.toolbar_row);
+            holder.phoneButton = (ImageView) view.findViewById(R.id.phone_button);
+            holder.phoneButton.setOnClickListener(this);
+            holder.chatButton = (ImageView) view.findViewById(R.id.chat_button);
+            holder.chatButton.setOnClickListener(this);
+            holder.nudgeButton = (ImageView) view.findViewById(R.id.nudge_button);
+            holder.nudgeButton.setOnClickListener(this);
             view.setTag(holder);
         }
         else
@@ -87,37 +94,38 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
     public void onClick(View v) {
         switch(v.getId())
         {
-            case R.id.friend_image:
+            case R.id.chat_button:
+                Toast.makeText(activity.getApplicationContext(), "chat clicked", Toast.LENGTH_SHORT).show();
                 break;
-
-            case R.id.friend_name:
-                Toast.makeText(activity.getApplicationContext(), "name clicked", Toast.LENGTH_SHORT).show();
+            case R.id.nudge_button:
+                Toast.makeText(activity.getApplicationContext(), "nudge clicked", Toast.LENGTH_SHORT).show();
+            case R.id.phone_button:
+                Toast.makeText(activity.getApplicationContext(), "phone clicked", Toast.LENGTH_SHORT).show();
             default:
                 break;
         }
     }
-    private class ToggleToolbarListener implements View.OnClickListener
+    public class ToggleToolbarListener implements View.OnClickListener
     {
-
-        @Override
-        public void onClick(View v)
-        {
-            TableRow toolbar = (TableRow) v.findViewById(R.id.toolbar_row);
+       @Override
+        public void onClick(View v) {
+           View parent = (View)v.getParent();
+            final TableRow toolbar = (TableRow)parent.findViewById(R.id.toolbar_row);
             if (toolbar.isShown())
             {
                 Animation out = AnimationUtils.makeOutAnimation(activity.getApplicationContext(), true);
                 toolbar.startAnimation(out);
                 toolbar.setVisibility(View.GONE);
+
             }
             else
             {
                 Animation in = AnimationUtils.makeInAnimation(activity.getApplicationContext(), true);
                 toolbar.startAnimation(in);
                 toolbar.setVisibility(View.VISIBLE);
+             }
             }
-
         }
-    }
 
     public static class ViewHolder
     {
@@ -126,5 +134,8 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
         public ImageView socialNetworkImage;
         public TextView distance;
         public TableRow toolbar;
+        public ImageView phoneButton;
+        public ImageView chatButton;
+        public ImageView nudgeButton;
     }
 }
