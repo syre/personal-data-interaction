@@ -536,8 +536,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 // Creates an explicit intent for an Activity in your app
             Intent resultIntent = new Intent(this,
                     MainActivity.class);
-            resultIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
-                    Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            resultIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 
 // The stack builder object will contain an artificial back stack for the
 // started Activity.
