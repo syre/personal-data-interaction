@@ -7,9 +7,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
@@ -47,7 +45,6 @@ import org.json.JSONObject;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -66,8 +63,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                                                       GoogleApiClient.OnConnectionFailedListener,
                                                       MqttCallback {
 
-    HashMap<String, Friend> friendHashMap = new HashMap<String, Friend>();
-    HashMap<String, Marker>  markers = new HashMap<String, Marker>();
+    HashMap<String, Friend> friendHashMap = new HashMap<>();
+    HashMap<String, Marker>  markers = new HashMap<>();
     ListView friendListView;
     ArrayAdapter friendListAdapter;
     MapView friendmapview;
@@ -81,19 +78,21 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     Location last_location = null;
     private static boolean isInForeground;
     ArrayList<String> notificationList = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("MainActivity", "onCreate executed!");
         setContentView(R.layout.activity_main);
         friendmapview = (MapView)findViewById(R.id.friendMapView);
         toggleBroadcastingButton = (ImageButton)findViewById(R.id.toggleBroadcastingButton);
         friendmapview.onCreate(savedInstanceState);
         friendHashMap.put("handiiandii@gmail.com", new Friend("Anders Rahbek", 0.0, 0.0, "handiiandii@gmail.com"));
         friendHashMap.put("syrelyre@gmail.com", new Friend("Søren Howe Gersager", 0.0, 0.0, "syrelyre@gmail.com"));
-        Log.d("Søren", "Marker er 0.0");
+
         friendListView = (ListView)findViewById(R.id.friendListView);
-        ArrayList<Friend> valuesList = new ArrayList<Friend>(friendHashMap.values());
-        friendListAdapter = new ArrayAdapter<Friend>(this, android.R.layout.simple_list_item_1, valuesList);
+        ArrayList<Friend> valuesList = new ArrayList<>(friendHashMap.values());
+        friendListAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, valuesList);
         friendListView.setAdapter(friendListAdapter);
 
         MapsInitializer.initialize(this);
@@ -137,18 +136,21 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         super.onStart();
         mGoogleApiClient.connect();
         isInForeground = true;
+        Log.d("MainActivity", "onStart executed!");
     }
     @Override
     public void onPause() {
         super.onPause();
         friendmapview.onPause();
         isInForeground = false;
+        Log.d("MainActivity", "onPause executed!");
     }
 
     @Override
     public void onStop() {
         super.onStop();
         isInForeground = false;
+        Log.d("MainActivity", "onStop executed!");
     }
     @Override
     public void onResume() {
@@ -156,12 +158,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendmapview.onResume();
         isInForeground = true;
         notificationList.clear();
-        /*
-        if(friendHashMap.isEmpty()==false) {
-            Log.d("onResume", "friendHashMap is not empty");
-            updateMarker();
-        }
-        */
+        Log.d("MainActivity", "onResume executed!");
     }
 
     @Override
@@ -176,7 +173,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             Log.d("MainActivity","MQTT: could not disconnect from broker");
         }
         isInForeground = false;
-        Log.d("onDestroy", "Bye bye!");
+        Log.d("MainActivity", "onDestroy executed!");
     }
 
     @Override
@@ -208,43 +205,12 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     @Override
     public void onMapReady(GoogleMap map) {
-        // gets last known location
-
-        LocationManager locationmanager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-        //LocationHelper loc = new LocationHelper();
-        Criteria criteria = new Criteria();
-        String provider = locationmanager.getBestProvider(criteria, false);
-        Location last_location = locationmanager.getLastKnownLocation(provider);
-        /*
-        if(last_location!=null)
-        {
-            onLocationChanged(last_location);
-        }
-
-        //locationmanager.requestLocationUpdates(provider, 2000, 0, this);
-        */
-
-        CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(last_location.getLatitude(), last_location.getLongitude()));
-        CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
-        // enables location marker
+        // enables location marker and disables all gestures
         mMap = map;
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setAllGesturesEnabled(false);
-        mMap.moveCamera(center);
-        mMap.animateCamera(zoom);
 
-        Iterator<String> friendListIterator = friendHashMap.keySet().iterator();
-
-        while(friendListIterator.hasNext())
-        {
-            String key = friendListIterator.next();
-            Marker marker = mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(friendHashMap.get(key).getLat(), friendHashMap.get(key).getLng()))
-                    .title(friendHashMap.get(key).getName()));
-
-            markers.put(friendHashMap.get(key).getEmail(), marker);
-
-        }
+        updateMarkers();
 
     }
 
@@ -255,64 +221,103 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         return Double.valueOf(df2.format(value));
     }
 
+    private void subscribeToFriends(Location loc)
+    {
+        Iterator<String> friendListIterator = friendHashMap.keySet().iterator();
+        while (friendListIterator.hasNext())
+        {
+            String key = friendListIterator.next();
+            String topic_string = friendHashMap.get(key).getEmail()+"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
+            try {
+                mqttClient.subscribe(topic_string);
+            }
+            catch(MqttException except)
+            {
+                Log.d("MainActivity", "MQTT: could not subscribe message: "+except.getMessage());
+            }
+        }
+
+    }
+
+    private void unsubscribeToFriends(Location loc)
+    {
+        Iterator<String> friendListIterator = friendHashMap.keySet().iterator();
+        while (friendListIterator.hasNext())
+        {
+            String key = friendListIterator.next();
+            String topic_string = friendHashMap.get(key).getEmail()+"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
+            try {
+                mqttClient.unsubscribe(topic_string);
+            }
+            catch(MqttException except)
+            {
+                Log.d("MainActivity", "MQTT: could not subscribe message: "+except.getMessage());
+            }
+        }
+
+    }
+    // Sent when leaving an "area"
+    private void sendNewAreaUpdate(Location loc)
+    {
+        String command = "loc_removal";
+        String json_string = "{email:"+client_email+
+                ",command:"+command+"}";
+        String topic =  client_email +"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
+        MqttMessage msg = new MqttMessage(json_string.getBytes());
+        msg.setQos(0);
+        try {
+            mqttClient.publish(topic, msg);
+        }
+        catch(MqttException except)
+        {
+            Log.d("MainActivity", "MQTT: could not publish loc_removal message: "+except.getMessage());
+        }
+    }
+
+    private void sendLocationChangeUpdate(Location loc)
+    {
+        Double latitude = loc.getLatitude();
+        Double longitude = loc.getLongitude();
+        String command = "loc_update";
+        String json_string = "{email:"+client_email+
+                ",command:"+command+
+                ",lat:"+latitude+
+                ",lng:"+longitude+"}";
+        String topic = client_email+"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
+        Log.d("MainActivity", "topic is: "+topic);
+        MqttMessage msg = new MqttMessage(json_string.getBytes());
+        msg.setQos(0);
+        try {
+            mqttClient.publish(topic,msg);
+        }
+        catch(MqttException except)
+        {
+            Log.d("MainActivity", "MQTT: could not send location message: "+except.getMessage() +" (" +except.getReasonCode() + ")");
+        }
+    }
+
     @Override
     public void onLocationChanged(Location loc)
     {
         LatLng latLng = new LatLng(loc.getLatitude(), loc.getLongitude());
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
+        mMap.animateCamera(zoom);
+        subscribeToFriends(loc);
         Log.d("MainActivity","Location changed to: lat: "+loc.getLatitude()+", lng: "+loc.getLongitude());
         if (broadcastingEnabled)
         {   // if location when converted to accuracy of 110m (3 decimal places) has changed
             if (last_location == null || roundtoThreeDecimals(loc.getLatitude()) != roundtoThreeDecimals(last_location.getLatitude()) &&
                     roundtoThreeDecimals(loc.getLongitude()) != roundtoThreeDecimals(last_location.getLongitude()))
             {
-                String command = "loc_removal";
-                String json_string = "{email:"+client_email+
-                        ",command:"+command+"}";
-                String topic =  client_email +"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
-                MqttMessage msg = new MqttMessage(json_string.getBytes());
-                msg.setQos(1);
-                try {
-                    mqttClient.publish(topic, msg);
-                }
-                catch(MqttException except)
-                {
-                    Log.d("MainActivity", "MQTT: could not publish loc_removal message: "+except.getMessage());
-                }
-                Iterator<String> friendListIterator = friendHashMap.keySet().iterator();
-                while (friendListIterator.hasNext())
-                {
-                    String key = friendListIterator.next();
-                    String topic_string = friendHashMap.get(key).getEmail()+"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
-                    try {
-                        mqttClient.subscribe(topic_string);
-                    }
-                    catch(MqttException except)
-                    {
-                        Log.d("MainActivity", "MQTT: could not subscribe message: "+except.getMessage());
-                    }
-                }
+                sendNewAreaUpdate(loc);
+                if (last_location != null)
+                    unsubscribeToFriends(last_location);
+                subscribeToFriends(loc);
 
                 last_location = loc;
             }
-            Double latitude = loc.getLatitude();
-            Double longitude = loc.getLongitude();
-            String command = "loc_update";
-            String json_string = "{email:"+client_email+
-                                  ",command:"+command+
-                                  ",lat:"+latitude+
-                                  ",lng:"+longitude+"}";
-            String topic = client_email+"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
-            Log.d("MainActivity", "topic is: "+topic);
-            MqttMessage msg = new MqttMessage(json_string.getBytes());
-            msg.setQos(1);
-            try {
-                mqttClient.publish(topic,msg);
-            }
-            catch(MqttException except)
-            {
-                Log.d("MainActivity", "MQTT: could not send location message: "+except.getMessage() +" (" +except.getReasonCode() + ")");
-            }
+            sendLocationChangeUpdate(loc);
         }
 
     }
@@ -385,15 +390,14 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     @Override
                     public void run() {
                         friendListAdapter.notifyDataSetChanged();
-                        updateMarker();
+                        updateMarkers();
                         sendNotification();
                     }
 
                 });
             }
-            else if (command.equals("loc_removal"))
+            else if (command.equals("loc_remove"))
             {
-                //int index = findFriendIndexByEmail(email);
                 if (friendHashMap.get(email) != null)
                 {
                     friendHashMap.remove(email);
@@ -403,7 +407,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                         @Override
                         public void run() {
                             friendListAdapter.notifyDataSetChanged();
-                            updateMarker();
+                            updateMarkers();
                         }
 
                     });
@@ -417,11 +421,9 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         }
     }
 
-    private void updateMarker()
+    private void updateMarkers()
     {
-
         Iterator<String> friendListIterator = friendHashMap.keySet().iterator();
-        Iterator<String> markerIterator = markers.keySet().iterator();
         while(friendListIterator.hasNext())
         {
             String key = friendListIterator.next();
@@ -436,20 +438,16 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             }
             else
             {
-                LatLng old = markers.get(key).getPosition();
-                LatLng New = new LatLng(friendHashMap.get(key).getLat(), friendHashMap.get(key).getLng());
-                markers.get(key).setPosition(New);
+                LatLng old_loc = markers.get(key).getPosition();
+                LatLng new_loc = new LatLng(friendHashMap.get(key).getLat(), friendHashMap.get(key).getLng());
+                markers.get(key).setPosition(new_loc);
                 float[] result = new float[1];
-                Location.distanceBetween(old.latitude, old.longitude, New.latitude, New.longitude, result);
+                Location.distanceBetween(old_loc.latitude, old_loc.longitude, new_loc.latitude, new_loc.longitude, result);
                 if(result[0] >100)
-                {
                     notificationList.add(key);
-                }
-                Log.d("updateMarker", "result[0] = "+result[0] + ", name = " + friendHashMap.get(key).getName());
-                Log.d("updateMarker", "notificationList.size() = " + notificationList.size());
             }
         }
-
+        Iterator<String> markerIterator = markers.keySet().iterator();
         while (markerIterator.hasNext())
         {
             String key = markerIterator.next();
@@ -542,8 +540,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         }
         else
         {
-            Log.d("Notification", "Activity is in forground. No notification send");
-            Log.d("Notification", "notificationList.size() = " +notificationList.size());
+            Log.d("Notification", "Activity is in foreground. No notification send");
             notificationList.clear();
         }
         notificationList.clear();
