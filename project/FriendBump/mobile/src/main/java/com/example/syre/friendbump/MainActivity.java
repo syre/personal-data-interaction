@@ -48,6 +48,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -66,16 +67,16 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     HashMap<String, Friend> friendHashMap = new HashMap<>();
     HashMap<String, Marker>  markers = new HashMap<>();
     ListView friendListView;
-    ArrayAdapter friendListAdapter;
-    MapView friendmapview;
+    FriendListAdapter friendListAdapter;
+    MapView friendMapView;
     GoogleApiClient mGoogleApiClient;
     Boolean broadcastingEnabled;
     ImageButton toggleBroadcastingButton;
     MqttClient mqttClient;
     GoogleMap mMap;
     MemoryPersistence persistence;
-    String client_email;
-    Location last_location = null;
+    String clientEmail;
+    Location lastLocation = null;
     private static boolean isInForeground;
     ArrayList<String> notificationList = new ArrayList<>();
 
@@ -84,19 +85,19 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         super.onCreate(savedInstanceState);
         Log.d("MainActivity", "onCreate executed!");
         setContentView(R.layout.activity_main);
-        friendmapview = (MapView)findViewById(R.id.friendMapView);
+        friendMapView = (MapView)findViewById(R.id.friendMapView);
         toggleBroadcastingButton = (ImageButton)findViewById(R.id.toggleBroadcastingButton);
-        friendmapview.onCreate(savedInstanceState);
+        friendMapView.onCreate(savedInstanceState);
         friendHashMap.put("handiiandii@gmail.com", new Friend("Anders Rahbek", 0.0, 0.0, "handiiandii@gmail.com"));
         friendHashMap.put("syrelyre@gmail.com", new Friend("Søren Howe Gersager", 0.0, 0.0, "syrelyre@gmail.com"));
 
         friendListView = (ListView)findViewById(R.id.friendListView);
         ArrayList<Friend> valuesList = new ArrayList<>(friendHashMap.values());
-        friendListAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, valuesList);
+        friendListAdapter = new FriendListAdapter(this, valuesList, getResources());
         friendListView.setAdapter(friendListAdapter);
 
         MapsInitializer.initialize(this);
-        friendmapview.getMapAsync(this);
+        friendMapView.getMapAsync(this);
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                             .addConnectionCallbacks(this)
                             .addOnConnectionFailedListener(this)
@@ -109,13 +110,13 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         Account[] accounts = AccountManager.get(getApplicationContext()).getAccounts();
         for (Account account : accounts) {
             if (emailPattern.matcher(account.name).matches()) {
-                client_email = account.name;
+                clientEmail = account.name;
                 break;
             }
         }
 
         try {
-            mqttClient = new MqttClient("tcp://syrelyre.dk:1883",client_email,persistence);
+            mqttClient = new MqttClient("tcp://syrelyre.dk:1883", clientEmail,persistence);
             
             MqttConnectOptions options = new MqttConnectOptions();
             options.setKeepAliveInterval(60);
@@ -141,7 +142,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     @Override
     public void onPause() {
         super.onPause();
-        friendmapview.onPause();
+        friendMapView.onPause();
         isInForeground = false;
         Log.d("MainActivity", "onPause executed!");
     }
@@ -155,7 +156,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     @Override
     public void onResume() {
         super.onResume();
-        friendmapview.onResume();
+        friendMapView.onResume();
         isInForeground = true;
         notificationList.clear();
         Log.d("MainActivity", "onResume executed!");
@@ -164,7 +165,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     @Override
     public void onDestroy() {
         super.onDestroy();
-        friendmapview.onDestroy();
+        friendMapView.onDestroy();
         try{
             mqttClient.disconnect();
         }
@@ -179,7 +180,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        friendmapview.onLowMemory();
+        friendMapView.onLowMemory();
     }
 
     @Override
@@ -196,11 +197,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
-            return true;
-        }
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
 
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -260,9 +258,9 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     private void sendNewAreaUpdate(Location loc)
     {
         String command = "loc_removal";
-        String json_string = "{email:"+client_email+
+        String json_string = "{email:"+ clientEmail +
                 ",command:"+command+"}";
-        String topic =  client_email +"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
+        String topic =  clientEmail +"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
         MqttMessage msg = new MqttMessage(json_string.getBytes());
         msg.setQos(0);
         try {
@@ -279,11 +277,11 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         Double latitude = loc.getLatitude();
         Double longitude = loc.getLongitude();
         String command = "loc_update";
-        String json_string = "{email:"+client_email+
+        String json_string = "{email:"+ clientEmail +
                 ",command:"+command+
                 ",lat:"+latitude+
                 ",lng:"+longitude+"}";
-        String topic = client_email+"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
+        String topic = clientEmail +"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
         Log.d("MainActivity", "topic is: "+topic);
         MqttMessage msg = new MqttMessage(json_string.getBytes());
         msg.setQos(0);
@@ -307,15 +305,15 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         Log.d("MainActivity","Location changed to: lat: "+loc.getLatitude()+", lng: "+loc.getLongitude());
         if (broadcastingEnabled)
         {   // if location when converted to accuracy of 110m (3 decimal places) has changed
-            if (last_location == null || roundtoThreeDecimals(loc.getLatitude()) != roundtoThreeDecimals(last_location.getLatitude()) &&
-                    roundtoThreeDecimals(loc.getLongitude()) != roundtoThreeDecimals(last_location.getLongitude()))
+            if (lastLocation == null || roundtoThreeDecimals(loc.getLatitude()) != roundtoThreeDecimals(lastLocation.getLatitude()) &&
+                    roundtoThreeDecimals(loc.getLongitude()) != roundtoThreeDecimals(lastLocation.getLongitude()))
             {
                 sendNewAreaUpdate(loc);
-                if (last_location != null)
-                    unsubscribeToFriends(last_location);
+                if (lastLocation != null)
+                    unsubscribeToFriends(lastLocation);
                 subscribeToFriends(loc);
 
-                last_location = loc;
+                lastLocation = loc;
             }
             sendLocationChangeUpdate(loc);
         }
@@ -469,7 +467,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         Log.d("MainActivity", "message arrived:" + msg);
         try {
             JSONObject json_obj = new JSONObject(msg);
-            if (!json_obj.getString("email").equals(client_email))
+            if (!json_obj.getString("email").equals(clientEmail))
                 parseCommand(json_obj);
 
         }
@@ -489,7 +487,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         Log.d("Notification", "Run notification() ");
         if(!isInForeground && notificationList.size()>0)
         {
-            String title = "";
+            String title;
             String contentText = "";
             if(notificationList.size()==1)
             {
