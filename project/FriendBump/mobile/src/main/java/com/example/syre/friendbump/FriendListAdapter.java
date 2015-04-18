@@ -6,8 +6,12 @@ import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,15 +58,14 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
         if (convertView == null)
         {
             view = inflater.inflate(R.layout.friendlist_item, null);
+            TableRow listItemRow = (TableRow) view.findViewById(R.id.list_item_row);
+            listItemRow.setOnClickListener(new ToggleToolbarListener());
             holder = new ViewHolder();
             holder.name = (TextView) view.findViewById(R.id.friend_name);
-            holder.name.setOnClickListener(this);
             holder.profileImage = (ImageView) view.findViewById(R.id.friend_image);
-            holder.profileImage.setOnClickListener(this);
             holder.distance = (TextView) view.findViewById(R.id.friend_distance);
-            holder.distance.setOnClickListener(this);
             holder.socialNetworkImage = (ImageView) view.findViewById(R.id.friend_social_network_image);
-            holder.socialNetworkImage.setOnClickListener(this);
+            holder.toolbar = (TableRow) view.findViewById(R.id.toolbar_row);
             view.setTag(holder);
         }
         else
@@ -85,11 +88,34 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
         switch(v.getId())
         {
             case R.id.friend_image:
-                Toast.makeText(activity.getApplicationContext(), "image clicked", Toast.LENGTH_SHORT).show();
+                break;
+
             case R.id.friend_name:
                 Toast.makeText(activity.getApplicationContext(), "name clicked", Toast.LENGTH_SHORT).show();
             default:
                 break;
+        }
+    }
+    private class ToggleToolbarListener implements View.OnClickListener
+    {
+
+        @Override
+        public void onClick(View v)
+        {
+            TableRow toolbar = (TableRow) v.findViewById(R.id.toolbar_row);
+            if (toolbar.isShown())
+            {
+                Animation out = AnimationUtils.makeOutAnimation(activity.getApplicationContext(), true);
+                toolbar.startAnimation(out);
+                toolbar.setVisibility(View.GONE);
+            }
+            else
+            {
+                Animation in = AnimationUtils.makeInAnimation(activity.getApplicationContext(), true);
+                toolbar.startAnimation(in);
+                toolbar.setVisibility(View.VISIBLE);
+            }
+
         }
     }
 
@@ -99,5 +125,6 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
         public ImageView profileImage;
         public ImageView socialNetworkImage;
         public TextView distance;
+        public TableRow toolbar;
     }
 }
