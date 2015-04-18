@@ -8,6 +8,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
@@ -532,10 +534,13 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                             .setContentTitle(title)
                             .setContentText(contentText);
 // Creates an explicit intent for an Activity in your app
-            Intent resultIntent = new Intent(this,
+            final Intent resultIntent = new Intent(getApplicationContext(),
                     MainActivity.class);
-            resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            resultIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            //resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            resultIntent.setAction("android.intent.action.MAIN");
+            resultIntent.addCategory("android.intent.category.LAUNCHER");
+
+
 
 // The stack builder object will contain an artificial back stack for the
 // started Activity.
@@ -553,6 +558,9 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     );
             mBuilder.setContentIntent(resultPendingIntent);
             mBuilder.setAutoCancel(true);
+            Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            mBuilder.setSound(alarmSound);
+            mBuilder.setVibrate(new long[] { 0, 100, 100, 100, 100 });
             NotificationManager mNotificationManager =
                     (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 // mId allows you to update the notification later on.
