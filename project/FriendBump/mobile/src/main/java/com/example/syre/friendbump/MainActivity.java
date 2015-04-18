@@ -45,13 +45,17 @@ import org.json.JSONObject;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 //For notification
@@ -78,12 +82,12 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     String clientEmail;
     Location lastLocation = null;
     private static boolean isInForeground;
-    ArrayList<String> notificationList = new ArrayList<>();
+    Set notificationList = new HashSet();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("MainActivity", "onCreate executed!");
+        Log.d("onCreate", "onCreate executed!");
         setContentView(R.layout.activity_main);
         friendMapView = (MapView)findViewById(R.id.friendMapView);
         toggleBroadcastingButton = (ImageButton)findViewById(R.id.toggleBroadcastingButton);
@@ -159,7 +163,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendMapView.onResume();
         isInForeground = true;
         notificationList.clear();
-        Log.d("MainActivity", "onResume executed!");
+        Log.d("onResume", "onResume executed!");
     }
 
     @Override
@@ -432,7 +436,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                         .title(friendHashMap.get(key).getName()));
 
                 markers.put(key, marker);
-                notificationList.add(key);
+                //if(!notificationList.contains(key))
+                    notificationList.add(key);
             }
             else
             {
@@ -441,8 +446,10 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 markers.get(key).setPosition(new_loc);
                 float[] result = new float[1];
                 Location.distanceBetween(old_loc.latitude, old_loc.longitude, new_loc.latitude, new_loc.longitude, result);
-                if(result[0] >100)
-                    notificationList.add(key);
+                if(result[0] >100) {
+                    //if(!notificationList.contains(key))
+                        notificationList.add(key);
+                }
             }
         }
         Iterator<String> markerIterator = markers.keySet().iterator();
@@ -489,20 +496,33 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         {
             String title;
             String contentText = "";
+            Log.d("Notification", "notiList.size() = "+notificationList.size());
+            /*
             if(notificationList.size()==1)
             {
                 title = "There is 1 friend near you!";
-                contentText = friendHashMap.get(notificationList.get(0)).getName() + " is near you!";
+                contentText = friendHashMap.get(notificationList.getName() + " is near you!";
             }
             else
             {
+            */
+                int i = 0;
                 title = "There is several friends near you!";
-                for(int i = 0; i<3; i++)
+                for(Object name : notificationList)
                 {
-                    contentText += friendHashMap.get(notificationList.get(0)).getName() + ", ";
+                    if(i==3)
+                        break;
+                    contentText += friendHashMap.get(name).getName() + ", ";
+                    i++;
                 }
                 contentText = contentText.substring(0, contentText.length()-2);
-            }
+                if(i == 1)
+                    title = "There is 1 friend near you!";
+                else
+                    title = "There is several friends near you!";
+
+           // }
+
             notificationList.clear();
             Log.d("Notification", "Notification send!");
             int mId = 5;
@@ -514,6 +534,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 // Creates an explicit intent for an Activity in your app
             Intent resultIntent = new Intent(this,
                     MainActivity.class);
+            resultIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
 // The stack builder object will contain an artificial back stack for the
 // started Activity.
