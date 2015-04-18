@@ -3,22 +3,20 @@
 <TableLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:paddingTop="0dip"
-    android:stretchColumns="0"
-    >
+    android:layout_height="wrap_content">
 <TableRow
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:id="@+id/list_item_row">
     <LinearLayout
-        android:layout_width="70dp"
-        android:layout_height="70dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:paddingTop="5dp"
-        android:paddingBottom="5dp">
+        android:paddingBottom="5dp"
+        android:layout_weight="1">
         <ImageView
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
             android:id="@+id/friend_image"
             android:src="@drawable/person_placeholder"
             android:contentDescription="Profile picture of Friend">
@@ -27,26 +25,24 @@
     <TableLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="0dip"
-        android:layout_gravity="top"
-        android:stretchColumns="0">
-    <TableRow android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_weight="1"
+        android:paddingTop="10dp"
+        android:paddingBottom="5dp">
+    <TableRow>
         <TextView
             android:id="@+id/friend_name"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:layout_weight="1"
-            android:layout_gravity="start|center_vertical"
             android:layout_marginTop="4dip"
-            android:layout_span="1"/>
+            android:text="Blabla"/>
         </TableRow>
-        <TableRow android:layout_width="wrap_content">
+        <TableRow>
             <TextView
                 android:id="@+id/friend_distance"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:layout_marginTop="4dip"/>
+                android:layout_marginTop="4dip"
+                android:text="Distance"/>
         </TableRow>
     </TableLayout>
 
@@ -64,22 +60,25 @@
         android:id="@+id/toolbar_row"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:paddingTop="10dp"
+        android:orientation="horizontal"
         android:visibility="gone">
         <ImageView
             android:id="@+id/phone_button"
             android:layout_width="30dp"
             android:layout_height="30dp"
+            android:layout_weight="1"
             android:src="@drawable/phone"/>
         <ImageView
             android:id="@+id/chat_button"
             android:layout_width="30dp"
             android:layout_height="30dp"
+            android:layout_weight="1"
             android:src="@drawable/chat"/>
         <ImageView
             android:id="@+id/nudge_button"
             android:layout_width="30dp"
             android:layout_height="30dp"
+            android:layout_weight="1"
             android:src="@drawable/finger"/>
 
     </TableRow>
