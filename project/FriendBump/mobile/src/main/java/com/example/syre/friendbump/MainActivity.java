@@ -17,7 +17,6 @@ import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -47,16 +46,13 @@ import org.json.JSONObject;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -100,7 +96,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
         friendListView = (ListView)findViewById(R.id.friendListView);
         ArrayList<Friend> valuesList = new ArrayList<>(friendHashMap.values());
-        friendListAdapter = new FriendListAdapter(this, valuesList, getResources());
+        friendListAdapter = new FriendListAdapter(this, valuesList, getResources(), friendListView);
         friendListView.setAdapter(friendListAdapter);
         MapsInitializer.initialize(this);
         friendMapView.getMapAsync(this);
