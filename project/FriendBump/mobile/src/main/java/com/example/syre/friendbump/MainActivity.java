@@ -62,7 +62,8 @@ import java.util.regex.Pattern;
 
 //For notification
 import android.support.v4.app.NotificationCompat;
-
+import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.app.NotificationCompat.WearableExtender;
 
 public class MainActivity extends Activity implements OnMapReadyCallback,
                                                       LocationListener,
@@ -527,24 +528,27 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             notificationList.clear();
             Log.d("Notification", "Notification send!");
             int mId = 5;
-            NotificationCompat.Builder mBuilder =
+
+            Intent resultIntent = new Intent(this,
+                    MainActivity.class);
+            PendingIntent viewPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
+            //resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            //resultIntent.setAction("android.intent.action.MAIN");
+            //resultIntent.addCategory("android.intent.category.LAUNCHER");
+
+
+
+             NotificationCompat.Builder mBuilder =
                     new NotificationCompat.Builder(this)
                             .setSmallIcon(R.mipmap.broadcast_disabled)
                             .setContentTitle(title)
-                            .setContentText(contentText);
+                            .setContentText(contentText)
+                            .setContentIntent(viewPendingIntent);
 // Creates an explicit intent for an Activity in your app
-            final Intent resultIntent = new Intent(getApplicationContext(),
-                    MainActivity.class);
-            //resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            resultIntent.setAction("android.intent.action.MAIN");
-            resultIntent.addCategory("android.intent.category.LAUNCHER");
 
 
+            /*
 
-// The stack builder object will contain an artificial back stack for the
-// started Activity.
-// This ensures that navigating backward from the Activity leads out of
-// your application to the Home screen.
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
 // Adds the back stack for the Intent (but not the Intent itself)
             stackBuilder.addParentStack(MainActivity.class);
@@ -556,14 +560,21 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                             PendingIntent.FLAG_UPDATE_CURRENT
                     );
             mBuilder.setContentIntent(resultPendingIntent);
+
+            */
             mBuilder.setAutoCancel(true);
             Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             mBuilder.setSound(alarmSound);
             mBuilder.setVibrate(new long[] { 0, 100, 100, 100, 100 });
-            NotificationManager mNotificationManager =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+            NotificationManagerCompat mNotificationManager =
+                    NotificationManagerCompat.from(this);
+                    //(NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 // mId allows you to update the notification later on.
             mNotificationManager.notify(mId, mBuilder.build());
+
+
+
         }
         else
         {
