@@ -3,16 +3,14 @@ package com.example.syre.friendbump;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.TableLayout;
+import android.widget.ListView;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,14 +24,16 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
 {
     private Activity activity;
     private ArrayList list;
+    private ListView listView;
     public Resources res;
     private static LayoutInflater inflater = null;
 
-    public FriendListAdapter(Activity a, ArrayList l, Resources r)
+    public FriendListAdapter(Activity a, ArrayList l, Resources r, ListView lv)
     {
         activity = a;
         list = l;
         res = r;
+        listView = lv;
         inflater = (LayoutInflater )activity.
                 getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
@@ -68,7 +68,7 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
             holder.distance = (TextView) view.findViewById(R.id.friend_distance);
             holder.socialNetworkImage = (ImageView) view.findViewById(R.id.friend_social_network_image);
             holder.toolbar = (TableRow) view.findViewById(R.id.toolbar_row);
-
+            holder.toolbar.setTag(position);
             holder.phoneButton = (ImageView) view.findViewById(R.id.phone_button);
             holder.phoneButton.setOnClickListener(this);
             holder.phoneButton.setTag(position);
@@ -80,7 +80,7 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
             holder.nudgeButton = (ImageView) view.findViewById(R.id.nudge_button);
             holder.nudgeButton.setOnClickListener(this);
             holder.nudgeButton.setTag(position);
-            
+
             view.setTag(holder);
         }
         else
@@ -114,7 +114,19 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
         }
 
     }
+    public void hideAllOtherToolbars(int position)
+    {
+        final int childCount = listView.getChildCount();
+        for (int i = 0; i < childCount; i++)
+        {
+            if (i == position)
+                continue;
 
+            View child = listView.getChildAt(i);
+            TableRow toolbar = (TableRow)child.findViewById(R.id.toolbar_row);
+            toolbar.setVisibility(View.GONE);
+        }
+    }
     public class ToggleToolbarListener implements View.OnClickListener
     {
        @Override
@@ -133,6 +145,8 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
                 Animation in = AnimationUtils.makeInAnimation(activity.getApplicationContext(), true);
                 toolbar.startAnimation(in);
                 toolbar.setVisibility(View.VISIBLE);
+                int position = (int)toolbar.getTag();
+                hideAllOtherToolbars(position);
              }
             }
         }
