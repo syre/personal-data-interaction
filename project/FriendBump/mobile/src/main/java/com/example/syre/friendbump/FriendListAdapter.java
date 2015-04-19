@@ -1,8 +1,15 @@
 package com.example.syre.friendbump;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.ContactsContract;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -103,17 +110,77 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
         switch(view.getId())
         {
         case R.id.chat_button:
-            Toast.makeText(activity.getApplicationContext(), "chat clicked on "+position, Toast.LENGTH_SHORT).show();
+            try {
+                /*
+                Intent it = new Intent(Intent.ACTION_VIEW);
+                //it.putExtra(Intent.EXTRA_PHONE_NUMBER, getNumber(list.get(position).toString()));
+                it.putExtra(Intent.EXTRA_TEXT, "text");
+                it.setType("vnd.android-dir/mms-sms");
+                activity.startActivity(it);
+                */
+                String number = getNumber(list.get(position).toString());  // The number on which you want to send SMS
+                if(!number.equals("NULL")) {
+                    activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", number, "hej hej")));
+                }
+                else
+                    Toast.makeText(activity.getApplicationContext(), "Number not found. Can't send a sms!", Toast.LENGTH_SHORT).show();
+
+            }
+            catch (Error error){
+                Toast.makeText(activity.getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
             break;
+
         case R.id.nudge_button:
             Toast.makeText(activity.getApplicationContext(), "nudge clicked on "+position, Toast.LENGTH_SHORT).show();
         case R.id.phone_button:
-            Toast.makeText(activity.getApplicationContext(), "phone clicked on "+position, Toast.LENGTH_SHORT).show();
+            String number = getNumber(list.get(position).toString());
+            if(!number.equals("NULL")) {
+                try {
+
+                    Intent callIntent = new Intent(Intent.ACTION_CALL);
+                    callIntent.setData(Uri.parse("tel:" + getNumber(list.get(position).toString())));
+                    activity.startActivity(callIntent);
+                } catch (ActivityNotFoundException activityException) {
+                    Toast.makeText(activity.getApplicationContext(), "Error!", Toast.LENGTH_SHORT).show();
+                    Log.e("Calling a Phone Number", "Call failed", activityException);
+                }
+            }
+            else
+                Toast.makeText(activity.getApplicationContext(), "Number not found. Can't make the call!", Toast.LENGTH_SHORT).show();
+            //getNumber(view.getId())
+
+            //Toast.makeText(activity.getApplicationContext(), "phone clicked on "+position, Toast.LENGTH_SHORT).show();
         default:
             break;
         }
 
     }
+    private String getNumber(String qName) {
+        Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+        String[] projection = new String[]{ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Phone.NUMBER};
+
+        Cursor people = activity.getContentResolver().query(uri, projection, null, null, null);
+
+        int indexName = people.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+        int indexNumber = people.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+        String resultNumber = "NULL";
+        people.moveToFirst();
+        do {
+            String name = people.getString(indexName);
+            String number = people.getString(indexNumber);
+
+            if(qName.equals(name)) {
+                resultNumber = number;
+                break;
+            }
+            // Do work...
+        } while (people.moveToNext());
+        return resultNumber;
+    }
+
+
     public void hideAllOtherToolbars(int position)
     {
         final int childCount = listView.getChildCount();
