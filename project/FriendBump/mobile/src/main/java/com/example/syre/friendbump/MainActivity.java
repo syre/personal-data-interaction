@@ -495,17 +495,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             String title;
             String contentText = "";
             Log.d("Notification", "notiList.size() = "+notificationList.size());
-            /*
-            if(notificationList.size()==1)
-            {
-                title = "There is 1 friend near you!";
-                contentText = friendHashMap.get(notificationList.getName() + " is near you!";
-            }
-            else
-            {
-            */
                 int i = 0;
-                title = "There is several friends near you!";
                 for(Object name : notificationList)
                 {
                     if(i==3)
@@ -519,7 +509,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 else
                     title = "There is several friends near you!";
 
-           // }
 
             notificationList.clear();
             Log.d("Notification", "Notification send!");
@@ -528,36 +517,12 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             Intent resultIntent = new Intent(this,
                     MainActivity.class);
             PendingIntent viewPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
-            //resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            //resultIntent.setAction("android.intent.action.MAIN");
-            //resultIntent.addCategory("android.intent.category.LAUNCHER");
-
-
-
              NotificationCompat.Builder mBuilder =
                     new NotificationCompat.Builder(this)
                             .setSmallIcon(R.mipmap.broadcast_disabled)
                             .setContentTitle(title)
                             .setContentText(contentText)
                             .setContentIntent(viewPendingIntent);
-// Creates an explicit intent for an Activity in your app
-
-
-            /*
-
-            TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-// Adds the back stack for the Intent (but not the Intent itself)
-            stackBuilder.addParentStack(MainActivity.class);
-// Adds the Intent that starts the Activity to the top of the stack
-            stackBuilder.addNextIntent(resultIntent);
-            PendingIntent resultPendingIntent =
-                    stackBuilder.getPendingIntent(
-                            0,
-                            PendingIntent.FLAG_UPDATE_CURRENT
-                    );
-            mBuilder.setContentIntent(resultPendingIntent);
-
-            */
             mBuilder.setAutoCancel(true);
             Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             mBuilder.setSound(alarmSound);
@@ -565,7 +530,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
             NotificationManagerCompat mNotificationManager =
                     NotificationManagerCompat.from(this);
-                    //(NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 // mId allows you to update the notification later on.
             mNotificationManager.notify(mId, mBuilder.build());
 

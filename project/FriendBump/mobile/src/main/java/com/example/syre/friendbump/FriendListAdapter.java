@@ -111,20 +111,12 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
         {
         case R.id.chat_button:
             try {
-                /*
-                Intent it = new Intent(Intent.ACTION_VIEW);
-                //it.putExtra(Intent.EXTRA_PHONE_NUMBER, getNumber(list.get(position).toString()));
-                it.putExtra(Intent.EXTRA_TEXT, "text");
-                it.setType("vnd.android-dir/mms-sms");
-                activity.startActivity(it);
-                */
-                String number = getNumber(list.get(position).toString());  // The number on which you want to send SMS
+                String number = getNumber(list.get(position).toString());  // The number to send SMS to
                 if(!number.equals("NULL")) {
                     activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", number, "hej hej")));
                 }
                 else
                     Toast.makeText(activity.getApplicationContext(), "Number not found. Can't send a sms!", Toast.LENGTH_SHORT).show();
-
             }
             catch (Error error){
                 Toast.makeText(activity.getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
@@ -137,7 +129,6 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
             String number = getNumber(list.get(position).toString());
             if(!number.equals("NULL")) {
                 try {
-
                     Intent callIntent = new Intent(Intent.ACTION_CALL);
                     callIntent.setData(Uri.parse("tel:" + getNumber(list.get(position).toString())));
                     activity.startActivity(callIntent);
@@ -148,9 +139,6 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
             }
             else
                 Toast.makeText(activity.getApplicationContext(), "Number not found. Can't make the call!", Toast.LENGTH_SHORT).show();
-            //getNumber(view.getId())
-
-            //Toast.makeText(activity.getApplicationContext(), "phone clicked on "+position, Toast.LENGTH_SHORT).show();
         default:
             break;
         }
@@ -175,7 +163,6 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
                 resultNumber = number;
                 break;
             }
-            // Do work...
         } while (people.moveToNext());
         return resultNumber;
     }
