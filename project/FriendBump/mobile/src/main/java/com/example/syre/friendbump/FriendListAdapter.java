@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TableLayout;
@@ -67,12 +68,19 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
             holder.distance = (TextView) view.findViewById(R.id.friend_distance);
             holder.socialNetworkImage = (ImageView) view.findViewById(R.id.friend_social_network_image);
             holder.toolbar = (TableRow) view.findViewById(R.id.toolbar_row);
+
             holder.phoneButton = (ImageView) view.findViewById(R.id.phone_button);
             holder.phoneButton.setOnClickListener(this);
+            holder.phoneButton.setTag(position);
+
             holder.chatButton = (ImageView) view.findViewById(R.id.chat_button);
             holder.chatButton.setOnClickListener(this);
+            holder.chatButton.setTag(position);
+
             holder.nudgeButton = (ImageView) view.findViewById(R.id.nudge_button);
             holder.nudgeButton.setOnClickListener(this);
+            holder.nudgeButton.setTag(position);
+            
             view.setTag(holder);
         }
         else
@@ -86,25 +94,27 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
 
             holder.profileImage.setImageResource(res.getIdentifier("com.example.syre.friendbump:drawable/person_placeholder",null,null));
         }
-        view.setOnClickListener(this);
         return view;
     }
-
     @Override
-    public void onClick(View v) {
-        switch(v.getId())
+    public void onClick(View view)
+    {
+        int position =(int)view.getTag();
+        switch(view.getId())
         {
-            case R.id.chat_button:
-                Toast.makeText(activity.getApplicationContext(), "chat clicked", Toast.LENGTH_SHORT).show();
-                break;
-            case R.id.nudge_button:
-                Toast.makeText(activity.getApplicationContext(), "nudge clicked", Toast.LENGTH_SHORT).show();
-            case R.id.phone_button:
-                Toast.makeText(activity.getApplicationContext(), "phone clicked", Toast.LENGTH_SHORT).show();
-            default:
-                break;
+        case R.id.chat_button:
+            Toast.makeText(activity.getApplicationContext(), "chat clicked on "+position, Toast.LENGTH_SHORT).show();
+            break;
+        case R.id.nudge_button:
+            Toast.makeText(activity.getApplicationContext(), "nudge clicked on "+position, Toast.LENGTH_SHORT).show();
+        case R.id.phone_button:
+            Toast.makeText(activity.getApplicationContext(), "phone clicked on "+position, Toast.LENGTH_SHORT).show();
+        default:
+            break;
         }
+
     }
+
     public class ToggleToolbarListener implements View.OnClickListener
     {
        @Override

@@ -101,7 +101,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         ArrayList<Friend> valuesList = new ArrayList<>(friendHashMap.values());
         friendListAdapter = new FriendListAdapter(this, valuesList, getResources());
         friendListView.setAdapter(friendListAdapter);
-
         MapsInitializer.initialize(this);
         friendMapView.getMapAsync(this);
         mGoogleApiClient = new GoogleApiClient.Builder(this)
