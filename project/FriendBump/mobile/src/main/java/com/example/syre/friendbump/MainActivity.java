@@ -467,8 +467,11 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     private String extractInitials(String text)
     {
         String[] splitarray = text.split("\\s+");
-        String extracted = splitarray[0].substring(0,1)+splitarray[1].substring(0,1);
-        Log.d("MainActivity", "extracted initials: "+extracted);
+        String extracted = "";
+        for (String value: splitarray)
+        {
+            extracted += value.substring(0,1);
+        }
         return extracted;
     }
     private void updateMarkers()
