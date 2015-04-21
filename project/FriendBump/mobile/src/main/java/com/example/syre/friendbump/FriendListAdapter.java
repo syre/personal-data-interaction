@@ -113,7 +113,7 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
             try {
                 String number = getNumber(list.get(position).toString());  // The number to send SMS to
                 if(!number.equals("NULL")) {
-                    activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", number, "hej hej")));
+                    activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", number, "")));
                 }
                 else
                     Toast.makeText(activity.getApplicationContext(), "Number not found. Can't send a sms!", Toast.LENGTH_SHORT).show();

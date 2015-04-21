@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -17,6 +18,7 @@ import android.location.Location;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.Menu;
@@ -566,8 +568,14 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     Object name = iter.next();
                     title = "There is 1 friend near you!";
                     Intent callIntent = new Intent(Intent.ACTION_CALL);
-                    callIntent.setData(Uri.parse("tel:" + friendListAdapter.getNumber((String) name)));
+                    Log.d("Notification", "String name = " + friendHashMap.get((String) name).getName());
+                    String number = getNumber(friendHashMap.get((String) name).getName());
+                    callIntent.setData(Uri.parse("tel:" + number));
                     PendingIntent callPendingIntent = PendingIntent.getActivity(this, 0, callIntent, 0);
+
+                    Intent smsIntent = new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", number, ""));
+                    PendingIntent smsPendingIntent = PendingIntent.getActivity(this, 0, smsIntent, 0);
+
                     //activity.startActivity(callIntent);
                     int mId = 5;
 
@@ -580,7 +588,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                                     .setContentTitle(title)
                                     .setContentText(contentText)
                                     .setContentIntent(viewPendingIntent)
-                                    .addAction(R.id.phone_button, "Call", callPendingIntent);
+                                    .addAction(R.drawable.ic_launcher, "Call", callPendingIntent)
+                                    .addAction(R.drawable.ic_launcher, "SMS", smsPendingIntent);
                     mBuilder.setAutoCancel(true);
                     Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
                     mBuilder.setSound(alarmSound);
@@ -611,5 +620,29 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             notificationList.clear();
         }
         notificationList.clear();
+    }
+
+
+    public String getNumber(String qName) {
+        Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+        String[] projection = new String[]{ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Phone.NUMBER};
+
+        Cursor people = getContentResolver().query(uri, projection, null, null, null);
+
+        int indexName = people.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+        int indexNumber = people.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+        String resultNumber = "NULL";
+        people.moveToFirst();
+        do {
+            String name = people.getString(indexName);
+            String number = people.getString(indexNumber);
+
+            if(qName.equals(name)) {
+                resultNumber = number;
+                break;
+            }
+        } while (people.moveToNext());
+        return resultNumber;
     }
 }
