@@ -3,21 +3,27 @@ package com.example.syre.friendbump;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.location.Location;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -32,6 +38,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -55,11 +63,9 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
-
 //For notification
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.app.NotificationCompat.WearableExtender;
 
 public class MainActivity extends Activity implements OnMapReadyCallback,
                                                       LocationListener,
@@ -214,10 +220,13 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     }
 
-    private double roundtoThreeDecimals(double value)
+    private double roundtoDecimals(int decimals, double value)
     {
+        String pattern = "###.";
+        for (int i = 0; i < decimals; i++)
+            pattern += "#";
         DecimalFormat df2 = (DecimalFormat) NumberFormat.getNumberInstance(Locale.ENGLISH);
-        df2.applyPattern("###.###");
+        df2.applyPattern(pattern);
         return Double.valueOf(df2.format(value));
     }
 
@@ -227,7 +236,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         while (friendListIterator.hasNext())
         {
             String key = friendListIterator.next();
-            String topic_string = friendHashMap.get(key).getEmail()+"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
+            String topic_string = friendHashMap.get(key).getEmail()+"."+roundtoDecimals(2, loc.getLatitude())+"."+roundtoDecimals(2, loc.getLongitude());
             try {
                 mqttClient.subscribe(topic_string);
             }
@@ -245,7 +254,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         while (friendListIterator.hasNext())
         {
             String key = friendListIterator.next();
-            String topic_string = friendHashMap.get(key).getEmail()+"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
+            String topic_string = friendHashMap.get(key).getEmail()+"."+roundtoDecimals(2, loc.getLatitude())+"."+roundtoDecimals(2, loc.getLongitude());
             try {
                 mqttClient.unsubscribe(topic_string);
             }
@@ -262,7 +271,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         String command = "loc_removal";
         String json_string = "{email:"+ clientEmail +
                 ",command:"+command+"}";
-        String topic =  clientEmail +"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
+        String topic =  clientEmail +"."+roundtoDecimals(2, loc.getLatitude())+"."+roundtoDecimals(2, loc.getLongitude());
         MqttMessage msg = new MqttMessage(json_string.getBytes());
         msg.setQos(0);
         try {
@@ -283,7 +292,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 ",command:"+command+
                 ",lat:"+latitude+
                 ",lng:"+longitude+"}";
-        String topic = clientEmail +"."+roundtoThreeDecimals(loc.getLatitude())+"."+roundtoThreeDecimals(loc.getLongitude());
+        String topic = clientEmail +"."+roundtoDecimals(2, loc.getLatitude())+"."+roundtoDecimals(2, loc.getLongitude());
         Log.d("MainActivity", "topic is: "+topic);
         MqttMessage msg = new MqttMessage(json_string.getBytes());
         msg.setQos(0);
@@ -307,8 +316,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         Log.d("MainActivity","Location changed to: lat: "+loc.getLatitude()+", lng: "+loc.getLongitude());
         if (broadcastingEnabled)
         {   // if location when converted to accuracy of 110m (3 decimal places) has changed
-            if (lastLocation == null || roundtoThreeDecimals(loc.getLatitude()) != roundtoThreeDecimals(lastLocation.getLatitude()) &&
-                    roundtoThreeDecimals(loc.getLongitude()) != roundtoThreeDecimals(lastLocation.getLongitude()))
+            if (lastLocation == null || roundtoDecimals(2, loc.getLatitude()) != roundtoDecimals(2, lastLocation.getLatitude()) &&
+                    roundtoDecimals(2, loc.getLongitude()) != roundtoDecimals(2, lastLocation.getLongitude()))
             {
                 sendNewAreaUpdate(loc);
                 if (lastLocation != null)
@@ -420,7 +429,48 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             Log.d("MainActivity", "MessageArrived exception: " + except.getMessage());
         }
     }
+    private Bitmap drawMarkerBitmap(Context mContext,  int resourceId,  String mText)
+    {
+        Resources resources = mContext.getResources();
+        float scale = resources.getDisplayMetrics().density;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        Bitmap bitmap = BitmapFactory.decodeResource(resources, resourceId, options);
+        bitmap = Bitmap.createScaledBitmap(bitmap, 80, 80, true);
+        android.graphics.Bitmap.Config bitmapConfig =   bitmap.getConfig();
+        // set default bitmap config if none
+        if(bitmapConfig == null) {
+            bitmapConfig = android.graphics.Bitmap.Config.ARGB_8888;
+        }
+        // resource bitmaps are immutable,
+        // so we need to convert it to mutable one
+        bitmap = bitmap.copy(bitmapConfig, true);
 
+        Canvas canvas = new Canvas(bitmap);
+        // new antialised Paint
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        // text color - #3D3D3D
+        paint.setColor(Color.rgb(0,0, 0));
+        // text size in pixels
+        paint.setTextSize((int) (12 * scale));
+        // optional - text shadow
+        //paint.setShadowLayer(1f, 0f, 1f, Color.DKGRAY);
+
+        // draw text to the Canvas center
+        Rect bounds = new Rect();
+        paint.getTextBounds(mText, 0, mText.length(), bounds);
+        int x = (bitmap.getWidth() - bounds.width())/6;
+        int y = (bitmap.getHeight() + bounds.height())/6;
+
+        canvas.drawText(mText, x * scale, y * scale, paint);
+        return bitmap;
+    }
+    private String extractInitials(String text)
+    {
+        String[] splitarray = text.split("\\s+");
+        String extracted = splitarray[0].substring(0,1)+splitarray[1].substring(0,1);
+        Log.d("MainActivity", "extracted initials: "+extracted);
+        return extracted;
+    }
     private void updateMarkers()
     {
         Iterator<String> friendListIterator = friendHashMap.keySet().iterator();
@@ -429,13 +479,15 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             String key = friendListIterator.next();
             if(markers.get(key) == null) //if there is no marker for the friend
             {
+                String initials = extractInitials(friendHashMap.get(key).getName());
+                Bitmap markerBitmap = drawMarkerBitmap(getApplicationContext(),R.drawable.circle,initials);
+                BitmapDescriptor descriptor = BitmapDescriptorFactory.fromBitmap(markerBitmap);
                 Marker marker = mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(friendHashMap.get(key).getLat(), friendHashMap.get(key).getLng()))
-                        .title(friendHashMap.get(key).getName()));
+                        .title(friendHashMap.get(key).getName()).icon(descriptor));
 
                 markers.put(key, marker);
-                //if(!notificationList.contains(key))
-                    notificationList.add(key);
+                notificationList.add(key);
             }
             else
             {
@@ -445,7 +497,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 float[] result = new float[1];
                 Location.distanceBetween(old_loc.latitude, old_loc.longitude, new_loc.latitude, new_loc.longitude, result);
                 if(result[0] >100) {
-                    //if(!notificationList.contains(key))
                         notificationList.add(key);
                 }
             }
