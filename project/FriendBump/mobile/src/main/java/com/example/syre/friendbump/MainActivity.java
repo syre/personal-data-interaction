@@ -492,6 +492,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         Log.d("Notification", "Run notification() ");
         if(!isInForeground && notificationList.size()>0)
         {
+            if(notificationList.contains(clientEmail))
+                notificationList.remove(clientEmail);
             String title;
             String contentText = "";
             Log.d("Notification", "notiList.size() = "+notificationList.size());
@@ -504,34 +506,47 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     i++;
                 }
                 contentText = contentText.substring(0, contentText.length()-2);
-                if(i == 1)
+                if(i == 1) {
+                    Iterator iter = notificationList.iterator();
+
+                    Object name = iter.next();
                     title = "There is 1 friend near you!";
-                else
+                    Intent callIntent = new Intent(Intent.ACTION_CALL);
+                    callIntent.setData(Uri.parse("tel:" + friendListAdapter.getNumber((String) name)));
+                    PendingIntent callPendingIntent = PendingIntent.getActivity(this, 0, callIntent, 0);
+                    //activity.startActivity(callIntent);
+                    int mId = 5;
+
+                    Intent resultIntent = new Intent(this,
+                            MainActivity.class);
+                    PendingIntent viewPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
+                    NotificationCompat.Builder mBuilder =
+                            new NotificationCompat.Builder(this)
+                                    .setSmallIcon(R.mipmap.broadcast_disabled)
+                                    .setContentTitle(title)
+                                    .setContentText(contentText)
+                                    .setContentIntent(viewPendingIntent)
+                                    .addAction(R.id.phone_button, "Call", callPendingIntent);
+                    mBuilder.setAutoCancel(true);
+                    Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                    mBuilder.setSound(alarmSound);
+                    mBuilder.setVibrate(new long[] { 0, 100, 100, 100, 100 });
+
+                    NotificationManagerCompat mNotificationManager =
+                            NotificationManagerCompat.from(this);
+// mId allows you to update the notification later on.
+                    mNotificationManager.notify(mId, mBuilder.build());
+                }
+                else {
                     title = "There is several friends near you!";
+                }
 
 
             notificationList.clear();
             Log.d("Notification", "Notification send!");
-            int mId = 5;
 
-            Intent resultIntent = new Intent(this,
-                    MainActivity.class);
-            PendingIntent viewPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
-             NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(this)
-                            .setSmallIcon(R.mipmap.broadcast_disabled)
-                            .setContentTitle(title)
-                            .setContentText(contentText)
-                            .setContentIntent(viewPendingIntent);
-            mBuilder.setAutoCancel(true);
-            Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            mBuilder.setSound(alarmSound);
-            mBuilder.setVibrate(new long[] { 0, 100, 100, 100, 100 });
 
-            NotificationManagerCompat mNotificationManager =
-                    NotificationManagerCompat.from(this);
-// mId allows you to update the notification later on.
-            mNotificationManager.notify(mId, mBuilder.build());
+
 
 
 

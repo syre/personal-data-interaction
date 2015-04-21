@@ -21,8 +21,10 @@ client.connect("syrelyre.dk", 1883, 60)
 mail = "syrelyre@gmail.com"
 lat = 55.83038
 lng = 12.42859
-topic = mail + ".55.83.12.428" #"handiiandii@gmail.com.55.707.12.536"
+string_lat = str(lat)
+string_lng = str(lng)
+topic = mail + "."+string_lat[:6]+"."+string_lng[:6] #"handiiandii@gmail.com.55.707.12.536" 
 msg = """{email:%s, command:loc_update, lat: %f, lng: %f}""" % (mail, lat, lng)
 #msg = """{email:handiiandii@gmail.com, command:loc_remove}"""
 print("topic = %s\nmsg = %s" % (topic, msg))
-client.publish(topic, payload=msg)
+#client.publish(topic, payload=msg)

@@ -144,7 +144,7 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
         }
 
     }
-    private String getNumber(String qName) {
+    public String getNumber(String qName) {
         Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
         String[] projection = new String[]{ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
                 ContactsContract.CommonDataKinds.Phone.NUMBER};
