@@ -395,7 +395,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 final Double lng = json_obj.getDouble("lng");
                 if (areaFriendHashMap.get(email) == null)
                 {
-                    areaFriendHashMap.put(email, new Friend(email, lat, lng, email));
+                    areaFriendHashMap.put(email, new Friend(FriendHashMap.get(email).getName(), lat, lng, email));
                 }
                 else
                 {
