@@ -588,8 +588,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                                     .setContentTitle(title)
                                     .setContentText(contentText)
                                     .setContentIntent(viewPendingIntent)
-                                    .addAction(R.drawable.ic_launcher, "Call", callPendingIntent)
-                                    .addAction(R.drawable.ic_launcher, "SMS", smsPendingIntent);
+                                    .addAction(R.drawable.phone_notification, "Call", callPendingIntent)
+                                    .addAction(R.drawable.chat_notification, "SMS", smsPendingIntent);
                     mBuilder.setAutoCancel(true);
                     Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
                     mBuilder.setSound(alarmSound);

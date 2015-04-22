@@ -125,6 +125,7 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
 
         case R.id.nudge_button:
             Toast.makeText(activity.getApplicationContext(), "nudge clicked on "+position, Toast.LENGTH_SHORT).show();
+            break;
         case R.id.phone_button:
             String number = getNumber(list.get(position).toString());
             if(!number.equals("NULL")) {
