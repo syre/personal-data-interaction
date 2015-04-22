@@ -25,7 +25,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -75,7 +74,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                                                       GoogleApiClient.OnConnectionFailedListener,
                                                       MqttCallback {
 
-    HashMap<String, Friend> friendHashMap = new HashMap<>();
+    HashMap<String, Friend> FriendHashMap = new HashMap<>();
+    HashMap<String, Friend> areaFriendHashMap = new HashMap<>();
     HashMap<String, Marker>  markers = new HashMap<>();
     ListView friendListView;
     FriendListAdapter friendListAdapter;
@@ -99,11 +99,11 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendMapView = (MapView)findViewById(R.id.friendMapView);
         toggleBroadcastingButton = (ImageButton)findViewById(R.id.toggleBroadcastingButton);
         friendMapView.onCreate(savedInstanceState);
-        friendHashMap.put("handiiandii@gmail.com", new Friend("Anders Rahbek", 0.0, 0.0, "handiiandii@gmail.com"));
-        friendHashMap.put("syrelyre@gmail.com", new Friend("Søren Howe Gersager", 0.0, 0.0, "syrelyre@gmail.com"));
+        FriendHashMap.put("handiiandii@gmail.com", new Friend("Anders Rahbek", 0.0, 0.0, "handiiandii@gmail.com"));
+        FriendHashMap.put("syrelyre@gmail.com", new Friend("Søren Howe Gersager", 0.0, 0.0, "syrelyre@gmail.com"));
 
         friendListView = (ListView)findViewById(R.id.friendListView);
-        ArrayList<Friend> valuesList = new ArrayList<>(friendHashMap.values());
+        ArrayList<Friend> valuesList = new ArrayList<>(areaFriendHashMap.values());
         friendListAdapter = new FriendListAdapter(this, valuesList, getResources(), friendListView);
         friendListView.setAdapter(friendListAdapter);
         MapsInitializer.initialize(this);
@@ -234,11 +234,11 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     private void subscribeToFriends(Location loc)
     {
-        Iterator<String> friendListIterator = friendHashMap.keySet().iterator();
+        Iterator<String> friendListIterator = FriendHashMap.keySet().iterator();
         while (friendListIterator.hasNext())
         {
             String key = friendListIterator.next();
-            String topic_string = friendHashMap.get(key).getEmail()+"."+roundtoDecimals(3, loc.getLatitude())+"."+roundtoDecimals(3, loc.getLongitude());
+            String topic_string = FriendHashMap.get(key).getEmail()+"."+roundtoDecimals(3, loc.getLatitude())+"."+roundtoDecimals(3, loc.getLongitude());
             try {
                 mqttClient.subscribe(topic_string);
             }
@@ -252,11 +252,11 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     private void unsubscribeToFriends(Location loc)
     {
-        Iterator<String> friendListIterator = friendHashMap.keySet().iterator();
+        Iterator<String> friendListIterator = FriendHashMap.keySet().iterator();
         while (friendListIterator.hasNext())
         {
             String key = friendListIterator.next();
-            String topic_string = friendHashMap.get(key).getEmail()+"."+roundtoDecimals(3, loc.getLatitude())+"."+roundtoDecimals(3, loc.getLongitude());
+            String topic_string = FriendHashMap.get(key).getEmail()+"."+roundtoDecimals(3, loc.getLatitude())+"."+roundtoDecimals(3, loc.getLongitude());
             try {
                 mqttClient.unsubscribe(topic_string);
             }
@@ -316,7 +316,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
         mMap.animateCamera(zoom);
-        //subscribeToFriends(loc);
 
         Log.d("MainActivity","Location changed to: lat: "+loc.getLatitude()+", lng: "+loc.getLongitude());
         if (broadcastingEnabled)
@@ -328,6 +327,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 {
                     sendNewAreaUpdate(lastLocation);
                     unsubscribeToFriends(lastLocation);
+                    areaFriendHashMap.clear();
                 }
                 subscribeToFriends(loc);
                 Log.d("MainActivity", "Sending new area update (loc_remove)");
@@ -391,14 +391,13 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             {
                 final Double lat = json_obj.getDouble("lat");
                 final Double lng = json_obj.getDouble("lng");
-                if (friendHashMap.get(email) == null)
+                if (areaFriendHashMap.get(email) == null)
                 {
-                    friendHashMap.put(email, new Friend(email, lat, lng, email));
-                    //sendNotification();
+                    areaFriendHashMap.put(email, new Friend(email, lat, lng, email));
                 }
                 else
                 {
-                    Friend friend = friendHashMap.get(email);
+                    Friend friend = areaFriendHashMap.get(email);
                     friend.setLat(lat);
                     friend.setLng(lng);
                 }
@@ -417,9 +416,9 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             }
             else if (command.equals("loc_remove"))
             {
-                if (friendHashMap.get(email) != null)
+                if (areaFriendHashMap.get(email) != null)
                 {
-                    friendHashMap.remove(email);
+                    areaFriendHashMap.remove(email);
 
                     runOnUiThread(new Runnable() {
 
@@ -486,18 +485,18 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     }
     private void updateMarkers()
     {
-        Iterator<String> friendListIterator = friendHashMap.keySet().iterator();
+        Iterator<String> friendListIterator = areaFriendHashMap.keySet().iterator();
         while(friendListIterator.hasNext())
         {
             String key = friendListIterator.next();
             if(markers.get(key) == null) //if there is no marker for the friend
             {
-                String initials = extractInitials(friendHashMap.get(key).getName());
+                String initials = extractInitials(areaFriendHashMap.get(key).getName());
                 Bitmap markerBitmap = drawMarkerBitmap(getApplicationContext(),R.drawable.circle,initials);
                 BitmapDescriptor descriptor = BitmapDescriptorFactory.fromBitmap(markerBitmap);
                 Marker marker = mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(friendHashMap.get(key).getLat(), friendHashMap.get(key).getLng()))
-                        .title(friendHashMap.get(key).getName()).icon(descriptor));
+                        .position(new LatLng(areaFriendHashMap.get(key).getLat(), areaFriendHashMap.get(key).getLng()))
+                        .title(areaFriendHashMap.get(key).getName()).icon(descriptor));
 
                 markers.put(key, marker);
                 notificationList.add(key);
@@ -505,7 +504,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             else
             {
                 LatLng old_loc = markers.get(key).getPosition();
-                LatLng new_loc = new LatLng(friendHashMap.get(key).getLat(), friendHashMap.get(key).getLng());
+                LatLng new_loc = new LatLng(areaFriendHashMap.get(key).getLat(), areaFriendHashMap.get(key).getLng());
                 markers.get(key).setPosition(new_loc);
                 float[] result = new float[1];
                 Location.distanceBetween(old_loc.latitude, old_loc.longitude, new_loc.latitude, new_loc.longitude, result);
@@ -518,7 +517,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         while (markerIterator.hasNext())
         {
             String key = markerIterator.next();
-            if(friendHashMap.get(key) == null) //Friend for Marker m, doesn't exist in Marker
+            if(areaFriendHashMap.get(key) == null) //Friend for Marker m, doesn't exist in Marker
             {
                 markers.get(key).remove();
                 markerIterator.remove();
@@ -566,7 +565,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 {
                     if(i==3)
                         break;
-                    contentText += friendHashMap.get(name).getName() + ", ";
+                    contentText += areaFriendHashMap.get(name).getName() + ", ";
                     i++;
                 }
                 contentText = contentText.substring(0, contentText.length()-2);
@@ -576,15 +575,14 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     Object name = iter.next();
                     title = "There is 1 friend near you!";
                     Intent callIntent = new Intent(Intent.ACTION_CALL);
-                    Log.d("Notification", "String name = " + friendHashMap.get((String) name).getName());
-                    String number = getNumber(friendHashMap.get((String) name).getName());
+                    Log.d("Notification", "String name = " + areaFriendHashMap.get((String) name).getName());
+                    String number = getNumber(areaFriendHashMap.get((String) name).getName());
                     callIntent.setData(Uri.parse("tel:" + number));
                     PendingIntent callPendingIntent = PendingIntent.getActivity(this, 0, callIntent, 0);
 
                     Intent smsIntent = new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", number, ""));
                     PendingIntent smsPendingIntent = PendingIntent.getActivity(this, 0, smsIntent, 0);
 
-                    //activity.startActivity(callIntent);
                     int mId = 5;
 
                     Intent resultIntent = new Intent(this,
