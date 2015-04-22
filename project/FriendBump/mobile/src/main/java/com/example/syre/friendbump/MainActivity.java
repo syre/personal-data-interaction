@@ -82,6 +82,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     MapView friendMapView;
     GoogleApiClient mGoogleApiClient;
     Boolean broadcastingEnabled;
+    ArrayList<Friend> valuesList;
     ImageButton toggleBroadcastingButton;
     MqttClient mqttClient;
     GoogleMap mMap;
@@ -103,7 +104,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         FriendHashMap.put("syrelyre@gmail.com", new Friend("Søren Howe Gersager", 0.0, 0.0, "syrelyre@gmail.com"));
 
         friendListView = (ListView)findViewById(R.id.friendListView);
-        ArrayList<Friend> valuesList = new ArrayList<>(areaFriendHashMap.values());
+        valuesList = new ArrayList<>(areaFriendHashMap.values());
         friendListAdapter = new FriendListAdapter(this, valuesList, getResources(), friendListView);
         friendListView.setAdapter(friendListAdapter);
         MapsInitializer.initialize(this);
@@ -328,6 +329,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     sendNewAreaUpdate(lastLocation);
                     unsubscribeToFriends(lastLocation);
                     areaFriendHashMap.clear();
+
                 }
                 subscribeToFriends(loc);
                 Log.d("MainActivity", "Sending new area update (loc_remove)");
@@ -407,8 +409,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
                     @Override
                     public void run() {
-                        friendListAdapter.notifyDataSetChanged();
-                        updateMarkers();
                         sendNotification();
                     }
 
@@ -420,19 +420,19 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 {
                     areaFriendHashMap.remove(email);
 
-                    runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            friendListAdapter.notifyDataSetChanged();
-                            updateMarkers();
-                        }
-
-                    });
                 }
             }
+            runOnUiThread(new Runnable() {
 
+                @Override
+                public void run() {
+                    valuesList.clear();
+                    valuesList.addAll(areaFriendHashMap.values());
+                    friendListAdapter.notifyDataSetChanged();
+                    updateMarkers();
+                }
 
+            });
         }
         catch(Exception except) {
             Log.d("MainActivity", "MessageArrived exception: " + except.getMessage());
