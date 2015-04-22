@@ -169,7 +169,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendMapView.onResume();
         isInForeground = true;
         notificationList.clear();
-        Log.d("onResume", "onResume executed!");
+        Log.d("MainActivity", "onResume executed!");
     }
 
     @Override
@@ -238,7 +238,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         while (friendListIterator.hasNext())
         {
             String key = friendListIterator.next();
-            String topic_string = friendHashMap.get(key).getEmail()+"."+roundtoDecimals(2, loc.getLatitude())+"."+roundtoDecimals(2, loc.getLongitude());
+            String topic_string = friendHashMap.get(key).getEmail()+"."+roundtoDecimals(3, loc.getLatitude())+"."+roundtoDecimals(3, loc.getLongitude());
             try {
                 mqttClient.subscribe(topic_string);
             }
@@ -256,7 +256,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         while (friendListIterator.hasNext())
         {
             String key = friendListIterator.next();
-            String topic_string = friendHashMap.get(key).getEmail()+"."+roundtoDecimals(2, loc.getLatitude())+"."+roundtoDecimals(2, loc.getLongitude());
+            String topic_string = friendHashMap.get(key).getEmail()+"."+roundtoDecimals(3, loc.getLatitude())+"."+roundtoDecimals(3, loc.getLongitude());
             try {
                 mqttClient.unsubscribe(topic_string);
             }
@@ -273,7 +273,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         String command = "loc_removal";
         String json_string = "{email:"+ clientEmail +
                 ",command:"+command+"}";
-        String topic =  clientEmail +"."+roundtoDecimals(2, loc.getLatitude())+"."+roundtoDecimals(2, loc.getLongitude());
+        String topic =  clientEmail +"."+roundtoDecimals(3, loc.getLatitude())+"."+roundtoDecimals(3, loc.getLongitude());
         MqttMessage msg = new MqttMessage(json_string.getBytes());
         msg.setQos(0);
         try {
@@ -294,7 +294,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 ",command:"+command+
                 ",lat:"+latitude+
                 ",lng:"+longitude+"}";
-        String topic = clientEmail +"."+roundtoDecimals(2, loc.getLatitude())+"."+roundtoDecimals(2, loc.getLongitude());
+        String topic = clientEmail +"."+roundtoDecimals(3, loc.getLatitude())+"."+roundtoDecimals(3, loc.getLongitude());
         Log.d("MainActivity", "topic is: "+topic);
         MqttMessage msg = new MqttMessage(json_string.getBytes());
         msg.setQos(0);
@@ -318,8 +318,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         Log.d("MainActivity","Location changed to: lat: "+loc.getLatitude()+", lng: "+loc.getLongitude());
         if (broadcastingEnabled)
         {   // if location when converted to accuracy of 110m (3 decimal places) has changed
-            if (lastLocation == null || roundtoDecimals(2, loc.getLatitude()) != roundtoDecimals(2, lastLocation.getLatitude()) &&
-                    roundtoDecimals(2, loc.getLongitude()) != roundtoDecimals(2, lastLocation.getLongitude()))
+            if (lastLocation == null || roundtoDecimals(3, loc.getLatitude()) != roundtoDecimals(3, lastLocation.getLatitude()) &&
+                    roundtoDecimals(3, loc.getLongitude()) != roundtoDecimals(3, lastLocation.getLongitude()))
             {
                 sendNewAreaUpdate(loc);
                 if (lastLocation != null)
