@@ -328,10 +328,23 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 {
                     sendNewAreaUpdate(lastLocation);
                     unsubscribeToFriends(lastLocation);
-                    areaFriendHashMap.clear();
 
                 }
+                areaFriendHashMap.clear();
+
                 subscribeToFriends(loc);
+
+                runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        valuesList.clear();
+                        friendListAdapter.notifyDataSetChanged();
+                        updateMarkers();
+                    }
+
+                });
+
                 Log.d("MainActivity", "Sending new area update (loc_remove)");
                 Toast.makeText(getApplicationContext(), "Sending new area update (loc_remove)", Toast.LENGTH_LONG).show();
 
