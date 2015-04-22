@@ -275,7 +275,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 ",command:"+command+"}";
         String topic =  clientEmail +"."+roundtoDecimals(3, loc.getLatitude())+"."+roundtoDecimals(3, loc.getLongitude());
         MqttMessage msg = new MqttMessage(json_string.getBytes());
-        msg.setQos(0);
+        msg.setQos(1);
         try {
             mqttClient.publish(topic, msg);
         }
