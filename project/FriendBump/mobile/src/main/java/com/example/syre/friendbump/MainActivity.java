@@ -323,7 +323,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             if (lastLocation == null || roundtoDecimals(3, loc.getLatitude()) != roundtoDecimals(3, lastLocation.getLatitude()) ||
                     roundtoDecimals(3, loc.getLongitude()) != roundtoDecimals(3, lastLocation.getLongitude()))
             {
-                sendNewAreaUpdate(loc);
+                sendNewAreaUpdate(lastLocation);
                 if (lastLocation != null)
                     unsubscribeToFriends(lastLocation);
                 subscribeToFriends(loc);
