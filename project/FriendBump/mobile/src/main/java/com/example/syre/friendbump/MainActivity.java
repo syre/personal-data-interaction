@@ -304,6 +304,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         catch(MqttException except)
         {
             Log.d("MainActivity", "MQTT: could not send location message: "+except.getMessage() +" (" +except.getReasonCode() + ")");
+            Toast.makeText(getApplicationContext(), "MQTT: could not send location message: "+except.getMessage() +" (" +except.getReasonCode() + ")", Toast.LENGTH_LONG).show();
+
         }
     }
 
@@ -325,6 +327,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 if (lastLocation != null)
                     unsubscribeToFriends(lastLocation);
                 subscribeToFriends(loc);
+                Log.d("MainActivity", "Sending new area update (loc_remove)");
+                Toast.makeText(getApplicationContext(), "Sending new area update (loc_remove)", Toast.LENGTH_LONG).show();
 
 
             }
