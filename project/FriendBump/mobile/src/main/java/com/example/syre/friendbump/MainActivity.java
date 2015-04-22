@@ -270,7 +270,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     // Sent when leaving an "area"
     private void sendNewAreaUpdate(Location loc)
     {
-        String command = "loc_removal";
+        String command = "loc_remove";
         String json_string = "{email:"+ clientEmail +
                 ",command:"+command+"}";
         String topic =  clientEmail +"."+roundtoDecimals(3, loc.getLatitude())+"."+roundtoDecimals(3, loc.getLongitude());
@@ -318,7 +318,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         Log.d("MainActivity","Location changed to: lat: "+loc.getLatitude()+", lng: "+loc.getLongitude());
         if (broadcastingEnabled)
         {   // if location when converted to accuracy of 110m (3 decimal places) has changed
-            if (lastLocation == null || roundtoDecimals(3, loc.getLatitude()) != roundtoDecimals(3, lastLocation.getLatitude()) &&
+            if (lastLocation == null || roundtoDecimals(3, loc.getLatitude()) != roundtoDecimals(3, lastLocation.getLatitude()) ||
                     roundtoDecimals(3, loc.getLongitude()) != roundtoDecimals(3, lastLocation.getLongitude()))
             {
                 sendNewAreaUpdate(loc);
@@ -326,8 +326,9 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     unsubscribeToFriends(lastLocation);
                 subscribeToFriends(loc);
 
-                lastLocation = loc;
+
             }
+            lastLocation = loc;
             sendLocationChangeUpdate(loc);
         }
 
