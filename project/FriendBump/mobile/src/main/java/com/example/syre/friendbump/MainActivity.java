@@ -317,16 +317,18 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
         mMap.animateCamera(zoom);
         subscribeToFriends(loc);
-        if (lastLocation == null)
-            lastLocation = loc;
+
         Log.d("MainActivity","Location changed to: lat: "+loc.getLatitude()+", lng: "+loc.getLongitude());
         if (broadcastingEnabled)
         {   // if location when converted to accuracy of 110m (3 decimal places) has changed
-            if (roundtoDecimals(3, loc.getLatitude()) != roundtoDecimals(3, lastLocation.getLatitude()) ||
+            if (lastLocation == null || roundtoDecimals(3, loc.getLatitude()) != roundtoDecimals(3, lastLocation.getLatitude()) ||
                     roundtoDecimals(3, loc.getLongitude()) != roundtoDecimals(3, lastLocation.getLongitude()))
             {
-                sendNewAreaUpdate(lastLocation);
-                unsubscribeToFriends(lastLocation);
+                if (lastLocation != null)
+                {
+                    sendNewAreaUpdate(lastLocation);
+                    unsubscribeToFriends(lastLocation);
+                }
                 subscribeToFriends(loc);
                 Log.d("MainActivity", "Sending new area update (loc_remove)");
                 Toast.makeText(getApplicationContext(), "Sending new area update (loc_remove)", Toast.LENGTH_LONG).show();
