@@ -310,6 +310,36 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         }
     }
 
+    public void sendNudgeMessage(String targetName)
+    {
+        String command = "nudge";
+        Friend friend = findFriendByName(targetName);
+        if (friend != null) {
+            String targetEmail = friend.getEmail();
+            String json_string = "{email:" + clientEmail +
+                    ",command:" + command + ",targetEmail:" + targetEmail + "}";
+            String topic = clientEmail + "." + roundtoDecimals(3, lastLocation.getLatitude()) + "." + roundtoDecimals(3, lastLocation.getLongitude());
+            MqttMessage msg = new MqttMessage(json_string.getBytes());
+            msg.setQos(0);
+            try {
+                mqttClient.publish(topic, msg);
+            } catch (MqttException except) {
+                Log.d("MainActivity", "MQTT: could not publish nudge message: " + except.getMessage());
+            }
+        }
+        else
+            Log.d("sendNudgeMessage", "friend wad null!");
+    }
+    public Friend findFriendByName(String name)
+    {
+        for (HashMap.Entry<String, Friend> entry : areaFriendHashMap.entrySet())
+        {
+            if (entry.getValue().getName().equals(name))
+                return entry.getValue();
+
+        }
+        return null;
+    }
     @Override
     public void onLocationChanged(Location loc)
     {
@@ -422,7 +452,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
                     @Override
                     public void run() {
-                        sendNotification();
+                        sendFriendNotification();
                     }
 
                 });
@@ -432,6 +462,16 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 if (areaFriendHashMap.get(email) != null)
                 {
                     areaFriendHashMap.remove(email);
+
+                }
+            }
+            else if (command.equals("nudge"))
+            {
+                final String targetEmail = json_obj.getString("targetEmail");
+
+                if (targetEmail == clientEmail)
+                {
+                    sendNudgeNotification(areaFriendHashMap.get(email));
 
                 }
             }
@@ -563,7 +603,33 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     }
 
-    public void sendNotification()
+    public void sendNudgeNotification(Friend fromFriend)
+    {
+        String title = "You have got nudged!";
+        String contentText = fromFriend.getName() + " is near you and wants to meet!";
+        int mId = 02;
+
+        Intent resultIntent = new Intent(this,
+                MainActivity.class);
+        PendingIntent viewPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.mipmap.broadcast_disabled)
+                        .setContentTitle(title)
+                        .setContentText(contentText)
+                        .setContentIntent(viewPendingIntent);
+        mBuilder.setAutoCancel(true);
+        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        mBuilder.setSound(alarmSound);
+        mBuilder.setVibrate(new long[] { 0, 100, 100, 100, 100 });
+
+        NotificationManagerCompat mNotificationManager =
+                NotificationManagerCompat.from(this);
+// mId allows you to update the notification later on.
+        mNotificationManager.notify(mId, mBuilder.build());
+    }
+
+    private void sendFriendNotification()
     {
         Log.d("Notification", "Run notification() ");
         if(!isInForeground && notificationList.size()>0)
@@ -596,7 +662,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     Intent smsIntent = new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", number, ""));
                     PendingIntent smsPendingIntent = PendingIntent.getActivity(this, 0, smsIntent, 0);
 
-                    int mId = 5;
+                    int mId = 01;
 
                     Intent resultIntent = new Intent(this,
                             MainActivity.class);

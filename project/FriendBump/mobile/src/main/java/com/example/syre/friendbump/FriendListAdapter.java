@@ -34,6 +34,7 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
     private ListView listView;
     public Resources res;
     private static LayoutInflater inflater = null;
+    private MainActivity mainActivity = new MainActivity();
 
     public FriendListAdapter(Activity a, ArrayList l, Resources r, ListView lv)
     {
@@ -125,6 +126,7 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
 
         case R.id.nudge_button:
             Toast.makeText(activity.getApplicationContext(), "nudge clicked on "+position, Toast.LENGTH_SHORT).show();
+            mainActivity.sendNudgeMessage(list.get(position).toString());//mainActivity.
             break;
         case R.id.phone_button:
             String number = getNumber(list.get(position).toString());
