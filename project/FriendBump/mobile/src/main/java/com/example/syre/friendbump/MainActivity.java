@@ -313,7 +313,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     public void sendNudgeMessage(String targetName)
     {
         String command = "nudge";
-        Friend friend = findFriendByName(targetName);
+        Friend friend = getFriendByName(targetName, areaFriendHashMap);
         if (friend != null) {
             String targetEmail = friend.getEmail();
             String json_string = "{email:" + clientEmail +
@@ -328,14 +328,15 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             }
         }
         else
-            Log.d("sendNudgeMessage", "friend wad null!");
+            Log.d("sendNudgeMessage", "friend was null!");
     }
-    public Friend findFriendByName(String name)
+    public Friend getFriendByName(String name, HashMap map)
     {
-        for (HashMap.Entry<String, Friend> entry : areaFriendHashMap.entrySet())
+        for (Object friend : map.values())
         {
-            if (entry.getValue().getName().equals(name))
-                return entry.getValue();
+            Friend friend1 = (Friend)friend;
+            if (friend1.getName().equals(name))
+                return friend1;
 
         }
         return null;
@@ -432,16 +433,21 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         try {
             final String command = json_obj.getString("command");
             final String email = json_obj.getString("email");
+            Log.d("parseCommand", "Command = " +command);
+            Log.d("parseCommand", "email = " +email);
             if (command.equals("loc_update"))
             {
+                Log.d("parseCommand", "log_update");
                 final Double lat = json_obj.getDouble("lat");
                 final Double lng = json_obj.getDouble("lng");
                 if (areaFriendHashMap.get(email) == null)
                 {
+                    Log.d("parseCommand", "if null");
                     areaFriendHashMap.put(email, new Friend(FriendHashMap.get(email).getName(), lat, lng, email));
                 }
                 else
                 {
+
                     Friend friend = areaFriendHashMap.get(email);
                     friend.setLat(lat);
                     friend.setLng(lng);
@@ -467,10 +473,12 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             }
             else if (command.equals("nudge"))
             {
+                Log.d("parseCommand", "Nudge!!");
                 final String targetEmail = json_obj.getString("targetEmail");
 
-                if (targetEmail == clientEmail)
+                if (targetEmail.equals(clientEmail))
                 {
+                    Log.d("parseCommand", "Nudge!! - targetEmail == clientEmail!");
                     sendNudgeNotification(areaFriendHashMap.get(email));
 
                 }
@@ -538,18 +546,27 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     }
     private void updateMarkers()
     {
+        Log.d("updateMarker", "updateMarkers!");
+        if(areaFriendHashMap.get("syrelyre@gmail.com") != null)
+            Log.d("updateMarker", "areaFriendHashMap.get(\"syrelyre@gmail.com\" = " + areaFriendHashMap.get("syrelyre@gmail.com").getEmail());
+
         Iterator<String> friendListIterator = areaFriendHashMap.keySet().iterator();
         while(friendListIterator.hasNext())
         {
             String key = friendListIterator.next();
             if(markers.get(key) == null) //if there is no marker for the friend
             {
+                Log.d("updateMarker", "There is no marker for the friend!");
                 String initials = extractInitials(areaFriendHashMap.get(key).getName());
                 Bitmap markerBitmap = drawMarkerBitmap(getApplicationContext(),R.drawable.circle,initials);
                 BitmapDescriptor descriptor = BitmapDescriptorFactory.fromBitmap(markerBitmap);
                 Marker marker = mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(areaFriendHashMap.get(key).getLat(), areaFriendHashMap.get(key).getLng()))
                         .title(areaFriendHashMap.get(key).getName()).icon(descriptor));
+                Log.d("updateMarker", "initials = " + initials);
+                Log.d("updateMarker", "markerBitmap = " + markerBitmap.toString());
+                Log.d("updateMarker", "descriptor = " + descriptor.toString());
+                Log.d("updateMarker", "marker = " + marker.getPosition().toString());
 
                 markers.put(key, marker);
                 notificationList.add(key);
@@ -605,10 +622,14 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     public void sendNudgeNotification(Friend fromFriend)
     {
+        Log.d("sendNudgeNotification", "sendNudgeNotification here!!");
         String title = "You have got nudged!";
+        if(fromFriend == null)
+            Log.d("sendNudgeNotification", "fromFriend is NULL!");
+
         String contentText = fromFriend.getName() + " is near you and wants to meet!";
         int mId = 02;
-
+        Log.d("sendNudgeNotification", "contentText = " + contentText);
         Intent resultIntent = new Intent(this,
                 MainActivity.class);
         PendingIntent viewPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
@@ -616,8 +637,10 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.broadcast_disabled)
                         .setContentTitle(title)
-                        .setContentText(contentText)
-                        .setContentIntent(viewPendingIntent);
+                        //.setContentText(contentText)
+                        .setContentIntent(viewPendingIntent)
+                        .setStyle(new NotificationCompat.BigTextStyle()
+                                .bigText(contentText));
         mBuilder.setAutoCancel(true);
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         mBuilder.setSound(alarmSound);
@@ -671,7 +694,9 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                             new NotificationCompat.Builder(this)
                                     .setSmallIcon(R.mipmap.broadcast_disabled)
                                     .setContentTitle(title)
-                                    .setContentText(contentText)
+                                    //.setContentText(contentText)
+                                    .setStyle(new NotificationCompat.BigTextStyle()
+                                            .bigText(contentText))
                                     .setContentIntent(viewPendingIntent)
                                     .addAction(R.drawable.phone_notification, "Call", callPendingIntent)
                                     .addAction(R.drawable.chat_notification, "SMS", smsPendingIntent);
