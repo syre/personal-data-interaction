@@ -546,27 +546,18 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     }
     private void updateMarkers()
     {
-        Log.d("updateMarker", "updateMarkers!");
-        if(areaFriendHashMap.get("syrelyre@gmail.com") != null)
-            Log.d("updateMarker", "areaFriendHashMap.get(\"syrelyre@gmail.com\" = " + areaFriendHashMap.get("syrelyre@gmail.com").getEmail());
-
         Iterator<String> friendListIterator = areaFriendHashMap.keySet().iterator();
         while(friendListIterator.hasNext())
         {
             String key = friendListIterator.next();
             if(markers.get(key) == null) //if there is no marker for the friend
             {
-                Log.d("updateMarker", "There is no marker for the friend!");
                 String initials = extractInitials(areaFriendHashMap.get(key).getName());
                 Bitmap markerBitmap = drawMarkerBitmap(getApplicationContext(),R.drawable.circle,initials);
                 BitmapDescriptor descriptor = BitmapDescriptorFactory.fromBitmap(markerBitmap);
                 Marker marker = mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(areaFriendHashMap.get(key).getLat(), areaFriendHashMap.get(key).getLng()))
                         .title(areaFriendHashMap.get(key).getName()).icon(descriptor));
-                Log.d("updateMarker", "initials = " + initials);
-                Log.d("updateMarker", "markerBitmap = " + markerBitmap.toString());
-                Log.d("updateMarker", "descriptor = " + descriptor.toString());
-                Log.d("updateMarker", "marker = " + marker.getPosition().toString());
 
                 markers.put(key, marker);
                 notificationList.add(key);
