@@ -225,12 +225,29 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     private double roundtoDecimals(int decimals, double value)
     {
+        String valueString = String.valueOf(value);
+        String splitString = "";
+        if(valueString.contains("."))
+            splitString = ".";
+        else
+            splitString = ",";
+
+        int indexOfDot = valueString.indexOf(splitString);
+        int dec = Integer.parseInt(valueString.substring(0,indexOfDot));
+        int frac = Integer.parseInt(valueString.substring(indexOfDot+1, indexOfDot+1+decimals));
+        double newValue = Double.parseDouble(String.valueOf(dec)+"."+String.valueOf(frac));
+        return newValue;
+
+
+        /*
+        //Log.d("roundtoDecimals", "test.contains = " + test.contains("."));
         String pattern = "###.";
         for (int i = 0; i < decimals; i++)
             pattern += "#";
         DecimalFormat df2 = (DecimalFormat) NumberFormat.getNumberInstance(Locale.ENGLISH);
         df2.applyPattern(pattern);
         return Double.valueOf(df2.format(value));
+        */
     }
 
     private void subscribeToFriends(Location loc)

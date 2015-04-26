@@ -22,9 +22,9 @@ client.connect("syrelyre.dk", 1883, 60)
 command = "loc_update" #loc_update, loc_remove or nudge
 mail = "syrelyre@gmail.com"
 target_mail = "handiiandii@gmail.com" #for nudge
-lat = 55.704
-lng = 12.530
-topic = mail + ".55.706.12.536" #"handiiandii@gmail.com.55.707.12.536"
+lat = 55.83090291
+lng = 12.42890156
+topic = mail + ".55.83.12.428" #"handiiandii@gmail.com.55.707.12.536"
 msg = """{email:%s, targetEmail:%s, command:%s, lat: %f, lng: %f}""" % (mail, target_mail, command, lat, lng)
 #msg = """{email:%s, command:loc_update, lat: %f, lng: %f}""" % (mail, lat, lng)
 print("topic = %s\nmsg = %s" % (topic, msg))
