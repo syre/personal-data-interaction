@@ -3,6 +3,7 @@ package com.example.syre.friendbump;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -91,6 +92,10 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     Location lastLocation = null;
     private static boolean isInForeground;
     Set notificationList = new HashSet();
+    private String friendNotificationContentText = "";
+    private String friendNotificationTitle = "";
+    private String nudgeNotificationContentText = "";
+    private String nudgeNotificationTitle = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +107,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendMapView.onCreate(savedInstanceState);
         FriendHashMap.put("handiiandii@gmail.com", new Friend("Anders Rahbek", 0.0, 0.0, "handiiandii@gmail.com"));
         FriendHashMap.put("syrelyre@gmail.com", new Friend("Søren Howe Gersager", 0.0, 0.0, "syrelyre@gmail.com"));
-
+        FriendHashMap.put("test@gmail.com", new Friend("Anders test", 0.0, 0.0, "test@gmail.com"));
+        FriendHashMap.put("test1@gmail.com", new Friend("Søren test", 0.0, 0.0, "test1@gmail.com"));
         friendListView = (ListView)findViewById(R.id.friendListView);
         valuesList = new ArrayList<>(areaFriendHashMap.values());
         friendListAdapter = new FriendListAdapter(this, valuesList, getResources(), friendListView);
@@ -148,6 +154,10 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         super.onStart();
         mGoogleApiClient.connect();
         isInForeground = true;
+        friendNotificationContentText = "";
+        friendNotificationTitle = "";
+        nudgeNotificationContentText = "";
+        nudgeNotificationTitle = "";
         Log.d("MainActivity", "onStart executed!");
     }
     @Override
@@ -169,7 +179,10 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         super.onResume();
         friendMapView.onResume();
         isInForeground = true;
-        notificationList.clear();
+        friendNotificationContentText = "";
+        friendNotificationTitle = "";
+        nudgeNotificationContentText = "";
+        nudgeNotificationTitle = "";
         Log.d("MainActivity", "onResume executed!");
     }
 
@@ -475,7 +488,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
                     @Override
                     public void run() {
-                        sendFriendNotification();
+                        sendFriendNotification(email);
                     }
 
                 });
@@ -630,114 +643,146 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     public void sendNudgeNotification(Friend fromFriend)
     {
-        Log.d("sendNudgeNotification", "sendNudgeNotification here!!");
-        String title = "You have got nudged!";
-        if(fromFriend == null)
-            Log.d("sendNudgeNotification", "fromFriend is NULL!");
+        Log.d("nudgeNotification", "Run notification() ");
+        if(!nudgeNotificationContentText.contains(fromFriend.getName()))
+        {
+            nudgeNotificationTitle = "You have got nudged!";
+            int mId = 2;
+            Intent resultIntent = new Intent(this,
+                    MainActivity.class);
+            PendingIntent viewPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
+            NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(this)
+                            .setSmallIcon(R.mipmap.broadcast_disabled)
+                            .setContentIntent(viewPendingIntent);
 
-        String contentText = fromFriend.getName() + " is near you and wants to meet!";
-        int mId = 02;
-        Log.d("sendNudgeNotification", "contentText = " + contentText);
-        Intent resultIntent = new Intent(this,
-                MainActivity.class);
-        PendingIntent viewPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.mipmap.broadcast_disabled)
-                        .setContentTitle(title)
-                        //.setContentText(contentText)
-                        .setContentIntent(viewPendingIntent)
-                        .setStyle(new NotificationCompat.BigTextStyle()
-                                .bigText(contentText));
-        mBuilder.setAutoCancel(true);
-        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        mBuilder.setSound(alarmSound);
-        mBuilder.setVibrate(new long[] { 0, 100, 100, 100, 100 });
+            if (nudgeNotificationContentText == "") {
+                nudgeNotificationContentText = fromFriend.getName() + " is near you and wants to meet!";
+                Log.d("nudgeNotification", "nudgeNotificationContentText = " + nudgeNotificationContentText);
+                Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-        NotificationManagerCompat mNotificationManager =
-                NotificationManagerCompat.from(this);
+
+                NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
+                bigText.bigText(nudgeNotificationContentText);
+                bigText.setBigContentTitle(nudgeNotificationTitle);
+                bigText.setSummaryText("");
+
+                mBuilder.setStyle(bigText)
+                        .setAutoCancel(true)
+                        .setAutoCancel(true)
+                        .setSound(alarmSound)
+                        .setVibrate(new long[]{0, 100, 100, 100, 100});
+            } else {
+                Log.d("nudgeNotification", "else");
+                String subString = nudgeNotificationContentText.substring(0,
+                        nudgeNotificationContentText.indexOf(" is near you and wants to meet!"));
+                Log.d("nudgeNotification", "else - substring = " + subString);
+                if (subString.contains(" and ")) {
+                    subString.replace(" and ", ", ");
+                }
+                Log.d("nudgeNotification", "else - efter if");
+                nudgeNotificationContentText = subString + " and " +
+                        fromFriend.getName() + " is near you and wants to meet!";
+
+                Log.d("nudgeNotification", "else nudgeNotificationContentText = " + nudgeNotificationContentText);
+                NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
+                bigText.bigText(nudgeNotificationContentText);
+                bigText.setBigContentTitle(nudgeNotificationTitle);
+                bigText.setSummaryText("");
+
+                mBuilder.setStyle(bigText)
+                        .setAutoCancel(true);
+            }
+
+            NotificationManagerCompat mNotificationManager =
+                    NotificationManagerCompat.from(this);
 // mId allows you to update the notification later on.
-        mNotificationManager.notify(mId, mBuilder.build());
+            mNotificationManager.notify(mId, mBuilder.build());
+        }
+        Log.d("nudgeNotification", "The reciever already has a nudge from this friend. No notification send!");
     }
 
-    private void sendFriendNotification()
+    private void sendFriendNotification(String email)
     {
-        Log.d("Notification", "Run notification() ");
-        if(!isInForeground && notificationList.size()>0)
+        Log.d("sendFriendNotification", "Run notification() ");
+        Log.d("sendFriendNotification", "isInForeground = " + isInForeground);
+        String isNearYouString = " is near you!";
+        if(isInForeground == false)
         {
-            if(notificationList.contains(clientEmail))
-                notificationList.remove(clientEmail);
-            String title;
-            String contentText = "";
-            Log.d("Notification", "notiList.size() = "+notificationList.size());
-                int i = 0;
-                for(Object name : notificationList)
-                {
-                    if(i==3)
-                        break;
-                    contentText += areaFriendHashMap.get(name).getName() + ", ";
-                    i++;
-                }
-                contentText = contentText.substring(0, contentText.length()-2);
-                if(i == 1) {
-                    Iterator iter = notificationList.iterator();
+            if(areaFriendHashMap.get(email).getNotification() == false) {
+                int mId = 1;
+                Intent resultIntent = new Intent(this,
+                        MainActivity.class);
+                PendingIntent viewPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
+                NotificationCompat.Builder mBuilder =
+                        new NotificationCompat.Builder(this)
+                                .setSmallIcon(R.mipmap.broadcast_disabled)
+                                .setContentIntent(viewPendingIntent);
 
-                    Object name = iter.next();
-                    title = "There is 1 friend near you!";
+                if (friendNotificationContentText == "") {
+                    friendNotificationTitle = "There is 1 friend near you!";
                     Intent callIntent = new Intent(Intent.ACTION_CALL);
-                    Log.d("Notification", "String name = " + areaFriendHashMap.get((String) name).getName());
-                    String number = getNumber(areaFriendHashMap.get((String) name).getName());
-                    callIntent.setData(Uri.parse("tel:" + number));
-                    PendingIntent callPendingIntent = PendingIntent.getActivity(this, 0, callIntent, 0);
+                    Log.d("Notification", "String name = " + areaFriendHashMap.get(email).getName());
+                    friendNotificationContentText += areaFriendHashMap.get(email).getName();
+                    friendNotificationContentText += isNearYouString;
 
-                    Intent smsIntent = new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", number, ""));
-                    PendingIntent smsPendingIntent = PendingIntent.getActivity(this, 0, smsIntent, 0);
 
-                    int mId = 01;
+                    NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
+                    bigText.bigText(friendNotificationContentText);
+                    bigText.setBigContentTitle(friendNotificationTitle);
+                    bigText.setSummaryText("");
 
-                    Intent resultIntent = new Intent(this,
-                            MainActivity.class);
-                    PendingIntent viewPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
-                    NotificationCompat.Builder mBuilder =
-                            new NotificationCompat.Builder(this)
-                                    .setSmallIcon(R.mipmap.broadcast_disabled)
-                                    .setContentTitle(title)
-                                    //.setContentText(contentText)
-                                    .setStyle(new NotificationCompat.BigTextStyle()
-                                            .bigText(contentText))
-                                    .setContentIntent(viewPendingIntent)
-                                    .addAction(R.drawable.phone_notification, "Call", callPendingIntent)
-                                    .addAction(R.drawable.chat_notification, "SMS", smsPendingIntent);
-                    mBuilder.setAutoCancel(true);
+                    String number = getNumber(areaFriendHashMap.get(email).getName());
+                    if (number != "NULL") {
+                        callIntent.setData(Uri.parse("tel:" + number));
+                        PendingIntent callPendingIntent = PendingIntent.getActivity(this, 0, callIntent, 0);
+
+                        Intent smsIntent = new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", number, ""));
+                        PendingIntent smsPendingIntent = PendingIntent.getActivity(this, 0, smsIntent, 0);
+                        mBuilder.addAction(R.drawable.phone_notification, "Call", callPendingIntent)
+                                .addAction(R.drawable.chat_notification, "SMS", smsPendingIntent);
+                    }
                     Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
                     mBuilder.setSound(alarmSound);
-                    mBuilder.setVibrate(new long[] { 0, 100, 100, 100, 100 });
+                    mBuilder.setVibrate(new long[]{0, 100, 100, 100, 100});
+                    mBuilder.setStyle(bigText)
+                            .setAutoCancel(true);
+                } else //If contentText isn't empty!!
+                {
+                    Log.d("Notification", "else!");
+                    String subString = friendNotificationContentText.substring(0,
+                            friendNotificationContentText.indexOf(isNearYouString));
 
-                    NotificationManagerCompat mNotificationManager =
-                            NotificationManagerCompat.from(this);
-// mId allows you to update the notification later on.
-                    mNotificationManager.notify(mId, mBuilder.build());
+                    if (subString.contains(" and ")) {
+                        subString.replace(" and ", ", ");
+                    }
+
+                    friendNotificationContentText = subString + " and " +
+                            areaFriendHashMap.get(email).getName() + isNearYouString;
+                    friendNotificationTitle = "There is several friends near you!";
+                    Log.d("Notification", "else! - friendNotificationContentText" + friendNotificationContentText);
+                    NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
+                    bigText.bigText(friendNotificationContentText);
+                    bigText.setBigContentTitle(friendNotificationTitle);
+                    bigText.setSummaryText("");
+                    mBuilder.setStyle(bigText)
+                            .setAutoCancel(true);
                 }
-                else {
-                    title = "There is several friends near you!";
-                }
+                Log.d("Notification", "friendNotificationContentText = " + friendNotificationContentText);
 
 
-            notificationList.clear();
-            Log.d("Notification", "Notification send!");
-
-
-
-
-
-
+                NotificationManagerCompat mNotificationManager =
+                        NotificationManagerCompat.from(this);
+                mNotificationManager.notify(mId, mBuilder.build());
+                Log.d("Notification", "Notification send!");
+                areaFriendHashMap.get(email).setNotification(true);
+            }
         }
-        else
+        else //Activity is in foreground. No notification send
         {
             Log.d("Notification", "Activity is in foreground. No notification send");
-            notificationList.clear();
+            areaFriendHashMap.get(email).setNotification(true);
         }
-        notificationList.clear();
     }
 
 
