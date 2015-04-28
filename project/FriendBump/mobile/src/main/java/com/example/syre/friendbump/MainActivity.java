@@ -3,7 +3,6 @@ package com.example.syre.friendbump;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +20,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.Menu;
@@ -32,9 +33,9 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -44,6 +45,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -55,35 +58,24 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
+
 //For notification
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 
 public class MainActivity extends Activity implements OnMapReadyCallback,
-                                                      LocationListener,
-                                                      GoogleApiClient.ConnectionCallbacks,
-                                                      GoogleApiClient.OnConnectionFailedListener,
-                                                      MqttCallback {
+        LocationListener,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        MqttCallback {
 
     HashMap<String, Friend> FriendHashMap = new HashMap<>();
     HashMap<String, Friend> areaFriendHashMap = new HashMap<>();
-    HashMap<String, Marker>  markers = new HashMap<>();
+    HashMap<String, Marker> markers = new HashMap<>();
     ListView friendListView;
     FriendListAdapter friendListAdapter;
     MapView friendMapView;
@@ -128,40 +120,44 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         }
 
         setContentView(R.layout.activity_main);
-        friendMapView = (MapView)findViewById(R.id.friendMapView);
-        toggleBroadcastingButton = (ImageButton)findViewById(R.id.toggleBroadcastingButton);
+        friendMapView = (MapView) findViewById(R.id.friendMapView);
+        toggleBroadcastingButton = (ImageButton) findViewById(R.id.toggleBroadcastingButton);
         friendMapView.onCreate(savedInstanceState);
-        
+
         friendListView = (ListView)findViewById(R.id.friendListView);
+
         valuesList = new ArrayList<>(areaFriendHashMap.values());
         friendListAdapter = new FriendListAdapter(this, valuesList, getResources(), friendListView);
         friendListView.setAdapter(friendListAdapter);
         MapsInitializer.initialize(this);
         friendMapView.getMapAsync(this);
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                            .addConnectionCallbacks(this)
-                            .addOnConnectionFailedListener(this)
-                            .addApi(LocationServices.API)
-                            .build();
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
         broadcastingEnabled = true;
         persistence = new MemoryPersistence();
 
 
-        try {
-            mqttClient = new MqttClient("tcp://syrelyre.dk:1883", clientEmail,persistence);
-            
-            MqttConnectOptions options = new MqttConnectOptions();
-            options.setKeepAliveInterval(60);
-            mqttClient.setCallback(this);
-            mqttClient.connect();
+        final MqttCallback currentActivity = this;
+        Thread connectThread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    mqttClient = new MqttClient("tcp://syrelyre.dk:1883", clientEmail, persistence);
+                    MqttConnectOptions options = new MqttConnectOptions();
+                    options.setKeepAliveInterval(60);
+                    mqttClient.setCallback(currentActivity);
+                    mqttClient.connect();
+                } catch (MqttException except) {
+                    Log.d("MainActivity mqtt:", except.getMessage());
+                    Toast.makeText(getApplicationContext(), "MQTT Connection failed: " + except.getMessage(), Toast.LENGTH_SHORT).show();
+                }
             }
-        catch(MqttException except)
-        {
-            Log.d("MainActivity mqtt:", except.getMessage());
-            Toast.makeText(getApplicationContext(), "MQTT Connection failed: "+except.getMessage(), Toast.LENGTH_SHORT).show();
-        }
+        };
 
-
+        connectThread.start();
     }
 
     public void createFriends(String json)
@@ -193,8 +189,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     }
 
     @Override
-    public void onStart()
-    {
+    public void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
         isInForeground = true;
@@ -204,6 +199,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         nudgeNotificationTitle = "";
         Log.d("MainActivity", "onStart executed!");
     }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -218,6 +214,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         isInForeground = false;
         Log.d("MainActivity", "onStop executed!");
     }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -234,12 +231,10 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     public void onDestroy() {
         super.onDestroy();
         friendMapView.onDestroy();
-        try{
+        try {
             mqttClient.disconnect();
-        }
-        catch(MqttException except)
-        {
-            Log.d("MainActivity","MQTT: could not disconnect from broker");
+        } catch (MqttException except) {
+            Log.d("MainActivity", "MQTT: could not disconnect from broker");
         }
         isInForeground = false;
         Log.d("MainActivity", "onDestroy executed!");
@@ -280,112 +275,87 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     }
 
-    private double roundtoDecimals(int decimals, double value)
-    {
+    private double roundtoDecimals(int decimals, double value) {
         String valueString = String.valueOf(value);
         String splitString = "";
-        if(valueString.contains("."))
+        if (valueString.contains("."))
             splitString = ".";
         else
             splitString = ",";
 
         int indexOfDot = valueString.indexOf(splitString);
-        int dec = Integer.parseInt(valueString.substring(0,indexOfDot));
-        int frac = Integer.parseInt(valueString.substring(indexOfDot+1, indexOfDot+1+decimals));
-        double newValue = Double.parseDouble(String.valueOf(dec)+"."+String.valueOf(frac));
+        int dec = Integer.parseInt(valueString.substring(0, indexOfDot));
+        int frac = Integer.parseInt(valueString.substring(indexOfDot + 1, indexOfDot + 1 + decimals));
+        double newValue = Double.parseDouble(String.valueOf(dec) + "." + String.valueOf(frac));
         return newValue;
 
-
-        /*
-        //Log.d("roundtoDecimals", "test.contains = " + test.contains("."));
-        String pattern = "###.";
-        for (int i = 0; i < decimals; i++)
-            pattern += "#";
-        DecimalFormat df2 = (DecimalFormat) NumberFormat.getNumberInstance(Locale.ENGLISH);
-        df2.applyPattern(pattern);
-        return Double.valueOf(df2.format(value));
-        */
     }
 
-    private void subscribeToFriends(Location loc)
-    {
+    private void subscribeToFriends(Location loc) {
         Iterator<String> friendListIterator = FriendHashMap.keySet().iterator();
-        while (friendListIterator.hasNext())
-        {
+        while (friendListIterator.hasNext()) {
             String key = friendListIterator.next();
-            String topic_string = FriendHashMap.get(key).getEmail()+"."+roundtoDecimals(3, loc.getLatitude())+"."+roundtoDecimals(3, loc.getLongitude());
+            String topic_string = FriendHashMap.get(key).getEmail() + "." + roundtoDecimals(3, loc.getLatitude()) + "." + roundtoDecimals(3, loc.getLongitude());
             try {
                 mqttClient.subscribe(topic_string);
-            }
-            catch(MqttException except)
-            {
-                Log.d("MainActivity", "MQTT: could not subscribe message: "+except.getMessage());
+            } catch (MqttException except) {
+                Log.d("MainActivity", "MQTT: could not subscribe message: " + except.getMessage());
             }
         }
 
     }
 
-    private void unsubscribeToFriends(Location loc)
-    {
+    private void unsubscribeToFriends(Location loc) {
         Iterator<String> friendListIterator = FriendHashMap.keySet().iterator();
-        while (friendListIterator.hasNext())
-        {
+        while (friendListIterator.hasNext()) {
             String key = friendListIterator.next();
-            String topic_string = FriendHashMap.get(key).getEmail()+"."+roundtoDecimals(3, loc.getLatitude())+"."+roundtoDecimals(3, loc.getLongitude());
+            String topic_string = FriendHashMap.get(key).getEmail() + "." + roundtoDecimals(3, loc.getLatitude()) + "." + roundtoDecimals(3, loc.getLongitude());
             try {
                 mqttClient.unsubscribe(topic_string);
-            }
-            catch(MqttException except)
-            {
-                Log.d("MainActivity", "MQTT: could not subscribe message: "+except.getMessage());
+            } catch (MqttException except) {
+                Log.d("MainActivity", "MQTT: could not subscribe message: " + except.getMessage());
             }
         }
 
     }
+
     // Sent when leaving an "area"
-    private void sendNewAreaUpdate(Location loc)
-    {
+    private void sendNewAreaUpdate(Location loc) {
         String command = "loc_remove";
-        String json_string = "{email:"+ clientEmail +
-                ",command:"+command+"}";
-        String topic =  clientEmail +"."+roundtoDecimals(3, loc.getLatitude())+"."+roundtoDecimals(3, loc.getLongitude());
+        String json_string = "{email:" + clientEmail +
+                ",command:" + command + "}";
+        String topic = clientEmail + "." + roundtoDecimals(3, loc.getLatitude()) + "." + roundtoDecimals(3, loc.getLongitude());
         MqttMessage msg = new MqttMessage(json_string.getBytes());
         msg.setQos(1);
         try {
             mqttClient.publish(topic, msg);
-        }
-        catch(MqttException except)
-        {
-            Log.d("MainActivity", "MQTT: could not publish loc_removal message: "+except.getMessage());
+        } catch (MqttException except) {
+            Log.d("MainActivity", "MQTT: could not publish loc_removal message: " + except.getMessage());
         }
     }
 
-    private void sendLocationChangeUpdate(Location loc)
-    {
+    private void sendLocationChangeUpdate(Location loc) {
         Double latitude = loc.getLatitude();
         Double longitude = loc.getLongitude();
         String command = "loc_update";
-        String json_string = "{email:"+ clientEmail +
-                ",command:"+command+
-                ",lat:"+latitude+
-                ",lng:"+longitude+"}";
-        String topic = clientEmail +"."+roundtoDecimals(3, loc.getLatitude())+"."+roundtoDecimals(3, loc.getLongitude());
-        Log.d("MainActivity", "topic is: "+topic);
+        String json_string = "{email:" + clientEmail +
+                ",command:" + command +
+                ",lat:" + latitude +
+                ",lng:" + longitude + "}";
+        String topic = clientEmail + "." + roundtoDecimals(3, loc.getLatitude()) + "." + roundtoDecimals(3, loc.getLongitude());
+        Log.d("MainActivity", "topic is: " + topic);
         MqttMessage msg = new MqttMessage(json_string.getBytes());
         msg.setQos(0);
         try {
-            mqttClient.publish(topic,msg);
-        }
-        catch(MqttException except)
-        {
-            Log.d("MainActivity", "MQTT: could not send location message: "+except.getMessage() +" (" +except.getReasonCode() + ")");
-            Toast.makeText(getApplicationContext(), "MQTT: could not send location message: "+except.getMessage() +" (" +except.getReasonCode() + ")", Toast.LENGTH_LONG).show();
+            mqttClient.publish(topic, msg);
+        } catch (MqttException except) {
+            Log.d("MainActivity", "MQTT: could not send location message: " + except.getMessage() + " (" + except.getReasonCode() + ")");
+            Toast.makeText(getApplicationContext(), "MQTT: could not send location message: " + except.getMessage() + " (" + except.getReasonCode() + ")", Toast.LENGTH_LONG).show();
 
         }
     }
 
-    public void sendNudgeMessage(String targetName)
-    {
+    public void sendNudgeMessage(String targetName) {
         String command = "nudge";
         Friend friend = getFriendByName(targetName, areaFriendHashMap);
         if (friend != null) {
@@ -400,37 +370,32 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             } catch (MqttException except) {
                 Log.d("MainActivity", "MQTT: could not publish nudge message: " + except.getMessage());
             }
-        }
-        else
+        } else
             Log.d("sendNudgeMessage", "friend was null!");
     }
-    public Friend getFriendByName(String name, HashMap map)
-    {
-        for (Object friend : map.values())
-        {
-            Friend friend1 = (Friend)friend;
+
+    public Friend getFriendByName(String name, HashMap map) {
+        for (Object friend : map.values()) {
+            Friend friend1 = (Friend) friend;
             if (friend1.getName().equals(name))
                 return friend1;
 
         }
         return null;
     }
+
     @Override
-    public void onLocationChanged(Location loc)
-    {
+    public void onLocationChanged(Location loc) {
         LatLng latLng = new LatLng(loc.getLatitude(), loc.getLongitude());
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
         mMap.animateCamera(zoom);
 
-        Log.d("MainActivity","Location changed to: lat: "+loc.getLatitude()+", lng: "+loc.getLongitude());
-        if (broadcastingEnabled)
-        {   // if location when converted to accuracy of 110m (3 decimal places) has changed
+        Log.d("MainActivity", "Location changed to: lat: " + loc.getLatitude() + ", lng: " + loc.getLongitude());
+        if (broadcastingEnabled) {   // if location when converted to accuracy of 110m (3 decimal places) has changed
             if (lastLocation == null || roundtoDecimals(3, loc.getLatitude()) != roundtoDecimals(3, lastLocation.getLatitude()) ||
-                    roundtoDecimals(3, loc.getLongitude()) != roundtoDecimals(3, lastLocation.getLongitude()))
-            {
-                if (lastLocation != null)
-                {
+                    roundtoDecimals(3, loc.getLongitude()) != roundtoDecimals(3, lastLocation.getLongitude())) {
+                if (lastLocation != null) {
                     sendNewAreaUpdate(lastLocation);
                     unsubscribeToFriends(lastLocation);
 
@@ -460,35 +425,33 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         }
 
     }
-    @Override public void onConnectionSuspended(int id)
-    {
+
+    @Override
+    public void onConnectionSuspended(int id) {
 
     }
-    @Override public void onConnected(Bundle bundle)
-    {
+
+    @Override
+    public void onConnected(Bundle bundle) {
         Log.d("MainActivity", "device connected!");
         LocationRequest locationrequest = new LocationRequest();
         locationrequest.setInterval(10000);
         locationrequest.setFastestInterval(5000);
         locationrequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,locationrequest, this);
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationrequest, this);
         Toast.makeText(getApplicationContext(), "Connection successful", Toast.LENGTH_LONG).show();
     }
 
-    @Override public void onConnectionFailed(ConnectionResult result)
-    {
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
         Toast.makeText(getApplicationContext(), "Connection failed", Toast.LENGTH_LONG).show();
     }
 
 
-    public void toggleBroadcasting(View v)
-    {
-        if (broadcastingEnabled)
-        {
+    public void toggleBroadcasting(View v) {
+        if (broadcastingEnabled) {
             toggleBroadcastingButton.setBackgroundResource(R.mipmap.broadcast_disabled);
-        }
-        else
-        {
+        } else {
             toggleBroadcastingButton.setBackgroundResource(R.mipmap.broadcast_enabled);
         }
         broadcastingEnabled = !broadcastingEnabled;
@@ -498,38 +461,35 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     public void connectionLost(Throwable throwable) {
         boolean flag = false;
         Log.d("connectionLost", "connectionLost!!");
-        while(flag == false)
-        try {
-            mqttClient.connect();
-            flag = true;
-        }
-        catch(MqttException except)
-        {
-            try{Thread.sleep(1000);}
-            catch (InterruptedException e){Log.d("connectionLost", "Thread.sleep failed");}
-            Log.d("connectionLost", "MQTT: Connection Lost, reconnect failed: "+except.getMessage());
+        while (flag == false)
+            try {
+                mqttClient.connect();
+                flag = true;
+            } catch (MqttException except) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Log.d("connectionLost", "Thread.sleep failed");
+                }
+                Log.d("connectionLost", "MQTT: Connection Lost, reconnect failed: " + except.getMessage());
 
-        }
+            }
     }
 
     private void parseCommand(JSONObject json_obj) {
         try {
             final String command = json_obj.getString("command");
             final String email = json_obj.getString("email");
-            Log.d("parseCommand", "Command = " +command);
-            Log.d("parseCommand", "email = " +email);
-            if (command.equals("loc_update"))
-            {
+            Log.d("parseCommand", "Command = " + command);
+            Log.d("parseCommand", "email = " + email);
+            if (command.equals("loc_update")) {
                 Log.d("parseCommand", "log_update");
                 final Double lat = json_obj.getDouble("lat");
                 final Double lng = json_obj.getDouble("lng");
-                if (areaFriendHashMap.get(email) == null)
-                {
+                if (areaFriendHashMap.get(email) == null) {
                     Log.d("parseCommand", "if null");
                     areaFriendHashMap.put(email, new Friend(FriendHashMap.get(email).getName(), lat, lng, email));
-                }
-                else
-                {
+                } else {
 
                     Friend friend = areaFriendHashMap.get(email);
                     friend.setLat(lat);
@@ -545,22 +505,16 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     }
 
                 });
-            }
-            else if (command.equals("loc_remove"))
-            {
-                if (areaFriendHashMap.get(email) != null)
-                {
+            } else if (command.equals("loc_remove")) {
+                if (areaFriendHashMap.get(email) != null) {
                     areaFriendHashMap.remove(email);
 
                 }
-            }
-            else if (command.equals("nudge"))
-            {
+            } else if (command.equals("nudge")) {
                 Log.d("parseCommand", "Nudge!!");
                 final String targetEmail = json_obj.getString("targetEmail");
 
-                if (targetEmail.equals(clientEmail))
-                {
+                if (targetEmail.equals(clientEmail)) {
                     Log.d("parseCommand", "Nudge!! - targetEmail == clientEmail!");
                     sendNudgeNotification(areaFriendHashMap.get(email));
 
@@ -577,21 +531,20 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 }
 
             });
-        }
-        catch(Exception except) {
+        } catch (Exception except) {
             Log.d("MainActivity", "MessageArrived exception: " + except.getMessage());
         }
     }
-    private Bitmap drawMarkerBitmap(Context mContext,  int resourceId,  String mText)
-    {
+
+    private Bitmap drawMarkerBitmap(Context mContext, int resourceId, String mText) {
         Resources resources = mContext.getResources();
         float scale = resources.getDisplayMetrics().density;
         BitmapFactory.Options options = new BitmapFactory.Options();
         Bitmap bitmap = BitmapFactory.decodeResource(resources, resourceId, options);
         bitmap = Bitmap.createScaledBitmap(bitmap, 80, 80, true);
-        android.graphics.Bitmap.Config bitmapConfig =   bitmap.getConfig();
+        android.graphics.Bitmap.Config bitmapConfig = bitmap.getConfig();
         // set default bitmap config if none
-        if(bitmapConfig == null) {
+        if (bitmapConfig == null) {
             bitmapConfig = android.graphics.Bitmap.Config.ARGB_8888;
         }
         // resource bitmaps are immutable,
@@ -602,7 +555,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         // new antialised Paint
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         // text color - #3D3D3D
-        paint.setColor(Color.rgb(0,0, 0));
+        paint.setColor(Color.rgb(0, 0, 0));
         // text size in pixels
         paint.setTextSize((int) (12 * scale));
         // optional - text shadow
@@ -611,32 +564,30 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         // draw text to the Canvas center
         Rect bounds = new Rect();
         paint.getTextBounds(mText, 0, mText.length(), bounds);
-        int x = (bitmap.getWidth() - bounds.width())/6;
-        int y = (bitmap.getHeight() + bounds.height())/6;
+        int x = (bitmap.getWidth() - bounds.width()) / 6;
+        int y = (bitmap.getHeight() + bounds.height()) / 6;
 
         canvas.drawText(mText, x * scale, y * scale, paint);
         return bitmap;
     }
-    private String extractInitials(String text)
-    {
+
+    private String extractInitials(String text) {
         String[] splitarray = text.split("\\s+");
         String extracted = "";
-        for (String value: splitarray)
-        {
-            extracted += value.substring(0,1);
+        for (String value : splitarray) {
+            extracted += value.substring(0, 1);
         }
         return extracted;
     }
-    private void updateMarkers()
-    {
+
+    private void updateMarkers() {
         Iterator<String> friendListIterator = areaFriendHashMap.keySet().iterator();
-        while(friendListIterator.hasNext())
-        {
+        while (friendListIterator.hasNext()) {
             String key = friendListIterator.next();
-            if(markers.get(key) == null) //if there is no marker for the friend
+            if (markers.get(key) == null) //if there is no marker for the friend
             {
                 String initials = extractInitials(areaFriendHashMap.get(key).getName());
-                Bitmap markerBitmap = drawMarkerBitmap(getApplicationContext(),R.drawable.circle,initials);
+                Bitmap markerBitmap = drawMarkerBitmap(getApplicationContext(), R.drawable.circle, initials);
                 BitmapDescriptor descriptor = BitmapDescriptorFactory.fromBitmap(markerBitmap);
                 Marker marker = mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(areaFriendHashMap.get(key).getLat(), areaFriendHashMap.get(key).getLng()))
@@ -644,24 +595,21 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
                 markers.put(key, marker);
                 notificationList.add(key);
-            }
-            else
-            {
+            } else {
                 LatLng old_loc = markers.get(key).getPosition();
                 LatLng new_loc = new LatLng(areaFriendHashMap.get(key).getLat(), areaFriendHashMap.get(key).getLng());
                 markers.get(key).setPosition(new_loc);
                 float[] result = new float[1];
                 Location.distanceBetween(old_loc.latitude, old_loc.longitude, new_loc.latitude, new_loc.longitude, result);
-                if(result[0] >100) {
-                        notificationList.add(key);
+                if (result[0] > 100) {
+                    notificationList.add(key);
                 }
             }
         }
         Iterator<String> markerIterator = markers.keySet().iterator();
-        while (markerIterator.hasNext())
-        {
+        while (markerIterator.hasNext()) {
             String key = markerIterator.next();
-            if(areaFriendHashMap.get(key) == null) //Friend for Marker m, doesn't exist in Marker
+            if (areaFriendHashMap.get(key) == null) //Friend for Marker m, doesn't exist in Marker
             {
                 markers.get(key).remove();
                 markerIterator.remove();
@@ -673,8 +621,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
 
     @Override
-    public void messageArrived(String s, MqttMessage mqttMessage) throws Exception
-    {
+    public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
         String msg = new java.lang.String(mqttMessage.getPayload());
         Log.d("MainActivity", "message arrived:" + msg);
         try {
@@ -682,23 +629,19 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             if (!json_obj.getString("email").equals(clientEmail))
                 parseCommand(json_obj);
 
-        }
-        catch(Exception except) {
+        } catch (Exception except) {
             Log.d("MainActivity", "MessageArrived exception: " + except.getMessage());
         }
     }
 
     @Override
-    public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken)
-    {
+    public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
 
     }
 
-    public void sendNudgeNotification(Friend fromFriend)
-    {
+    public void sendNudgeNotification(Friend fromFriend) {
         Log.d("nudgeNotification", "Run notification() ");
-        if(!nudgeNotificationContentText.contains(fromFriend.getName()))
-        {
+        if (!nudgeNotificationContentText.contains(fromFriend.getName())) {
             nudgeNotificationTitle = "You have got nudged!";
             int mId = 2;
             Intent resultIntent = new Intent(this,
@@ -755,14 +698,12 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         Log.d("nudgeNotification", "The reciever already has a nudge from this friend. No notification send!");
     }
 
-    private void sendFriendNotification(String email)
-    {
+    private void sendFriendNotification(String email) {
         Log.d("sendFriendNotification", "Run notification() ");
         Log.d("sendFriendNotification", "isInForeground = " + isInForeground);
         String isNearYouString = " is near you!";
-        if(isInForeground == false)
-        {
-            if(areaFriendHashMap.get(email).getNotification() == false) {
+        if (isInForeground == false) {
+            if (areaFriendHashMap.get(email).getNotification() == false) {
                 int mId = 1;
                 Intent resultIntent = new Intent(this,
                         MainActivity.class);
@@ -830,8 +771,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 Log.d("Notification", "Notification send!");
                 areaFriendHashMap.get(email).setNotification(true);
             }
-        }
-        else //Activity is in foreground. No notification send
+        } else //Activity is in foreground. No notification send
         {
             Log.d("Notification", "Activity is in foreground. No notification send");
             areaFriendHashMap.get(email).setNotification(true);
@@ -854,7 +794,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             String name = people.getString(indexName);
             String number = people.getString(indexNumber);
 
-            if(qName.equals(name)) {
+            if (qName.equals(name)) {
                 resultNumber = number;
                 break;
             }
