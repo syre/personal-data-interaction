@@ -109,6 +109,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 break;
             }
         }
+        Log.d("onCreate", "clientMail = " + clientEmail);
         String json ="";
         try {
             json = new GetFriends().execute(clientEmail).get();

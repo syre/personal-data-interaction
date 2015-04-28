@@ -15,8 +15,9 @@ public class GetFriends extends AsyncTask<String, Void, String> {
     protected String doInBackground(String... clientEmail)
     {
         Log.d("getFriends", "doInBackground!");
-        Log.d("getFriends", "clientEmail = " + clientEmail);
-        String httpString = "http://syrelyre.dk:81/?email="+clientEmail;
+        Log.d("getFriends", "clientEmail = " + clientEmail[0]);
+        String httpString = "http://syrelyre.dk:81/?email="+clientEmail[0];
+        Log.d("getFriends", "clientEmail = " + clientEmail[0]);
         try {
             URL friensURL = new URL(httpString);
             URLConnection friendsCon = friensURL.openConnection();
