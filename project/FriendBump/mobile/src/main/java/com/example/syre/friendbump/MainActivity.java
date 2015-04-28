@@ -435,6 +435,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     {
         Toast.makeText(getApplicationContext(), "Connection failed", Toast.LENGTH_LONG).show();
     }
+
+
     public void toggleBroadcasting(View v)
     {
         if (broadcastingEnabled)
@@ -450,12 +452,19 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     @Override
     public void connectionLost(Throwable throwable) {
+        boolean flag = false;
+        Log.d("connectionLost", "connectionLost!!");
+        while(flag == false)
         try {
             mqttClient.connect();
+            flag = true;
         }
         catch(MqttException except)
         {
-            Log.d("MainActivity", "MQTT: Connection Lost, reconnect failed: "+except.getMessage());
+            try{Thread.sleep(1000);}
+            catch (InterruptedException e){Log.d("connectionLost", "Thread.sleep failed");}
+            Log.d("connectionLost", "MQTT: Connection Lost, reconnect failed: "+except.getMessage());
+
         }
     }
 
