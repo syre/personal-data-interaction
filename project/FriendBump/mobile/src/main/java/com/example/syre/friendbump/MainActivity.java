@@ -18,6 +18,7 @@ import android.graphics.Rect;
 import android.location.Location;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.util.Log;
@@ -51,11 +52,16 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -101,14 +107,31 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d("onCreate", "onCreate executed!");
+
+        // find email of first account to use as id
+        Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
+        Account[] accounts = AccountManager.get(getApplicationContext()).getAccounts();
+        for (Account account : accounts) {
+            if (emailPattern.matcher(account.name).matches()) {
+                clientEmail = account.name;
+                break;
+            }
+        }
+        String json ="";
+        try {
+            json = new GetFriends().execute(clientEmail).get();
+            createFriends(json);
+        }
+        catch (Exception e)
+        {
+            Log.d("onCreate", "json createFriends failed: " + e.getMessage());
+        }
+
         setContentView(R.layout.activity_main);
         friendMapView = (MapView)findViewById(R.id.friendMapView);
         toggleBroadcastingButton = (ImageButton)findViewById(R.id.toggleBroadcastingButton);
         friendMapView.onCreate(savedInstanceState);
-        FriendHashMap.put("handiiandii@gmail.com", new Friend("Anders Rahbek", 0.0, 0.0, "handiiandii@gmail.com"));
-        FriendHashMap.put("syrelyre@gmail.com", new Friend("Søren Howe Gersager", 0.0, 0.0, "syrelyre@gmail.com"));
-        FriendHashMap.put("test@gmail.com", new Friend("Anders test", 0.0, 0.0, "test@gmail.com"));
-        FriendHashMap.put("test1@gmail.com", new Friend("Søren test", 0.0, 0.0, "test1@gmail.com"));
+        
         friendListView = (ListView)findViewById(R.id.friendListView);
         valuesList = new ArrayList<>(areaFriendHashMap.values());
         friendListAdapter = new FriendListAdapter(this, valuesList, getResources(), friendListView);
@@ -122,15 +145,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                             .build();
         broadcastingEnabled = true;
         persistence = new MemoryPersistence();
-        // find email of first account to use as id
-        Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
-        Account[] accounts = AccountManager.get(getApplicationContext()).getAccounts();
-        for (Account account : accounts) {
-            if (emailPattern.matcher(account.name).matches()) {
-                clientEmail = account.name;
-                break;
-            }
-        }
+
 
         try {
             mqttClient = new MqttClient("tcp://syrelyre.dk:1883", clientEmail,persistence);
@@ -148,6 +163,35 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
 
     }
+
+    public void createFriends(String json)
+    {
+        JSONObject json_obj = null;
+        try
+        {
+            json_obj = new JSONObject(json);
+            final JSONArray friends = json_obj.getJSONArray("friends");
+            final int n = friends.length();
+            for(int i =0; i<n; i++)
+            {
+                final JSONObject friend = friends.getJSONObject(i);
+                final String email = friend.getString("email");
+                final double lat = friend.getDouble("lat");
+                final double lng = friend.getDouble("lng");
+                final String name = friend.getString("name");
+                FriendHashMap.put(email, new Friend(name, lat, lng, email));
+            }
+        }
+        catch (Exception e)
+        {
+            Log.e("createFriends", "Couldn't create JSON object from string");
+
+        }
+
+
+
+    }
+
     @Override
     public void onStart()
     {
@@ -817,4 +861,15 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         } while (people.moveToNext());
         return resultNumber;
     }
+
+
 }
+
+
+
+
+
+
+
+
+
