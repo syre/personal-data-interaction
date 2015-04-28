@@ -127,6 +127,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 break;
             }
         }
+        // run mqtt connection separate from ui thread to avoid ui hanging
         final MqttCallback currentActivity = this;
         Thread connectThread = new Thread() {
             @Override
