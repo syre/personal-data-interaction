@@ -17,7 +17,6 @@ import android.graphics.Rect;
 import android.location.Location;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.NotificationCompat;
@@ -111,13 +110,11 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             }
         }
         Log.d("onCreate", "clientMail = " + clientEmail);
-        String json ="";
+        String json = "";
         try {
             json = new GetFriends().execute(clientEmail).get();
             createFriends(json);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             Log.d("onCreate", "json createFriends failed: " + e.getMessage());
         }
 
@@ -126,7 +123,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         toggleBroadcastingButton = (ImageButton) findViewById(R.id.toggleBroadcastingButton);
         friendMapView.onCreate(savedInstanceState);
 
-        friendListView = (ListView)findViewById(R.id.friendListView);
+        friendListView = (ListView) findViewById(R.id.friendListView);
 
         valuesList = new ArrayList<>(areaFriendHashMap.values());
         friendListAdapter = new FriendListAdapter(this, valuesList, getResources(), friendListView);
@@ -162,16 +159,13 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         connectThread.start();
     }
 
-    public void createFriends(String json)
-    {
+    public void createFriends(String json) {
         JSONObject json_obj;
-        try
-        {
+        try {
             json_obj = new JSONObject(json);
             final JSONArray friends = json_obj.getJSONArray("friends");
             final int n = friends.length();
-            for(int i =0; i<n; i++)
-            {
+            for (int i = 0; i < n; i++) {
                 final JSONObject friend = friends.getJSONObject(i);
                 final String email = friend.getString("email");
                 final double lat = friend.getDouble("lat");
@@ -179,13 +173,10 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 final String name = friend.getString("name");
                 FriendHashMap.put(email, new Friend(name, lat, lng, email));
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             Log.e("createFriends", "Couldn't create JSON object from string");
 
         }
-
 
 
     }
@@ -199,15 +190,12 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendNotificationTitle = "";
         nudgeNotificationContentText = "";
         nudgeNotificationTitle = "";
-        if(FriendHashMap.isEmpty())
-        {
-            String json ="";
+        if (FriendHashMap.isEmpty()) {
+            String json = "";
             try {
                 json = new GetFriends().execute(clientEmail).get();
                 createFriends(json);
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 Log.d("onStart", "json createFriends failed: " + e.getMessage());
             }
 
@@ -239,15 +227,12 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendNotificationTitle = "";
         nudgeNotificationContentText = "";
         nudgeNotificationTitle = "";
-        if(FriendHashMap.isEmpty())
-        {
-            String json ="";
+        if (FriendHashMap.isEmpty()) {
+            String json = "";
             try {
                 json = new GetFriends().execute(clientEmail).get();
                 createFriends(json);
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 Log.d("onResume", "json createFriends failed: " + e.getMessage());
             }
 
@@ -406,16 +391,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         }
     }
 
-    public Friend getFriendByName(String name, HashMap map) {
-        for (Object friend : map.values()) {
-            Friend friend1 = (Friend) friend;
-            if (friend1.getName().equals(name))
-                return friend1;
-
-        }
-        return null;
-    }
-
     @Override
     public void onLocationChanged(Location loc) {
         LatLng latLng = new LatLng(loc.getLatitude(), loc.getLongitude());
@@ -445,7 +420,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                         friendListAdapter.notifyDataSetChanged();
                         updateMarkers();
                     }
-
                 });
 
                 Log.d("MainActivity", "Sending new area update (loc_remove)");
@@ -493,12 +467,10 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     @Override
     public void connectionLost(Throwable throwable) {
-        boolean flag = false;
         Log.d("connectionLost", "connectionLost!!");
-        while (flag == false)
+        while (!mqttClient.isConnected()) {
             try {
                 mqttClient.connect();
-                flag = true;
             } catch (MqttException except) {
                 try {
                     Thread.sleep(1000);
@@ -508,6 +480,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 Log.d("connectionLost", "MQTT: Connection Lost, reconnect failed: " + except.getMessage());
 
             }
+        }
     }
 
     private void parseCommand(JSONObject json_obj) {
@@ -700,7 +673,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 mBuilder.setContentText(nudgeNotificationContentText);
                 mBuilder.setContentTitle(nudgeNotificationTitle)
 
-                //mBuilder.setStyle(bigText)
+                        //mBuilder.setStyle(bigText)
                         .setAutoCancel(true)
                         .setAutoCancel(true)
                         .setSound(alarmSound)
@@ -757,12 +730,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     friendNotificationContentText += areaFriendHashMap.get(email).getName();
                     friendNotificationContentText += isNearYouString;
 
-                    /*
-                    NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
-                    bigText.bigText(friendNotificationContentText);
-                    bigText.setBigContentTitle(friendNotificationTitle);
-                    bigText.setSummaryText("Hej!");
-                    */
                     mBuilder.setContentText(friendNotificationContentText);
                     mBuilder.setContentTitle(friendNotificationTitle);
 
@@ -779,7 +746,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
                     mBuilder.setSound(alarmSound);
                     mBuilder.setVibrate(new long[]{0, 100, 100, 100, 100})
-                    //mBuilder.setStyle(bigText)
+                            //mBuilder.setStyle(bigText)
                             .setAutoCancel(true);
                 } else //If contentText isn't empty!!
                 {
@@ -801,9 +768,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     bigText.setBigContentTitle(friendNotificationTitle);
                     bigText.setSummaryText("");
 
-                    mBuilder.setStyle(bigText)
-                     //mBuilder.setContentText(friendNotificationContentText).setContentTitle(friendNotificationTitle)
-                            .setAutoCancel(true);
+                    mBuilder.setStyle(bigText).setAutoCancel(true);
                 }
                 Log.d("Notification", "friendNotificationContentText = " + friendNotificationContentText);
 
