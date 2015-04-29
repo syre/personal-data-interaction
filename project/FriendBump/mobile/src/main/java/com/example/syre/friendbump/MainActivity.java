@@ -59,9 +59,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 //For notification
@@ -88,7 +86,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     String clientEmail;
     Location lastLocation = null;
     private static boolean isInForeground;
-    Set notificationList = new HashSet();
     private String friendNotificationContentText = "";
     private String friendNotificationTitle = "";
     private String nudgeNotificationContentText = "";
@@ -190,16 +187,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendNotificationTitle = "";
         nudgeNotificationContentText = "";
         nudgeNotificationTitle = "";
-        if (FriendHashMap.isEmpty()) {
-            String json = "";
-            try {
-                json = new GetFriends().execute(clientEmail).get();
-                createFriends(json);
-            } catch (Exception e) {
-                Log.d("onStart", "json createFriends failed: " + e.getMessage());
-            }
 
-        }
         Log.d("MainActivity", "onStart executed!");
     }
 
@@ -227,16 +215,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendNotificationTitle = "";
         nudgeNotificationContentText = "";
         nudgeNotificationTitle = "";
-        if (FriendHashMap.isEmpty()) {
-            String json = "";
-            try {
-                json = new GetFriends().execute(clientEmail).get();
-                createFriends(json);
-            } catch (Exception e) {
-                Log.d("onResume", "json createFriends failed: " + e.getMessage());
-            }
-
-        }
         Log.d("onResume", "onResume executed!");
     }
 
@@ -363,8 +341,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             mqttClient.publish(topic, msg);
         } catch (MqttException except) {
             Log.d("MainActivity", "MQTT: could not send location message: " + except.getMessage() + " (" + except.getReasonCode() + ")");
-            Toast.makeText(getApplicationContext(), "MQTT: could not send location message: " + except.getMessage() + " (" + except.getReasonCode() + ")", Toast.LENGTH_LONG).show();
-
         }
     }
 
@@ -428,8 +404,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
             }
             lastLocation = loc;
-            for(Friend friend : areaFriendHashMap.values())
-            {
+            for (Friend friend : areaFriendHashMap.values()) {
                 float[] result = new float[1];
                 Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(), friend.getLat(), friend.getLng(), result);
                 friend.setDistance(result[0]);
@@ -675,7 +650,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 //mBuilder.setContentText(nudgeNotificationContentText);
                 //mBuilder.setContentTitle(nudgeNotificationTitle)
 
-                        mBuilder.setStyle(bigText)
+                mBuilder.setStyle(bigText)
                         .setAutoCancel(true)
                         .setAutoCancel(true)
                         .setSound(alarmSound)
