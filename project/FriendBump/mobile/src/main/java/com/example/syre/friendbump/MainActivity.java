@@ -94,6 +94,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     private String friendNotificationTitle = "";
     private String nudgeNotificationContentText = "";
     private String nudgeNotificationTitle = "";
+    private int decimals = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -198,6 +199,19 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendNotificationTitle = "";
         nudgeNotificationContentText = "";
         nudgeNotificationTitle = "";
+        if(FriendHashMap.isEmpty())
+        {
+            String json ="";
+            try {
+                json = new GetFriends().execute(clientEmail).get();
+                createFriends(json);
+            }
+            catch (Exception e)
+            {
+                Log.d("onStart", "json createFriends failed: " + e.getMessage());
+            }
+
+        }
         Log.d("MainActivity", "onStart executed!");
     }
 
@@ -225,7 +239,20 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendNotificationTitle = "";
         nudgeNotificationContentText = "";
         nudgeNotificationTitle = "";
-        Log.d("MainActivity", "onResume executed!");
+        if(FriendHashMap.isEmpty())
+        {
+            String json ="";
+            try {
+                json = new GetFriends().execute(clientEmail).get();
+                createFriends(json);
+            }
+            catch (Exception e)
+            {
+                Log.d("onResume", "json createFriends failed: " + e.getMessage());
+            }
+
+        }
+        Log.d("onResume", "onResume executed!");
     }
 
     @Override
@@ -296,7 +323,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         Iterator<String> friendListIterator = FriendHashMap.keySet().iterator();
         while (friendListIterator.hasNext()) {
             String key = friendListIterator.next();
-            String topic_string = FriendHashMap.get(key).getEmail() + "." + roundtoDecimals(3, loc.getLatitude()) + "." + roundtoDecimals(3, loc.getLongitude());
+            String topic_string = FriendHashMap.get(key).getEmail() + "." + roundtoDecimals(decimals, loc.getLatitude()) + "." + roundtoDecimals(decimals, loc.getLongitude());
             try {
                 mqttClient.subscribe(topic_string);
             } catch (MqttException except) {
@@ -310,7 +337,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         Iterator<String> friendListIterator = FriendHashMap.keySet().iterator();
         while (friendListIterator.hasNext()) {
             String key = friendListIterator.next();
-            String topic_string = FriendHashMap.get(key).getEmail() + "." + roundtoDecimals(3, loc.getLatitude()) + "." + roundtoDecimals(3, loc.getLongitude());
+            String topic_string = FriendHashMap.get(key).getEmail() + "." + roundtoDecimals(decimals, loc.getLatitude()) + "." + roundtoDecimals(decimals, loc.getLongitude());
             try {
                 mqttClient.unsubscribe(topic_string);
             } catch (MqttException except) {
@@ -325,7 +352,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         String command = "loc_remove";
         String json_string = "{email:" + clientEmail +
                 ",command:" + command + "}";
-        String topic = clientEmail + "." + roundtoDecimals(3, loc.getLatitude()) + "." + roundtoDecimals(3, loc.getLongitude());
+        String topic = clientEmail + "." + roundtoDecimals(decimals, loc.getLatitude()) + "." + roundtoDecimals(decimals, loc.getLongitude());
         MqttMessage msg = new MqttMessage(json_string.getBytes());
         msg.setQos(1);
         try {
@@ -343,7 +370,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 ",command:" + command +
                 ",lat:" + latitude +
                 ",lng:" + longitude + "}";
-        String topic = clientEmail + "." + roundtoDecimals(3, loc.getLatitude()) + "." + roundtoDecimals(3, loc.getLongitude());
+        String topic = clientEmail + "." + roundtoDecimals(decimals, loc.getLatitude()) + "." + roundtoDecimals(decimals, loc.getLongitude());
         Log.d("MainActivity", "topic is: " + topic);
         MqttMessage msg = new MqttMessage(json_string.getBytes());
         msg.setQos(0);
@@ -363,7 +390,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             String targetEmail = friend.getEmail();
             String json_string = "{email:" + clientEmail +
                     ",command:" + command + ",targetEmail:" + targetEmail + "}";
-            String topic = clientEmail + "." + roundtoDecimals(3, lastLocation.getLatitude()) + "." + roundtoDecimals(3, lastLocation.getLongitude());
+            String topic = clientEmail + "." + roundtoDecimals(decimals, lastLocation.getLatitude()) + "." + roundtoDecimals(decimals, lastLocation.getLongitude());
             MqttMessage msg = new MqttMessage(json_string.getBytes());
             msg.setQos(0);
             try {
@@ -394,8 +421,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
         Log.d("MainActivity", "Location changed to: lat: " + loc.getLatitude() + ", lng: " + loc.getLongitude());
         if (broadcastingEnabled) {   // if location when converted to accuracy of 110m (3 decimal places) has changed
-            if (lastLocation == null || roundtoDecimals(3, loc.getLatitude()) != roundtoDecimals(3, lastLocation.getLatitude()) ||
-                    roundtoDecimals(3, loc.getLongitude()) != roundtoDecimals(3, lastLocation.getLongitude())) {
+            if (lastLocation == null || roundtoDecimals(decimals, loc.getLatitude()) != roundtoDecimals(decimals, lastLocation.getLatitude()) ||
+                    roundtoDecimals(decimals, loc.getLongitude()) != roundtoDecimals(decimals, lastLocation.getLongitude())) {
                 if (lastLocation != null) {
                     sendNewAreaUpdate(lastLocation);
                     unsubscribeToFriends(lastLocation);
@@ -725,7 +752,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
                     bigText.bigText(friendNotificationContentText);
                     bigText.setBigContentTitle(friendNotificationTitle);
-                    bigText.setSummaryText("");
+                    bigText.setSummaryText("Hej!");
 
                     String number = getNumber(areaFriendHashMap.get(email).getName());
                     if (number != "NULL") {
@@ -759,7 +786,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
                     bigText.bigText(friendNotificationContentText);
                     bigText.setBigContentTitle(friendNotificationTitle);
-                    bigText.setSummaryText("");
+                    bigText.setSummaryText("Hej");
                     mBuilder.setStyle(bigText)
                             .setAutoCancel(true);
                 }
