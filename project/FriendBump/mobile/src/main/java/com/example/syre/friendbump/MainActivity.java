@@ -140,17 +140,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         broadcastingEnabled = true;
         persistence = new MemoryPersistence();
 
-        // find email of first account to use as id
-        Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
-        Account[] accounts = AccountManager.get(getApplicationContext()).getAccounts();
-        for (Account account : accounts) {
-            if (emailPattern.matcher(account.name).matches()) {
-                clientEmail = account.name;
-                break;
-            }
-        }
         // run mqtt connection separate from ui thread to avoid ui hanging
-
         final MqttCallback currentActivity = this;
         Thread connectThread = new Thread() {
             @Override
