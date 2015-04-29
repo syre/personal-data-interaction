@@ -19,12 +19,12 @@ client.on_message = on_message
 client.on_disconnect = on_disconnect
 client.connect("syrelyre.dk", 1883, 60)
 
-command = "nudge" #loc_update, loc_remove or nudge
-mail = "test1@gmail.com"
+command = "loc_update" #loc_update, loc_remove or nudge
+mail = "blabla@test.dk"
 target_mail = "handiiandii@gmail.com" #for nudge
-lat = 55.82995497
-lng = 12.42798938
-topic = mail + ".55.829.12.427" #"handiiandii@gmail.com.55.707.12.536"
+lat = 55.78995497
+lng = 12.51798938
+topic = mail + ".55.78.12.51" #"handiiandii@gmail.com.55.707.12.536"
 msg = """{email:%s, targetEmail:%s, command:%s, lat: %f, lng: %f}""" % (mail, target_mail, command, lat, lng)
 #msg = """{email:%s, command:loc_update, lat: %f, lng: %f}""" % (mail, lat, lng)
 print("topic = %s\nmsg = %s" % (topic, msg))

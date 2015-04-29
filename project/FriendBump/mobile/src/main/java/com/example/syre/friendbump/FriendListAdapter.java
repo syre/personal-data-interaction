@@ -125,8 +125,7 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
             break;
 
         case R.id.nudge_button:
-            Toast.makeText(activity.getApplicationContext(), "nudge clicked on "+position, Toast.LENGTH_SHORT).show();
-            mainActivity.sendNudgeMessage(list.get(position).toString());//mainActivity.
+            mainActivity.sendNudgeMessage((Friend) list.get(position));//mainActivity.
             break;
         case R.id.phone_button:
             String number = getNumber(list.get(position).toString());
@@ -142,6 +141,7 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
             }
             else
                 Toast.makeText(activity.getApplicationContext(), "Number not found. Can't make the call!", Toast.LENGTH_SHORT).show();
+            break;
         default:
             break;
         }

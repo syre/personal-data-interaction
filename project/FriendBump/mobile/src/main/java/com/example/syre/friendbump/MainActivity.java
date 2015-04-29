@@ -383,11 +383,11 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         }
     }
 
-    public void sendNudgeMessage(String targetName) {
+    public void sendNudgeMessage(Friend targetFriend) {
         String command = "nudge";
-        Friend friend = getFriendByName(targetName, areaFriendHashMap);
-        if (friend != null) {
-            String targetEmail = friend.getEmail();
+        //Friend friend = getFriendByName(targetName, areaFriendHashMap);
+        if (targetFriend != null) {
+            String targetEmail = targetFriend.getEmail();
             String json_string = "{email:" + clientEmail +
                     ",command:" + command + ",targetEmail:" + targetEmail + "}";
             String topic = clientEmail + "." + roundtoDecimals(decimals, lastLocation.getLatitude()) + "." + roundtoDecimals(decimals, lastLocation.getLongitude());
@@ -395,11 +395,12 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             msg.setQos(0);
             try {
                 mqttClient.publish(topic, msg);
+                Toast.makeText(this, "Nudge send!", Toast.LENGTH_SHORT).show();
             } catch (MqttException except) {
                 Log.d("MainActivity", "MQTT: could not publish nudge message: " + except.getMessage());
             }
         } else
-            Log.d("sendNudgeMessage", "friend was null!");
+            Log.d("sendNudgeMessage", "friend was null! ");
     }
 
     public Friend getFriendByName(String name, HashMap map) {
@@ -685,13 +686,16 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 Log.d("nudgeNotification", "nudgeNotificationContentText = " + nudgeNotificationContentText);
                 Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-
+                /*
                 NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
                 bigText.bigText(nudgeNotificationContentText);
                 bigText.setBigContentTitle(nudgeNotificationTitle);
                 bigText.setSummaryText("");
+                */
+                mBuilder.setContentText(nudgeNotificationContentText);
+                mBuilder.setContentTitle(nudgeNotificationTitle)
 
-                mBuilder.setStyle(bigText)
+                //mBuilder.setStyle(bigText)
                         .setAutoCancel(true)
                         .setAutoCancel(true)
                         .setSound(alarmSound)
@@ -748,11 +752,14 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     friendNotificationContentText += areaFriendHashMap.get(email).getName();
                     friendNotificationContentText += isNearYouString;
 
-
+                    /*
                     NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
                     bigText.bigText(friendNotificationContentText);
                     bigText.setBigContentTitle(friendNotificationTitle);
                     bigText.setSummaryText("Hej!");
+                    */
+                    mBuilder.setContentText(friendNotificationContentText);
+                    mBuilder.setContentTitle(friendNotificationTitle);
 
                     String number = getNumber(areaFriendHashMap.get(email).getName());
                     if (number != "NULL") {
@@ -766,8 +773,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     }
                     Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
                     mBuilder.setSound(alarmSound);
-                    mBuilder.setVibrate(new long[]{0, 100, 100, 100, 100});
-                    mBuilder.setStyle(bigText)
+                    mBuilder.setVibrate(new long[]{0, 100, 100, 100, 100})
+                    //mBuilder.setStyle(bigText)
                             .setAutoCancel(true);
                 } else //If contentText isn't empty!!
                 {
@@ -783,11 +790,14 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                             areaFriendHashMap.get(email).getName() + isNearYouString;
                     friendNotificationTitle = "There is several friends near you!";
                     Log.d("Notification", "else! - friendNotificationContentText" + friendNotificationContentText);
+
                     NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
                     bigText.bigText(friendNotificationContentText);
                     bigText.setBigContentTitle(friendNotificationTitle);
-                    bigText.setSummaryText("Hej");
+                    bigText.setSummaryText("");
+
                     mBuilder.setStyle(bigText)
+                     //mBuilder.setContentText(friendNotificationContentText).setContentTitle(friendNotificationTitle)
                             .setAutoCancel(true);
                 }
                 Log.d("Notification", "friendNotificationContentText = " + friendNotificationContentText);
