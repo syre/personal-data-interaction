@@ -140,15 +140,17 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         Thread connectThread = new Thread() {
             @Override
             public void run() {
-                try {
-                    mqttClient = new MqttClient("tcp://syrelyre.dk:1883", clientEmail, persistence);
-                    MqttConnectOptions options = new MqttConnectOptions();
-                    options.setKeepAliveInterval(60);
-                    mqttClient.setCallback(currentActivity);
-                    mqttClient.connect();
-                } catch (MqttException except) {
-                    Log.d("MainActivity mqtt:", except.getMessage());
-                    Toast.makeText(getApplicationContext(), "MQTT Connection failed: " + except.getMessage(), Toast.LENGTH_SHORT).show();
+                while (!mqttClient.isConnected()) {
+                    try {
+                        mqttClient = new MqttClient("tcp://syrelyre.dk:1883", clientEmail, persistence);
+                        MqttConnectOptions options = new MqttConnectOptions();
+                        options.setKeepAliveInterval(60);
+                        mqttClient.setCallback(currentActivity);
+                        mqttClient.connect();
+                    } catch (MqttException except) {
+                        Log.d("MainActivity mqtt:", except.getMessage());
+                        Toast.makeText(getApplicationContext(), "MQTT Connection failed: " + except.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         };
@@ -624,8 +626,11 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     }
 
     public void sendNudgeNotification(Friend fromFriend) {
+        String[] nameSplitted = fromFriend.getName().split(" ");
+
+        String name = nameSplitted[0] + " " + (nameSplitted[nameSplitted.length-1]);
         Log.d("nudgeNotification", "Run notification() ");
-        if (!nudgeNotificationContentText.contains(fromFriend.getName())) {
+        if (!nudgeNotificationContentText.contains(name)) {
             nudgeNotificationTitle = "You have got nudged!";
             int mId = 2;
             Intent resultIntent = new Intent(this,
@@ -637,20 +642,20 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                             .setContentIntent(viewPendingIntent);
 
             if (nudgeNotificationContentText == "") {
-                nudgeNotificationContentText = fromFriend.getName() + " is near you and wants to meet!";
+                nudgeNotificationContentText = name + " wants to meet!";
                 Log.d("nudgeNotification", "nudgeNotificationContentText = " + nudgeNotificationContentText);
                 Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-
+                /*
                 NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
                 bigText.bigText(nudgeNotificationContentText);
                 bigText.setBigContentTitle(nudgeNotificationTitle);
                 bigText.setSummaryText("");
+                */
+                mBuilder.setContentText(nudgeNotificationContentText);
+                mBuilder.setContentTitle(nudgeNotificationTitle)
 
-                //mBuilder.setContentText(nudgeNotificationContentText);
-                //mBuilder.setContentTitle(nudgeNotificationTitle)
-
-                mBuilder.setStyle(bigText)
+                //mBuilder.setStyle(bigText)
                         .setAutoCancel(true)
                         .setAutoCancel(true)
                         .setSound(alarmSound)
@@ -658,14 +663,14 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             } else {
                 Log.d("nudgeNotification", "else");
                 String subString = nudgeNotificationContentText.substring(0,
-                        nudgeNotificationContentText.indexOf(" is near you and wants to meet!"));
+                        nudgeNotificationContentText.indexOf(" wants to meet!"));
                 Log.d("nudgeNotification", "else - substring = " + subString);
                 if (subString.contains(" and ")) {
                     subString.replace(" and ", ", ");
                 }
                 Log.d("nudgeNotification", "else - efter if");
                 nudgeNotificationContentText = subString + " and " +
-                        fromFriend.getName() + " is near you and wants to meet!";
+                        name + " is near you and wants to meet!";
 
                 Log.d("nudgeNotification", "else nudgeNotificationContentText = " + nudgeNotificationContentText);
                 NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
