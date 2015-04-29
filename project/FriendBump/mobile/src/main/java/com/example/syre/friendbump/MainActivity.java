@@ -428,6 +428,12 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
             }
             lastLocation = loc;
+            for(Friend friend : areaFriendHashMap.values())
+            {
+                float[] result = new float[1];
+                Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(), friend.getLat(), friend.getLng(), result);
+                friend.setDistance(result[0]);
+            }
             Log.d("onLocationChanged", "lastLocation = " + lastLocation);
             sendLocationChangeUpdate(loc);
         }
