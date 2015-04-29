@@ -97,7 +97,7 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
         {
             Friend f = (Friend) list.get(position);
             holder.name.setText(f.getName());
-            holder.distance.setText(f.getEmail());
+            holder.distance.setText(Float.toString(f.getDistance()));
 
             holder.profileImage.setImageResource(res.getIdentifier("com.example.syre.friendbump:drawable/person_placeholder",null,null));
         }

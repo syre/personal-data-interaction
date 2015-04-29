@@ -9,6 +9,7 @@ public class Friend
     private String email;
     private double lat;
     private double lng;
+    private float distance;
     private boolean notification;
     public Friend(String name)
     {
@@ -22,6 +23,7 @@ public class Friend
         this.lng = lng;
         this.email = email;
         this.notification = false;
+        this.distance = -1;
     }
 
     public String getName()
@@ -49,6 +51,8 @@ public class Friend
     }
     public void setEmail(String email) {this.email = email;}
     public void setNotification(boolean flag) {this.notification = flag;}
+    public void setDistance(float distance) { this.distance = distance;}
+    public float getDistance() { return distance;}
 
     @Override
     public String toString()

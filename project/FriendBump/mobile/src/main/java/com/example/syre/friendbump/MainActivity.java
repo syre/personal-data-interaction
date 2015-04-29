@@ -490,7 +490,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             Log.d("parseCommand", "Command = " + command);
             Log.d("parseCommand", "email = " + email);
             if (command.equals("loc_update")) {
-                Log.d("parseCommand", "log_update");
+                Log.d("parseCommand", "loc_update");
                 final Double lat = json_obj.getDouble("lat");
                 final Double lng = json_obj.getDouble("lng");
                 if (areaFriendHashMap.get(email) == null) {
@@ -501,6 +501,9 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     Friend friend = areaFriendHashMap.get(email);
                     friend.setLat(lat);
                     friend.setLng(lng);
+                    float[] result = new float[1];
+                    Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(), lat, lng, result);
+                    friend.setDistance(result[0]);
                 }
 
                 // update list view on UI thread
@@ -601,16 +604,9 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                         .title(areaFriendHashMap.get(key).getName()).icon(descriptor));
 
                 markers.put(key, marker);
-                notificationList.add(key);
             } else {
-                LatLng old_loc = markers.get(key).getPosition();
                 LatLng new_loc = new LatLng(areaFriendHashMap.get(key).getLat(), areaFriendHashMap.get(key).getLng());
                 markers.get(key).setPosition(new_loc);
-                float[] result = new float[1];
-                Location.distanceBetween(old_loc.latitude, old_loc.longitude, new_loc.latitude, new_loc.longitude, result);
-                if (result[0] > 100) {
-                    notificationList.add(key);
-                }
             }
         }
         Iterator<String> markerIterator = markers.keySet().iterator();
