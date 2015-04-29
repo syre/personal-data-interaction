@@ -459,7 +459,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 mqttClient.connect();
             } catch (MqttException except) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(7500);
                 } catch (InterruptedException e) {
                     Log.d("connectionLost", "Thread.sleep failed");
                 }
