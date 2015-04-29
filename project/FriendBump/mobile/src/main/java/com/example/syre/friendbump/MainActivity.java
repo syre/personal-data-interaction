@@ -660,16 +660,16 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 Log.d("nudgeNotification", "nudgeNotificationContentText = " + nudgeNotificationContentText);
                 Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-                /*
+
                 NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
                 bigText.bigText(nudgeNotificationContentText);
                 bigText.setBigContentTitle(nudgeNotificationTitle);
                 bigText.setSummaryText("");
-                */
-                mBuilder.setContentText(nudgeNotificationContentText);
-                mBuilder.setContentTitle(nudgeNotificationTitle)
 
-                        //mBuilder.setStyle(bigText)
+                //mBuilder.setContentText(nudgeNotificationContentText);
+                //mBuilder.setContentTitle(nudgeNotificationTitle)
+
+                        mBuilder.setStyle(bigText)
                         .setAutoCancel(true)
                         .setAutoCancel(true)
                         .setSound(alarmSound)
