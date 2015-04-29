@@ -386,7 +386,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     public void sendNudgeMessage(Friend targetFriend) {
         String command = "nudge";
         //Friend friend = getFriendByName(targetName, areaFriendHashMap);
-        if (targetFriend != null) {
+        if (targetFriend != null && lastLocation != null) {
             String targetEmail = targetFriend.getEmail();
             String json_string = "{email:" + clientEmail +
                     ",command:" + command + ",targetEmail:" + targetEmail + "}";
@@ -399,8 +399,11 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             } catch (MqttException except) {
                 Log.d("MainActivity", "MQTT: could not publish nudge message: " + except.getMessage());
             }
-        } else
-            Log.d("sendNudgeMessage", "friend was null! ");
+        } else {
+            Log.d("sendNudgeMessage", "friend = " + targetFriend);
+            Log.d("sendNudgeMessage", "lastLocation = " + lastLocation);
+
+        }
     }
 
     public Friend getFriendByName(String name, HashMap map) {
@@ -416,6 +419,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     @Override
     public void onLocationChanged(Location loc) {
         LatLng latLng = new LatLng(loc.getLatitude(), loc.getLongitude());
+        Log.d("onLocationChanged", "loc = " + loc);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
         mMap.animateCamera(zoom);
@@ -450,6 +454,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
             }
             lastLocation = loc;
+            Log.d("onLocationChanged", "lastLocation = " + lastLocation);
             sendLocationChangeUpdate(loc);
         }
 
