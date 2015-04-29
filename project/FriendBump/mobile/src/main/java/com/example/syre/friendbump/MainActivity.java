@@ -140,12 +140,15 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         Thread connectThread = new Thread() {
             @Override
             public void run() {
+                try{
+                    mqttClient = new MqttClient("tcp://syrelyre.dk:1883", clientEmail, persistence);
+                    MqttConnectOptions options = new MqttConnectOptions();
+                    options.setKeepAliveInterval(60);
+                    mqttClient.setCallback(currentActivity);}
+                catch (MqttException except){};
                 while (!mqttClient.isConnected()) {
                     try {
-                        mqttClient = new MqttClient("tcp://syrelyre.dk:1883", clientEmail, persistence);
-                        MqttConnectOptions options = new MqttConnectOptions();
-                        options.setKeepAliveInterval(60);
-                        mqttClient.setCallback(currentActivity);
+
                         mqttClient.connect();
                     } catch (MqttException except) {
                         Log.d("MainActivity mqtt:", except.getMessage());
