@@ -41,12 +41,10 @@
 \mainmatter  % start of an individual contribution
 
 % first the title is needed
-\title{Lecture Notes in Computer Science:\\Authors' Instructions
-for the Preparation\\of Camera-Ready
-Contributions\\to LNCS/LNAI/LNBI Proceedings}
+\title{Project in Personal Data Interaction:\\FriendBump}
 
 % a short form should be given in case it is too long for the running head
-\titlerunning{Lecture Notes in Computer Science: Authors' Instructions}
+\titlerunning{Project in Personal Data Interaction: FriendBump}
 
 % the name(s) of the author(s) follow(s) next
 %
@@ -54,25 +52,18 @@ Contributions\\to LNCS/LNAI/LNBI Proceedings}
 % their surnames. This ensures that the names appear correctly in
 % the running heads and the author index.
 %
-\author{Alfred Hofmann%
-\thanks{Please note that the LNCS Editorial assumes that all authors have used
-the western naming convention, with given names preceding surnames. This determines
-the structure of the names in the running heads and the author index.}%
-\and Ursula Barth\and Ingrid Haas\and Frank Holzwarth\and\\
-Anna Kramer\and Leonie Kunz\and Christine Rei\ss\and\\
-Nicole Sator\and Erika Siebert-Cole\and Peter Stra\ss er}
+\author{Søren Howe Gersager \and Anders Lønberg Rahbek}
 %
-\authorrunning{Lecture Notes in Computer Science: Authors' Instructions}
+\authorrunning{Project in Personal Data Interaction: FriendBump}
 % (feature abused for this document to repeat the title also on left hand pages)
 
 % the affiliations are given next; don't give your e-mail address
 % unless you accept that it will be published
-\institute{Springer-Verlag, Computer Science Editorial,\\
-Tiergartenstr. 17, 69121 Heidelberg, Germany\\
-\mailsa\\
-\mailsb\\
-\mailsc\\
-\url{http://www.springer.com/lncs}}
+\institute{DTU Compute, Technical University of Denmark, \\Richard Petersens Plads, Building 324, 2800 Kgs. Lyngby, Denmark \\
+%\mailsa\\
+%\mailsb\\
+%\mailsc\\
+\url{http://www.compute.dtu.dk/}}
 
 %
 % NB: a more complex sample for affiliations and the mapping to the
@@ -95,309 +86,152 @@ the abstract section}
 \end{abstract}
 
 
+\section*{Preface}
+This report is produced based on a course project in Personal Data Interaction on the Technical University of Denmark. The references is stated with a number in brackets eg. [1]. If the reference is placed after the period in a section, the reference is used as reference for the entire section. 
+Both authors are responsible for the entire content of this report.
+
+
+
+
+
 \section{Introduction}
+Many of us has tried to go shopping, been to a conference or a concert, where you came home and discovered that one of your friends had also been there. If you had known that he would be there, you could’ve met with him and possibly made the experience more enjoyable.\\
 
-You are strongly encouraged to use \LaTeXe{} for the
-preparation of your camera-ready manuscript together with the
-corresponding Springer class file \verb+llncs.cls+. Only if you use
-\LaTeXe{} can hyperlinks be generated in the online version
-of your manuscript.
+This leaves us with the following problem definition: You don’t know when a friend is nearby but you would like to know in certain situations. \\
 
-The \LaTeX{} source of this instruction file for \LaTeX{} users may be
-used as a template. This is
-located in the ``authors'' subdirectory in
-\url{ftp://ftp.springer.de/pub/tex/latex/llncs/latex2e/instruct/} and
-entitled \texttt{typeinst.tex}. There is a separate package for Word 
-users. Kindly send the final and checked source
-and PDF files of your paper to the Contact Volume Editor. This is
-usually one of the organizers of the conference. You should make sure
-that the \LaTeX{} and the PDF files are identical and correct and that
-only one version of your paper is sent. It is not possible to update
-files at a later stage. Please note that we do not need the printed
-paper.
+This problem can be solved by a personal app, that allows you to  broadcasts your location to your friends and your friends location to you which enables you to quickly contact them when you are close to each other.\\
 
-We would like to draw your attention to the fact that it is not possible
-to modify a paper in any way, once it has been published. This applies
-to both the printed book and the online version of the publication.
-Every detail, including the order of the names of the authors, should
-be checked before the paper is sent to the Volume Editors.
+In this report we will describe the process of developing a prototype solution to solve this problem.
+We start with related works to describe how our app differs from other similar solutions in the market. 
+We analyse our problem further and then describe our design for the app. We evaluate the design, after describing the implementation. \\
+Finally we go through our results and discuss them. Last, some remarks for possible future work on the app and a conclusion. 
 
-\subsection{Checking the PDF File}
 
-Kindly assure that the Contact Volume Editor is given the name and email
-address of the contact author for your paper. The Contact Volume Editor
-uses these details to compile a list for our production department at
-SPS in India. Once the files have been worked upon, SPS sends a copy of
-the final pdf of each paper to its contact author. The contact author is
-asked to check through the final pdf to make sure that no errors have
-crept in during the transfer or preparation of the files. This should
-not be seen as an opportunity to update or copyedit the papers, which is
-not possible due to time constraints. Only errors introduced during the
-preparation of the files will be corrected.
 
-This round of checking takes place about two weeks after the files have
-been sent to the Editorial by the Contact Volume Editor, i.e., roughly
-seven weeks before the start of the conference for conference
-proceedings, or seven weeks before the volume leaves the printer's, for
-post-proceedings. If SPS does not receive a reply from a particular
-contact author, within the timeframe given, then it is presumed that the
-author has found no errors in the paper. The tight publication schedule
-of LNCS does not allow SPS to send reminders or search for alternative
-email addresses on the Internet.
+\section{Analysis}
+As the problem is, that you don’t know if a friend is nearby, the immediate solution would be to continuously broadcast your your location to your friends.
+However we have to factor in privacy and avoid giving the users the feeling of being spied on, people will probably not use a solution that allows everyone to see their location at all times.\\
+Also we figured the user should be able to disable broadcasts temporarily, because there are times when you don't want to advise your location, like going to the doctors or on a date where you’d rather be incognito. 
 
-In some cases, it is the Contact Volume Editor that checks all the final
-pdfs. In such cases, the authors are not involved in the checking phase.
 
-\subsection{Additional Information Required by the Volume Editor}
+\section{Design}
+Our design methods is divided into two overall parts: a low-fi prototype which is is developed based on an initial user story map and mock-ups, and a hi-fi prototype, an Android app. The hi-fi prototype is based on the low-fi prototype. \\
 
-If you have more than one surname, please make sure that the Volume Editor
-knows how you are to be listed in the author index.
+We decided on our prototype being a vertical slice and thus focusing on making it show friends on a map, instead of including non-essential features. 
 
-\subsection{Copyright Forms}
+\subsection{Low-fi prototype}
+We wanted to create a fixed-path prototype, which allowed for interaction by users early[ref Prototyping tools and techniques]. As a low-fi we used a mockup tool [ref] to make illustrations which were simple, yet interactive. The choice of this were to make it quick, but intuitive for our fellow students to understand, and thus give us better feedback. \\
 
-The copyright form may be downloaded from the ``For Authors"
-(Information for LNCS Authors) section of the LNCS Website:
-\texttt{www.springer.com/lncs}. Please send your signed copyright form
-to the Contact Volume Editor, either as a scanned pdf or by fax or by
-courier. One author may sign on behalf of all of the other authors of a
-particular paper. Digital signatures are acceptable.
+We wanted to make the design as simple and direct as possible. The features we wanted, should be right at the fingertips, so you shouldn’t have to tap many times to get to the wanted function. 
+We wanted the following: 
+\begin{itemize}
+  	\item A map to see where our friends are 
+	\item A list with those friends to give the user a better overview over these friends. 
+	\item A text-field which told the user how many friends that’s near him
+	\item Markers in form of profile image from a social network
+	\item An icon in the list, to show which network the friend is from
+	\item Distance to each of the friends
+	\item When (and maybe what) the friend has made an update on the particular social network.
+	\item A button to toggle the broadcast on and off\\ 
+\end{itemize}
 
-\section{Paper Preparation}
+All this is shown in figure 1. 
 
-Springer provides you with a complete integrated \LaTeX{} document class
-(\texttt{llncs.cls}) for multi-author books such as those in the LNCS
-series. Papers not complying with the LNCS style will be reformatted.
-This can lead to an increase in the overall number of pages. We would
-therefore urge you not to squash your paper.
+As functions we needed to could choose a friend, and then could call and sms this friend as well getting navigation to the friend - see figure 2. 
 
-Please always cancel any superfluous definitions that are
-not actually used in your text. If you do not, these may conflict with
-the definitions of the macro package, causing changes in the structure
-of the text and leading to numerous mistakes in the proofs.
+First were the list always visible (non-slide) but after a quick \& dirty evaluation (see evaluation), we changed it to a slide-list. This was to make the map bigger for the user, which is very important when it’s on a small screen - see figure 3. 
 
-If you wonder what \LaTeX{} is and where it can be obtained, see the
-``\textit{LaTeX project site}'' (\url{http://www.latex-project.org})
-and especially the webpage ``\textit{How to get it}''
-(\url{http://www.latex-project.org/ftp.html}) respectively.
+\subsection{Hi-fi prototype}
 
-When you use \LaTeX\ together with our document class file,
-\texttt{llncs.cls},
-your text is typeset automatically in Computer Modern Roman (CM) fonts.
-Please do
-\emph{not} change the preset fonts. If you have to use fonts other
-than the preset fonts, kindly submit these with your files.
+As the hi-fi prototype is based on the low-fi, we implemented the design from low-fi with the changes we mentioned last in latter subsection. 
 
-Please use the commands \verb+\label+ and \verb+\ref+ for
-cross-references and the commands \verb+\bibitem+ and \verb+\cite+ for
-references to the bibliography, to enable us to create hyperlinks at
-these places.
+From some quick \& dirty and talk aloud evaluation, we made some changes and removed/added some things. 
 
-For preparing your figures electronically and integrating them into
-your source file we recommend using the standard \LaTeX{} \verb+graphics+ or
-\verb+graphicx+ package. These provide the \verb+\includegraphics+ command.
-In general, please refrain from using the \verb+\special+ command.
+What we changed: 
+\begin{itemize}
+\item Button to toggle broadcast on and off
+We found out, that people didn’t understood the first icon (top-left icon on figure 1), so we found another icon based on suggestions from evaluation. \\
 
-Remember to submit any further style files and
-fonts you have used together with your source files.
 
-\subsubsection{Headings.}
+What we removed:
+\item Updates from network\\
+We removed this to make out prototype more vertical and because it was in general a little out of our scope. It was a nice feature but nothing more. \\
 
-Headings should be capitalized
-(i.e., nouns, verbs, and all other words
-except articles, prepositions, and conjunctions should be set with an
-initial capital) and should,
-with the exception of the title, be aligned to the left.
-Words joined by a hyphen are subject to a special rule. If the first
-word can stand alone, the second word should be capitalized.
+\item Text-field\\
+We removed the text-field which told the user how many friend there was near him. The user can manage to count some few friend, and the other case with many friend, we found a possible solution using visualization (See section ). \\
 
-Here are some examples of headings: ``Criteria to Disprove
-Context-Freeness of Collage Language", ``On Correcting the Intrusion of
-Tracing Non-deterministic Programs by Software", ``A User-Friendly and
-Extendable Data Distribution System", ``Multi-flip Networks:
-Parallelizing GenSAT", ``Self-determinations of Man".
+What we added: 
+\item bla bla :P \\
+After further development and quick \& dirty, we changed the button to toggle the broadcast on and off and added a nudge button. We also removed updates from social networks. See figure 2 and hi-fi. 
 
-\subsubsection{Lemmas, Propositions, and Theorems.}
+The result can be viewed on figure 4. 
 
-The numbers accorded to lemmas, propositions, and theorems, etc. should
-appear in consecutive order, starting with Lemma 1, and not, for
-example, with Lemma 11.
 
-\subsection{Figures}
+\end{itemize}
 
-For \LaTeX\ users, we recommend using the \emph{graphics} or \emph{graphicx}
-package and the \verb+\includegraphics+ command.
+\section{Implementation}
+Our implementation is divided into two parts: the already mentioned app and a backend server. The backend is composed of a python webserver and a RabbitMQ server[ref]. \\
+We will in the following section describe these two parts and details regarding them. 
 
-Please check that the lines in line drawings are not
-interrupted and are of a constant width. Grids and details within the
-figures must be clearly legible and may not be written one on top of
-the other. Line drawings should have a resolution of at least 800 dpi
-(preferably 1200 dpi). The lettering in figures should have a height of
-2~mm (10-point type). Figures should be numbered and should have a
-caption which should always be positioned \emph{under} the figures, in
-contrast to the caption belonging to a table, which should always appear
-\emph{above} the table; this is simply achieved as matter of sequence in
-your source.
+\subsection{Android app}
+Our activity has several functions, which are for communicating with the backend message-queue and common Android functionality. A table of these function and a short description, can be found in [ref] \\
 
-Please center the figures or your tabular material by using the \verb+\centering+
-declaration. Short captions are centered by default between the margins
-and typeset in 9-point type (Fig.~\ref{fig:example} shows an example).
-The distance between text and figure is preset to be about 8~mm, the
-distance between figure and caption about 6~mm.
 
-To ensure that the reproduction of your illustrations is of a reasonable
-quality, we advise against the use of shading. The contrast should be as
-pronounced as possible.
+There are a couple of non-trivial functions, which we will describe in a bit more detail below.\\
 
-If screenshots are necessary, please make sure that you are happy with
-the print quality before you send the files.
-\begin{figure}
-\centering
-\caption{One kernel at $x_s$ (\emph{dotted kernel}) or two kernels at
-$x_i$ and $x_j$ (\textit{left and right}) lead to the same summed estimate
-at $x_s$. This shows a figure consisting of different types of
-lines. Elements of the figure described in the caption should be set in
-italics, in parentheses, as shown in this sample caption.}
-\label{fig:example}
-\end{figure}
+\underline{drawMarkerBitmap}\\
+This function creates a bitmap object containing the initials of the person on a round and red background, for example Anders Rahbek turns into AR.\\
 
-Please define figures (and tables) as floating objects. Please avoid
-using optional location parameters like ``\verb+[h]+" for ``here".
+This is used to show an unique marker for a friend, thus the function is been called from “updateMarker” function. \\
 
-\paragraph{Remark 1.}
+\underline{getNumber}\\
+The getNumber function, tries to find a telephone number based on a name. It iterate through the mobiles phonebook and return the number if it finds the name, null otherwise. \\
 
-In the printed volumes, illustrations are generally black and white
-(halftones), and only in exceptional cases, and if the author is
-prepared to cover the extra cost for color reproduction, are colored
-pictures accepted. Colored pictures are welcome in the electronic
-version free of charge. If you send colored figures that are to be
-printed in black and white, please make sure that they really are
-legible in black and white. Some colors as well as the contrast of
-converted colors show up very poorly when printed in black and white.
+The function is used to create an action to a notification, so the user can call the friend directly from the notification. It is also used to call and sms from the list, under a person. 
+The code is strong inspired of the code from [ref].\\
 
-\subsection{Formulas}
 
-Displayed equations or formulas are centered and set on a separate
-line (with an extra line or halfline space above and below). Displayed
-expressions should be numbered for reference. The numbers should be
-consecutive within each section or within the contribution,
-with numbers enclosed in parentheses and set on the right margin --
-which is the default if you use the \emph{equation} environment, e.g.,
-\begin{equation}
-  \psi (u) = \int_{o}^{T} \left[\frac{1}{2}
-  \left(\Lambda_{o}^{-1} u,u\right) + N^{\ast} (-u)\right] dt \;  .
-\end{equation}
+To give a sense on how some of the functions work together, we have made some sequence diagrams, to show the flow. These diagrams is [ref]\\ 
 
-Equations should be punctuated in the same way as ordinary
-text but with a small space before the end punctuation mark.
+For the app we used the following libraries: Paho MQTT[ref], Sothee Sliding up panel[ref]
 
-\subsection{Footnotes}
 
-The superscript numeral used to refer to a footnote appears in the text
-either directly after the word to be discussed or -- in relation to a
-phrase or a sentence -- following the punctuation sign (comma,
-semicolon, or period). Footnotes should appear at the bottom of
-the
-normal text area, with a line of about 2~cm set
-immediately above them.\footnote{The footnote numeral is set flush left
-and the text follows with the usual word spacing.}
+\subsection{Backend (RabbitMQ and Flask)}
+The Python web server is running a simple Flask[ref] script which can be queried with an email and then returns a list of predetermined friends in JSON format, we decided to use these tools because they allowed us to quickly set up a “mock” backend for the app to communicate with. While testing the app among a number of users, we simply modified the script to return a number of their chosen friends based on their email.\\
 
-\subsection{Program Code}
+The RabbitMQ is responsible for acting as a message queue for relaying the messages between devices running the app. The protocol used for the messages is MQTT, which was chosen because it’s lightweight in terms of code footprint and network bandwidth. The message queue use the notion of “topics”, so each message is broadcast on a topic, which in our case is the email of the user and the latitude and longitude of their location reduced to 2 decimal places. This reduces the number of updates received by the app since you do not receive an update from a friend if your location is not the same as theirs to 2 decimal places. In hindsight this could also be implemented server-side where the server compared the last location with all friends, and only relayed it if they were within radius of each other.
 
-Program listings or program commands in the text are normally set in
-typewriter font, e.g., CMTT10 or Courier.
+ 
+\section{Related works}
+\textbf{Find My Friends \& Buddies by Sygic - FMFB (updated 2014, Google Play, free)}\\
+This is an app for locating your friends in real-time much like our app. What is different is the built-in minimum radius our app has, thus you are not able to see your friends location at all times. Furthermore FMFB allows you to see the movement of your friends for the last week, this is intrusive in our opinion and we do not allow that.\\
 
-\medskip
+\textbf{Family Locator by Life360 (updated 2015, Google Play, Free)}\\
+Family Locator is similar to our app in the sense that it allows you to see the location of other people, the way ours differ is that their solution are marketed to families or more precisely parents who want to get updated on their children's location, and thus they are also able to see their positions at all times. 
 
-\noindent
-{\it Example of a Computer Program}
-\begin{verbatim}
-program Inflation (Output)
-  {Assuming annual inflation rates of 7%, 8%, and 10%,...
-   years};
-   const
-     MaxYears = 10;
-   var
-     Year: 0..MaxYears;
-     Factor1, Factor2, Factor3: Real;
-   begin
-     Year := 0;
-     Factor1 := 1.0; Factor2 := 1.0; Factor3 := 1.0;
-     WriteLn('Year  7% 8% 10%'); WriteLn;
-     repeat
-       Year := Year + 1;
-       Factor1 := Factor1 * 1.07;
-       Factor2 := Factor2 * 1.08;
-       Factor3 := Factor3 * 1.10;
-       WriteLn(Year:5,Factor1:7:3,Factor2:7:3,Factor3:7:3)
-     until Year = MaxYears
-end.
-\end{verbatim}
-%
-\noindent
-{\small (Example from Jensen K., Wirth N. (1991) Pascal user manual and
-report. Springer, New York)}
 
-\subsection{Citations}
+\section{Evaluation}
+\subsection*{Quick \& dirty}
 
-For citations in the text please use
-square brackets and consecutive numbers: \cite{jour}, \cite{lncschap},
-\cite{proceeding1} -- provided automatically
-by \LaTeX 's \verb|\cite| \dots\verb|\bibitem| mechanism.
+\subsection*{Think aloud}
+We conducted the Think aloud feedback session because we wanted to assess the usability of our design. The session was conducted on our hi-fi prototype in an outdoors context to simulate a natural situation our app might be used in.\\
 
-\subsection{Page Numbering and Running Heads}
+We  have defined the following tasks for our prototypes:\\
+\begin{itemize}
+\item Can the user track and find a friend? 
+\item Can the user turn on/off location broadcasts? 
+\item Can the user track a friend from a notification?
+\item Can the user message/call/nudge a friend from a notification?
+\item Can the user asses the distance from a given user?
+\end{itemize}
 
-There is no need to include page numbers. If your paper title is too
-long to serve as a running head, it will be shortened. Your suggestion
-as to how to shorten it would be most welcome.
 
-\section{LNCS Online}
 
-The online version of the volume will be available in LNCS Online.
-Members of institutes subscribing to the Lecture Notes in Computer
-Science series have access to all the pdfs of all the online
-publications. Non-subscribers can only read as far as the abstracts. If
-they try to go beyond this point, they are automatically asked, whether
-they would like to order the pdf, and are given instructions as to how
-to do so.
 
-Please note that, if your email address is given in your paper,
-it will also be included in the meta data of the online version.
-
-\section{BibTeX Entries}
-
-The correct BibTeX entries for the Lecture Notes in Computer Science
-volumes can be found at the following Website shortly after the
-publication of the book:
-\url{http://www.informatik.uni-trier.de/~ley/db/journals/lncs.html}
-
-\subsubsection*{Acknowledgments.} The heading should be treated as a
-subsubsection heading and should not be assigned a number.
-
-\section{The References Section}\label{references}
-
-In order to permit cross referencing within LNCS-Online, and eventually
-between different publishers and their online databases, LNCS will,
-from now on, be standardizing the format of the references. This new
-feature will increase the visibility of publications and facilitate
-academic research considerably. Please base your references on the
-examples below. References that don't adhere to this style will be
-reformatted by Springer. You should therefore check your references
-thoroughly when you receive the final pdf of your paper.
-The reference section must be complete. You may not omit references.
-Instructions as to where to find a fuller version of the references are
-not permissible.
-
-We only accept references written using the latin alphabet. If the title
-of the book you are referring to is in Russian or Chinese, then please write
-(in Russian) or (in Chinese) at the end of the transcript or translation
-of the title.
-
-The following section shows a sample reference list with entries for
-journal articles \cite{jour}, an LNCS chapter \cite{lncschap}, a book
-\cite{book}, proceedings without editors \cite{proceeding1} and
-\cite{proceeding2}, as well as a URL \cite{url}.
-Please note that proceedings published in LNCS are not cited with their
-full titles, but with their acronyms!
+\section{Result}
+\section{Discussion}
+\section{Future work}
+\section{Conclusions}
 
 \begin{thebibliography}{4}
 
@@ -426,14 +260,55 @@ Integration. Technical report, Global Grid Forum (2002)
 \end{thebibliography}
 
 
-\section*{Appendix: Springer-Author Discount}
+\section*{Appendixes}
 
-LNCS authors are entitled to a 33.3\% discount off all Springer
-publications. Before placing an order, the author should send an email, 
-giving full details of his or her Springer publication,
-to \url{orders-HD-individuals@springer.com} to obtain a so-called token. This token is a
-number, which must be entered when placing an order via the Internet, in
-order to obtain the discount.
+\subsection*{Heuristic evaluation}
+In the last iteration we have evaluated the app using the Nielsen heuristics[ref].
+We have tested the interface independently using two evaluators.\\
+
+
+\begin{enumerate}
+  \item \textbf{Visibility of system status}\\
+  Our app keeps the user informed about the status of the app, through visual cues and Android Toast messages, however currently two things can be improved in the app regarding system status:
+  \begin{enumerate}
+    \item \textbf{Broadcast toggling}\\
+    Right now the broadcast icon simply changes when toggling broadcasting, this could be improved further by using a Toast and maybe a more visual approach than the icon changes we use now, like adding a small animation to the icon change when touched, providing a sort of tactile feedback to the user.
+    
+    \item \textbf{Connectivity problems}\\
+    The user can be notified of connectivity problems using Toasts and visual cues. 
+We previously used a toast when failing to connect, but it was simply annoying rather than informative if a Toast pop-up every few seconds, telling the user it can’t connect. A timeout could be added, so it can only pop-up once every 5 minutes for example, even better a visual effect could be added so the user is constantly aware of the connectivity of the app, perhaps change the opacity of the screen or make it black and white with a visual indicator that it’s reconnecting.  
+  \end{enumerate}
+  \item \textbf{Match between system and the real world
+}\\
+Our app provides the user with system information in a clear, non-domain specific language. For example if the user tries to call the friend from the app and it can’t find the number it simple says \\
+"Number not found. Can't make the call!".\\
+This also happens with SMS and nudge.
+  \item \textbf{User control and freedom}\\
+  The sliding up bar can perhaps be activated by mistake, an icon with arrows facing up when slid down and down when slid up, could perhaps make the affordance more clear.
+  \item \textbf{Consistency and standards}\\
+  For the most, we using platform standards for our function. Some examples is the call and SMS functions. Here we used standard icons for these functions. 
+As mentioned earlier in the Think-aloud evaluation, we need to change the icon for the broadcast button. The suggested solution is also more platform standardized than the current icon. \\
+This could also been the case with the nudge function. The current icon is chosen so it’s not the same as the facebook nudge in order to avoid that the user thinks it’s the real facebook nudge function. But maybe there could be developed a even better and more clear icon than the current.
+\item \textbf{Error prevention}\\
+MANGLER
+\item \textbf{Recognition rather than recall}\\
+The only thing our user has to recall, is where he can slide up the friend list and where he can make a call/SMS/nudge to a friend. There isn’t any straightforward solution to make it recognizable, without an error prevention problem occurs.
+\item \textbf{Flexibility and efficiency of use}\\
+In our apps current state we have no accelerators of any kind, however it would be ideal to add an accelerator for the marker of a friend so it automatically opens up the friend list with the given friends menu expanded, this would reduce the number of taps needed to access the friend functions and reduce the cognitive load of locating the friend in the list.
+\item \textbf{Aesthetic and minimalist design
+}\\
+Our design is very minimalistic, so it’s quite easy to use. The reason for this is of cause partly to the vertical approach. 
+Aesthetic wise we have some way to go. We need to make it more flat design so it complies with Android's material design patterns.
+We decided to make the options for each friend in the friend list collapsable, as to not make it compete with other information on the screen.
+\item \textbf{Help user to recognize, diagnose and recover from error}\\
+MANGLER!!!
+\item \textbf{Help and documentation}\\
+We haven’t any help or documentation for the user at this moment. It would be ideal to make a guided tour of the app first time using it, to introduce the basic features of the app. 
+
+
+\end{enumerate}
+
+
 \subsection*{Sourcecode}
 \lstset{numbers=left,
 tabsize=2, numbersep=10pt,

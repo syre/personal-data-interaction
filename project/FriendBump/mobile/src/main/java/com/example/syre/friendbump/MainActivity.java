@@ -649,12 +649,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 Log.d("nudgeNotification", "nudgeNotificationContentText = " + nudgeNotificationContentText);
                 Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-                /*
-                NotificationCompat.BigTextStyle bigText = new NotificationCompat.BigTextStyle();
-                bigText.bigText(nudgeNotificationContentText);
-                bigText.setBigContentTitle(nudgeNotificationTitle);
-                bigText.setSummaryText("");
-                */
                 mBuilder.setContentText(nudgeNotificationContentText);
                 mBuilder.setContentTitle(nudgeNotificationTitle)
 
@@ -719,7 +713,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     mBuilder.setContentTitle(friendNotificationTitle);
 
                     String number = getNumber(areaFriendHashMap.get(email).getName());
-                    if (number != "NULL") {
+                    if (number != null) {
                         callIntent.setData(Uri.parse("tel:" + number));
                         PendingIntent callPendingIntent = PendingIntent.getActivity(this, 0, callIntent, 0);
 
@@ -781,7 +775,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
         int indexName = people.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
         int indexNumber = people.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-        String resultNumber = "NULL";
+        String resultNumber = null;
         people.moveToFirst();
         do {
             String name = people.getString(indexName);
