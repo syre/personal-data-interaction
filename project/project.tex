@@ -34,6 +34,12 @@
 \usepackage{xcolor}
 \usepackage{textcomp}
 
+\usepackage{selinput}
+\SelectInputMappings{   % Semi-automatic determination
+               % of input encoding
+  oslash={ø},           % by a list of selected glyphs
+	              % see: http://partners.adobe.com/public/developer/en/opentype/glyphlist.txt
+}
 
 
 \begin{document}
@@ -52,7 +58,7 @@
 % their surnames. This ensures that the names appear correctly in
 % the running heads and the author index.
 %
-\author{Søren Howe Gersager \and Anders Lønberg Rahbek}
+\author{S\o ren Howe Gersager \and Anders L\o nberg Rahbek}
 %
 \authorrunning{Project in Personal Data Interaction: FriendBump}
 % (feature abused for this document to repeat the title also on left hand pages)
