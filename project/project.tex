@@ -146,27 +146,27 @@ We decided that our hi-fi prototype should be more vertical slice than the lo-fi
 
 From some quick \& dirty and talk aloud evaluation, we made some changes and removed/added some things. 
 
-What we changed: 
-\begin{itemize}
-\item Button to toggle broadcast on and off
+\textbf{What we changed:}\begin{itemize}
+\item Button to toggle broadcast on and off\\
 We found out, that people didn’t understood the first icon (top-left icon on figure 1), so we found another icon based on suggestions from evaluation. \\
 
 
-What we removed:
+\textbf{What we removed:}
 \item Updates from network\\
 We removed this to make out prototype more vertical and because it was in general a little out of our scope. It was a nice feature but nothing more. \\
 
 \item Text-field\\
 We removed the text-field which told the user how many friend there was near him. The user can manage to count some few friend, and the other case with many friend, we found a possible solution using visualization (See section ). \\
 
-What we added: 
-\item bla bla :P \\
+\textbf{What we added:}
+\item Call and SMS button \\
+We added two buttons: a call button and a SMS button, so the user could call/SMS a friend directly from the app. 
+
+\end{itemize}
+
 After further development and quick \& dirty, we changed the button to toggle the broadcast on and off and added a nudge button. We also removed updates from social networks. See figure 2 and hi-fi. 
 
 The result can be viewed on figure 4. 
-
-
-\end{itemize}
 
 \section{Implementation}
 Our implementation is divided into two parts: the already mentioned app and a backend server. The backend is composed of a python webserver and a RabbitMQ server\cite{rabbitmq}. \\
@@ -186,7 +186,7 @@ The function drawing the bitmap to the marker is taken from Stack Overflow\cite{
 The getNumber function, tries to find a telephone number based on a name. It iterate through the mobiles phonebook and return the number if it finds the name, null otherwise. \\
 
 The function is used to create an action to a notification, so the user can call the friend directly from the notification. It is also used to call and sms from the list, under a person. 
-The code is strong inspired of the code from [ref].\\
+The code is strong inspired of the code from \cite{number}.\\
 
 
 To give a sense on how some of the functions work together, we have made some sequence diagrams, to show the flow. These diagrams is [ref]\\ 
@@ -240,6 +240,7 @@ Due to our "improvised" backend, for calling and texting a friend, the app makes
 \bibitem{ninja} NinjaMock - Mockup tool: URL \url{http://ninjamock.com}
 \bibitem{rabbitmq} RabbitMQ - Message Queue Server: URL \url{http://www.rabbitmq.com/}
 \bibitem{heuristics}Nielsen, J., and R. Molich. “Heuristic Evaluation of User Interfaces.” SIGCHI Bulletin (1990): 249–256. Print.
+\bibitem{number} Search for number in phonebook by name: URL \url{http://stackoverflow.com/questions/18201108/getting-number-and-names-of-contacts-in-android}
 % bibliography examples:
 
 %\bibitem{proceeding2} Foster, I., Kesselman, C., Nick, J., Tuecke, S.: The Physiology of the
