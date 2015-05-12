@@ -212,20 +212,57 @@ Family Locator is similar to our app in the sense that it allows you to see the 
 
 \section{Evaluation}
 \subsection*{Quick \& dirty}
+As quick \& dirty typically is a formative evaluation method, we used it to help us early in the design phase.  Our fellow students helped us with by look and try our mockups. 
 
 \subsection*{Think aloud}
 We conducted the Think aloud feedback session because we wanted to assess the usability of our design. The session was conducted on our hi-fi prototype in an outdoors context to simulate a natural situation our app might be used in.\\
-
-We  have defined the following tasks for our prototypes:\\
+We conducted it with an indirect observation technique, where we recorded what the evaluator said. See the transcript of the record on page \pageref{transcript}. 
+We  have defined the following tasks for our prototypes:
 \begin{itemize}
 \item Can the user track and find a friend? 
 \item Can the user turn on/off location broadcasts? 
 \item Can the user track a friend from a notification?
-\item Can the user message/call/nudge a friend from a notification?
+\item Can the user SMS/call/nudge a friend from the app?
+\item Can the user call a friend from a notification?
 \item Can the user asses the distance from a given user?
 \end{itemize}
+The result of the Think aloud evaluation can be found section \ref{result}. 
+\subsection*{Heuristic}
+We did a heuristic evaluation on the hi-fi prototype. A fully description of the evaluation and it's fully result, can be found on page \pageref{heuristic}. \\
+An summery of the result can be found in section \ref{result}.
+\section{Result}\label{result}
+\subsection*{Quick \& dirty}
 
-\section{Result}
+
+\subsection*{Think aloud}
+From the recorded evaluation (see transcript on page \pageref{transcript}), we got the following result on the question from the latter section:
+\begin{itemize}
+\item \textbf{Can the user track and find a friend?}\\
+	Yes, there was no problem with this. 
+\item \textbf{Can the user turn on/off location broadcasts?}\\
+	No. The evaluator thought, that the icon for the button to toggle the broadcast, was an icon for sound (probably a speaker icon). This is a clear indication, that we need another icon, which is better to show its purpose. \\
+	Our evaluator suggested that we could use the same icon as the Facebook Messenger app uses, to turn geolocation on and off. We think it's a good idea to try. 
+\item \textbf{Can the user track a friend from a notification?}\\
+	Yes, there was no problem with this.
+\item \textbf{Can the user make a SMS/call/nudge from the app?}\\
+	Yes, there was no problem with this.
+\item \textbf{Can the user call a friend from a notification?}\\
+	No, the evaluator had some problems with this. He couldn't expand the notification so the call-action button became visible. 
+As the evaluator isn't used to Android (he is an iPhone user) we think this is the reason. When we showed him how to do, he agreed that a regular Android user wouldn't have this problem. 
+\item \textbf{Can the user asses the distance from a given user?}\\
+	Yes, there was no problem with this. 
+\end{itemize}
+
+\subsection*{Heuristic}
+We did a heuristic evaluation (see page \pageref{heuristic}) and the following is a very short and compact summery of the findings from the evaluation. To see the fully result, see page \pageref{heuristic}. \\
+
+Our app is generally very simple and easy to use for the user. Although we need more of the following:
+\begin{itemize}
+\item More Toasts to give the user feedback
+\item Other icons for certain buttons (already mentioned i Think aloud evaluation)
+\item The app need to comply more with Androids material design patterns. 
+\item Help to recover from error is needed (thus not critical) and help with the use of the app in general.  
+\end{itemize}
 \section{Discussion}
 We would like to have used at least five evaluators for the heuristic evaluation as a larger number of evaluators finds more usability problems as J. Nielsen and R. Molic (1990) found.\cite{heuristics}
 Due to our "improvised" backend, for calling and texting a friend, the app makes the assumption that the friend is located in the phone book with the same name it receives from the backend. 
@@ -256,7 +293,7 @@ Due to our "improvised" backend, for calling and texting a friend, the app makes
 
 \section*{Appendix}
 
-\subsection*{Transcript of summative think aloud evaluation}
+\subsection*{Transcript of summative think aloud evaluation}\label{transcript}
 The following \textit{in italic} is the transcript of the recordings of what the evaluator has "thought". The question/task that the observer has given the evaluator, is the following bulletpoints. 
 
 It's worth mentioned that the evaluator were used to use  an iPhone and not Android. \\
@@ -299,7 +336,7 @@ The evaluator is from now on denoted 'E'. \\
 		
 \end{enumerate}
 
-\subsection*{Heuristic evaluation}
+\subsection*{Heuristic evaluation} \label{heuristic}
 In the last iteration we have evaluated the app using the Nielsen heuristics[ref].
 
 We have tested the interface independently using two evaluators, below is a summary of the issues found.\\
@@ -371,6 +408,7 @@ We haven’t any help or documentation for the user at this moment. It would be 
 \caption{lo-fi prototype iteration 3, panel expanded}
 \includegraphics[width=0.6\textwidth]{figures/lo-fi-1}
 \end{figure}
+
 
 \subsection*{Sourcecode}
 \lstset{numbers=left,
