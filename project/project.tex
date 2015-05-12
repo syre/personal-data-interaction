@@ -117,12 +117,12 @@ Also we figured the user should be able to disable broadcasts temporarily, becau
 Our design methods is divided into two overall parts: a low-fi prototype which is is developed based on an initial user story map and done with mock-ups, and a hi-fi prototype, an Android app. The hi-fi prototype is based on the low-fi prototype. \\
 
 \subsection{Low-fi prototype}
-We wanted to create a fixed-path prototype, which allowed for interaction by users early as explained in \cite{prototyping}. As a low-fi we used a mockup tool \cite{ninja}. The choice of this were to make it quick, but intuitive for our fellow students to understand, and thus give us better feedback. \\
+We wanted to create a fixed-path prototype, which allowed for interaction by users early as explained in \cite{prototyping}. We used an online wireframe mockup tool\cite{ninja}, this allowed us to quickly sketch out designs for validation. \\
 
-We wanted to make the design as simple and direct as possible. The features we wanted, should be right at the fingertips, so you shouldn’t have to tap many times to get to the wanted function. 
-We wanted the following: 
+
+We wanted the following features for our first prototype: 
 \begin{itemize}
-  	\item A map to see where our friends are 
+  \item A map to see where our friends are 
 	\item A list with those friends to give the user a better overview over these friends. 
 	\item A text-field which told the user how many friends that’s near him
 	\item Markers in form of profile image from a social network
@@ -132,24 +132,22 @@ We wanted the following:
 	\item A button to toggle the broadcast on and off\\ 
 \end{itemize}
 
-All this is shown in figure 1. 
+Because our number of features were relatively modest, we wanted to minimize the number of touches and taps you'd have to do to get to a wanted feature. These features are sketched in figure 1.
 
-As functions we needed to could choose a friend, and then could call and sms this friend as well getting navigation to the friend - see figure 2. 
+We found out through feedback that calling and texting a friend in-app as well as navigating to him was a wanted feature, this can be seen in figure 2. 
 
-First were the list always visible (non-slide) but after a quick \& dirty evaluation (see evaluation), we changed it to a slide-list. This was to make the map bigger for the user, which is very important when it’s on a small screen - see figure 3. 
+In the early prototypes the friend list was always visible (non-slide) for accessing it quickly, but after a quick \& dirty evaluation (see evaluation), we changed it to a slide up panel. This was to increase the size of the map for the user, which is very important when the "screen real estate" is limited, this design can be seen in figure 3.
 
 \subsection{Hi-fi prototype}
 
-As the hi-fi prototype is based on the low-fi, we implemented the design from low-fi with the changes we mentioned last in latter subsection. 
+As the hi-fi prototype is based on the low-fi, we implemented the design from the last low-fi prototype. 
 
-We decided that our hi-fi prototype should be more vertical slice than the lo-fi, and thus focusing on making it show friends on a map, instead of including non-essential features. 
+We decided that our hi-fi prototype should be more vertical slice than the lo-fi, and thus focus on the primary feature of showing friends on a map, instead of including non-essential features. 
 
-From some quick \& dirty and talk aloud evaluation, we made some changes and removed/added some things. 
-
+From a quick \& dirty and talk aloud evaluation, we made the following changes and additions:
 \textbf{What we changed:}\begin{itemize}
 \item Button to toggle broadcast on and off\\
-We found out, that people didn’t understood the first icon (top-left icon on figure 1), so we found another icon based on suggestions from evaluation. \\
-
+We found out, that people didn’t understand the first icon (top-left icon on figure 1), so we found another icon based on suggestions from evaluation. \\
 
 \textbf{What we removed:}
 \item Updates from network\\
