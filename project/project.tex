@@ -132,7 +132,7 @@ We wanted the following features for our first prototype:
 	\item A button to toggle the broadcast on and off\\ 
 \end{itemize}
 
-Because our number of features were relatively modest, we wanted to minimize the number of touches and taps you'd have to do to get to a wanted feature. These features are sketched in figure 1.
+Because our number of features were relatively modest, we tried to minimize the number of touches and taps you'd have to do to get to a wanted feature. These features are sketched in figure 1.
 
 We found out through feedback that calling and texting a friend in-app as well as navigating to him was a wanted feature, this can be seen in figure 2. 
 
@@ -147,7 +147,7 @@ We decided that our hi-fi prototype should be more vertical slice than the lo-fi
 From a quick \& dirty and talk aloud evaluation, we made the following changes and additions:
 \textbf{What we changed:}\begin{itemize}
 \item Button to toggle broadcast on and off\\
-We found out, that people didn’t understand the first icon (top-left icon on figure 1), so we found another icon based on suggestions from evaluation. \\
+We found out, that people didn’t understand the first broadcast icon tried to convey (top-left icon on figure 1), so we found another icon based on suggestions from evaluation. \\
 
 \textbf{What we removed:}
 \item Updates from network\\
@@ -223,40 +223,33 @@ We  have defined the following tasks for our prototypes:
 \end{itemize}
 The result of the Think aloud evaluation can be found section \ref{result}. 
 \subsection*{Heuristic}
-We did a heuristic evaluation on the hi-fi prototype. A fully description of the evaluation and it's fully result, can be found on page \pageref{heuristic}. \\
-An summery of the result can be found in section \ref{result}.
+We did a heuristic evaluation on the hi-fi prototype. A fully description of the evaluation and its result, can be found on page \pageref{heuristic}. \\
+An summary of the result can be found in section \ref{result}.
 \section{Result}\label{result}
 \subsection*{Quick \& dirty}
 
 
 \subsection*{Think aloud}
-From the recorded evaluation (see transcript on page \pageref{transcript}), we got the following result on the question from the latter section:
+From the recorded evaluation (see transcript on page \pageref{transcript}), we identified the following usability problems:
 \begin{itemize}
-\item \textbf{Can the user track and find a friend?}\\
-	Yes, there was no problem with this. 
 \item \textbf{Can the user turn on/off location broadcasts?}\\
-	No. The evaluator thought, that the icon for the button to toggle the broadcast, was an icon for sound (probably a speaker icon). This is a clear indication, that we need another icon, which is better to show its purpose. \\
-	Our evaluator suggested that we could use the same icon as the Facebook Messenger app uses, to turn geolocation on and off. We think it's a good idea to try. 
-\item \textbf{Can the user track a friend from a notification?}\\
-	Yes, there was no problem with this.
-\item \textbf{Can the user make a SMS/call/nudge from the app?}\\
-	Yes, there was no problem with this.
+	The user thought the button icon for the button toggling the broadcast, was an icon for sound (probably a speaker icon). This is a clear indication, that we need another icon for conveying broadcasting. \\
+	Our user suggested that we could use the same icon as the Facebook Messenger app uses, to turn geolocation on and off, we think it's a reasonable idea. 
 \item \textbf{Can the user call a friend from a notification?}\\
-	No, the evaluator had some problems with this. He couldn't expand the notification so the call-action button became visible. 
-As the evaluator isn't used to Android (he is an iPhone user) we think this is the reason. When we showed him how to do, he agreed that a regular Android user wouldn't have this problem. 
-\item \textbf{Can the user asses the distance from a given user?}\\
-	Yes, there was no problem with this. 
+	The user had some problems with this. He couldn't expand the notification so the call-action button became visible. 
+As the notion of expanding a notification is specific for Android, and our user is an iPhone user, we suspect this could be the reason for his confusion, but we can't know for sure.
 \end{itemize}
 
 \subsection*{Heuristic}
-We did a heuristic evaluation (see page \pageref{heuristic}) and the following is a very short and compact summery of the findings from the evaluation. To see the fully result, see page \pageref{heuristic}. \\
+We did a summative heuristic evaluation (see page \pageref{heuristic}) and the following is short summary of the findings: \\
 
-Our app is generally very simple and easy to use for the user. Although we need more of the following:
+We found the app met some of the criteria of the heuristics. Although we found our app lacking in the following sections:
 \begin{itemize}
-\item More Toasts to give the user feedback
-\item Other icons for certain buttons (already mentioned i Think aloud evaluation)
-\item The app need to comply more with Androids material design patterns. 
-\item Help to recover from error is needed (thus not critical) and help with the use of the app in general.  
+\item Better feedback with toasts and a visual indicator for connectivity
+\item Other icons for certain buttons (already mentioned in Think aloud evaluation)
+\item Compliance with design guidelines for the Android platform
+\item Accelerators on the markers for showing options for a given friend.
+\item Help to recover from error is needed and help with the use of the app in general.
 \end{itemize}
 \section{Discussion}
 We would like to have used at least five evaluators for the heuristic evaluation as a larger number of evaluators finds more usability problems as J. Nielsen and R. Molic (1990) found.\cite{heuristics}
@@ -337,8 +330,6 @@ In the last iteration we have evaluated the app using the Nielsen heuristics[ref
 
 We have tested the interface independently using two evaluators, below is a summary of the issues found.\\
 
-
-
 \begin{enumerate}
   \item \textbf{Visibility of system status}\\
   Our app keeps the user informed about the status of the app, through visual cues and Android Toast messages, however currently two things can be improved in the app regarding system status:
@@ -369,15 +360,13 @@ The only thing our user has to recall, is where he can slide up the friend list 
 In our apps current state we have no accelerators of any kind, however it would be ideal to add an accelerator for the marker of a friend so it automatically opens up the friend list with the given friends menu expanded, this would reduce the number of taps needed to access the friend functions and reduce the cognitive load of locating the friend in the list.
 \item \textbf{Aesthetic and minimalist design
 }\\
-Our design is very minimalistic, so it’s quite easy to use. The reason for this is of cause partly to the vertical approach. 
+Our design is very minimalistic, the reason for this is partly because of the vertical approach. 
 Aesthetic wise we have some way to go. We need to make it more flat design so it complies with Android's material design patterns.
-We decided to make the options for each friend in the friend list collapsable, as to not make it compete with other information on the screen.
+We decided to make the call, text and nudge options for each friend in the friend list collapsable, as to not make it compete with other information on the screen and create an excess of buttons shown simultaneously.
 \item \textbf{Help user to recognize, diagnose and recover from error}\\
 While our feedback messages indicate the problems in plain language, they lack suggesting a solution, for example "Number not found. Can't make the call" could express that the contacts number needs to be added.
 \item \textbf{Help and documentation}\\
 We haven’t any help or documentation for the user at this moment. It would be ideal to make a guided tour of the app first time using it, to introduce the basic features of the app. 
-
-
 \end{enumerate}
 
 
