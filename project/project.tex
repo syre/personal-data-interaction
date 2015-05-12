@@ -87,8 +87,7 @@
 The abstract should summarize the contents of the paper and should
 contain at least 70 and at most 150 words. It should be written using the
 \emph{abstract} environment.
-\keywords{We would like to encourage you to list your keywords within
-the abstract section}
+\keywords{geolocation·android·prototyping·app}
 \end{abstract}
 
 
@@ -109,18 +108,13 @@ We start with related works to describe how our app differs from other similar s
 We analyse our problem further and then describe our design for the app. We evaluate the design, after describing the implementation. \\
 Finally we go through our results and discuss them. Last, some remarks for possible future work on the app and a conclusion. 
 
-
-
 \section{Analysis}
 As the problem is, that you don’t know if a friend is nearby, the immediate solution would be to continuously broadcast your your location to your friends.
 However we have to factor in privacy and avoid giving the users the feeling of being spied on, people will probably not use a solution that allows everyone to see their location at all times.\\
 Also we figured the user should be able to disable broadcasts temporarily, because there are times when you don't want to advise your location, like going to the doctors or on a date where you’d rather be incognito. 
 
-
 \section{Design}
 Our design methods is divided into two overall parts: a low-fi prototype which is is developed based on an initial user story map and done with mock-ups, and a hi-fi prototype, an Android app. The hi-fi prototype is based on the low-fi prototype. \\
-
-
 
 \subsection{Low-fi prototype}
 We wanted to create a fixed-path prototype, which allowed for interaction by users early as explained in \cite{prototyping}. As a low-fi we used a mockup tool \cite{ninja}. The choice of this were to make it quick, but intuitive for our fellow students to understand, and thus give us better feedback. \\
@@ -175,19 +169,18 @@ After further development and quick \& dirty, we changed the button to toggle th
 The result can be viewed on figure 4. 
 
 \section{Implementation}
-Our implementation is divided into two parts: the already mentioned app and a backend server. The backend is composed of a python webserver and a RabbitMQ server[ref]. \\
+Our implementation is divided into two parts: the already mentioned app and a backend server. The backend is composed of a python webserver and a RabbitMQ server\cite{rabbitmq}. \\
 We will in the following section describe these two parts and details regarding them. 
 
 \subsection{Android app}
 Our activity has several functions, which are for communicating with the backend message-queue and common Android functionality. A table of these function and a short description, can be found in [ref] \\
-
-
 There are a couple of non-trivial functions, which we will describe in a bit more detail below.\\
 
 \underline{drawMarkerBitmap}\\
 This function creates a bitmap object containing the initials of the person on a round and red background, for example Anders Rahbek turns into AR.\\
 
 This is used to show an unique marker for a friend, thus the function is been called from “updateMarker” function. \\
+The function drawing the bitmap to the marker is taken from Stack Overflow\cite{bitmapstackoverflow}
 
 \underline{getNumber}\\
 The getNumber function, tries to find a telephone number based on a name. It iterate through the mobiles phonebook and return the number if it finds the name, null otherwise. \\
@@ -198,7 +191,7 @@ The code is strong inspired of the code from \cite{number}.\\
 
 To give a sense on how some of the functions work together, we have made some sequence diagrams, to show the flow. These diagrams is [ref]\\ 
 
-For the app we used the following libraries: Paho MQTT[ref], Sothee Sliding up panel[ref]
+For the app we used the following libraries: Paho MQTT\cite{paho}, Sothee Sliding up panel\cite{slidinguppanel}.
 
 
 \subsection{Backend (RabbitMQ and Flask)}
@@ -230,11 +223,10 @@ We  have defined the following tasks for our prototypes:\\
 \item Can the user asses the distance from a given user?
 \end{itemize}
 
-
-
-
 \section{Result}
 \section{Discussion}
+We would like to have used at least five evaluators for the heuristic evaluation as a larger number of evaluators finds more usability problems as J. Nielsen and R. Molic (1990) found.\cite{heuristics}
+Due to our "improvised" backend, for calling and texting a friend, the app makes the assumption that the friend is located in the phone book with the same name it receives from the backend. 
 \section{Future work}
 \section{Conclusions}
 
@@ -245,9 +237,9 @@ We  have defined the following tasks for our prototypes:\\
 \bibitem{slidinguppanel} Android Sliding Up Panel: Github \url{https://github.com/umano/AndroidSlidingUpPanel}
 \bibitem{nielsenheuristics}Refined heuristics of J. Nielsen: URL \url{http://www.nngroup.com/articles/ten-usability-heuristics/}
 \bibitem{bitmapstackoverflow} Drawing a bitmap on a marker: URL \url{http://stackoverflow.com/questions/18335642/how-to-draw-text-in-default-marker-of-google-map-v2}
-
 \bibitem{ninja} NinjaMock - Mockup tool: URL \url{http://ninjamock.com}
-
+\bibitem{rabbitmq} RabbitMQ - Message Queue Server: URL \url{http://www.rabbitmq.com/}
+\bibitem{heuristics}Nielsen, J., and R. Molich. “Heuristic Evaluation of User Interfaces.” SIGCHI Bulletin (1990): 249–256. Print.
 \bibitem{number} Search for number in phonebook by name: URL \url{http://stackoverflow.com/questions/18201108/getting-number-and-names-of-contacts-in-android}
 % bibliography examples:
 
@@ -291,7 +283,9 @@ The evaluator is from now on denoted 'E'. \\
 
 \subsection*{Heuristic evaluation}
 In the last iteration we have evaluated the app using the Nielsen heuristics[ref].
-We have tested the interface independently using two evaluators.\\
+
+We have tested the interface independently using two evaluators, below is a summary of the issues found.\\
+
 
 
 \begin{enumerate}
@@ -317,7 +311,7 @@ This also happens with SMS and nudge.
 As mentioned earlier in the Think-aloud evaluation, we need to change the icon for the broadcast button. The suggested solution is also more platform standardized than the current icon. \\
 This could also been the case with the nudge function. The current icon is chosen so it’s not the same as the facebook nudge in order to avoid that the user thinks it’s the real facebook nudge function. But maybe there could be developed a even better and more clear icon than the current.
 \item \textbf{Error prevention}\\
-MANGLER
+The calling or texting features in our app makes the assumption that the contact can be found with that precise name in the phone book, this is obviously an error-prone condition, this would not be an issue with a proper backend for handling user information.
 \item \textbf{Recognition rather than recall}\\
 The only thing our user has to recall, is where he can slide up the friend list and where he can make a call/SMS/nudge to a friend. There isn’t any straightforward solution to make it recognizable, without an error prevention problem occurs.
 \item \textbf{Flexibility and efficiency of use}\\
@@ -328,7 +322,7 @@ Our design is very minimalistic, so it’s quite easy to use. The reason for thi
 Aesthetic wise we have some way to go. We need to make it more flat design so it complies with Android's material design patterns.
 We decided to make the options for each friend in the friend list collapsable, as to not make it compete with other information on the screen.
 \item \textbf{Help user to recognize, diagnose and recover from error}\\
-MANGLER!!!
+While our feedback messages indicate the problems in plain language, they lack suggesting a solution, for example "Number not found. Can't make the call" could express that the contacts number needs to be added.
 \item \textbf{Help and documentation}\\
 We haven’t any help or documentation for the user at this moment. It would be ideal to make a guided tour of the app first time using it, to introduce the basic features of the app. 
 
