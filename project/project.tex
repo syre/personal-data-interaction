@@ -265,7 +265,8 @@ Our app is generally very simple and easy to use for the user. Although we need 
 \end{itemize}
 \section{Discussion}
 We would like to have used at least five evaluators for the heuristic evaluation as a larger number of evaluators finds more usability problems as J. Nielsen and R. Molic (1990) found.\cite{heuristics}
-Due to our "improvised" backend, for calling and texting a friend, the app makes the assumption that the friend is located in the phone book with the same name it receives from the backend. 
+Due to our "improvised" backend, for calling and texting a friend, the app makes the assumption that the friend is located in the phone book with the same name it receives from the backend.
+As mentioned in the backend section we cannot set the radius ourselves right now as it's based decimal representations on the latitude and longitudes of the users, this limitation can be corrected comparing the last known location of the sender in the backend and only relay the message if it's within a predefined range we can set.
 \section{Future work}
 \section{Conclusions}
 
@@ -301,38 +302,38 @@ It's worth mentioned that the evaluator were used to use  an iPhone and not Andr
 The evaluator is from now on denoted 'E'. \\
 \begin{enumerate}
 	\item \textbf{Track friend from notificaton}\\
-		{[} The notification arriving{]} \\
+		{[} Upon the notification arriving{]} \\
 		\textit{There is a notification...}\\
-		{[}E pressing the notification and asking what the task was, for confirming it.{]}\\
-		\textit{I can see S\o ren right next to me}\\
+		{[}E touch the notification and asked for confirmation on what the task was.{]}\\
+		\textit{I can see Søren right next to me}\\
 		
 	\item \textbf{Call a friend directly from a notification}\\
-		{[}The notification arriving{]} \\
-		\textit{There is a notification. S\o ren is near me. The come some information up, if I long-pressing on the notification}\\
+		{[}Upon the notification arriving{]} \\
+		\textit{There is a notification. Søren is near me. Some information appears, can i perhaps long-press the notification? No..}\\
 		
 		{[}E is stopping and don't know what to do.{]}\\
 	
 	\item \textbf{SMS a friend from the app}\\
 		{[}E has the app open from start{]}\\
-		\textit{I pull up the list. Find S\o ren, pressing the little SMS-icon}\\
+		\textit{I pull up the list. Find Søren, press the little SMS-icon}\\
 		{[}The default SMS app turns up{]}\\
 		\textit{And I'm writing a SMS}\\
 		
 	\item \textbf{Nudge a friend from the app}\\
 		{[}E has the app open from start{]}\\
-		\textit{I pull up the friend-list. Ehm... Pressing on S\o ren. Then the little finger-icon}\\
+		\textit{I pull up the friend-list. Ehm... Press on Søren. Then the little finger-icon}\\
 		
 	\item \textbf{Call a friend from the app}\\
 		{[}E has the app open from start{]}\\
-		\textit{I have the app in my hand. I pull up the friend-list. Pressing on S\o ren and pressing on the phone-icon}\\
+		\textit{I have the app in my hand. I pull up the friend-list. Press on Søren and press the phone-icon}\\
 		
 	\item \textbf{Read the distance to a friend, from the app}\\
 		{[}E has the app open from start{]}\\
-		\textit{I can see S\o ren on the map. I pull up the friend-list. And then I can see the he is approx. 22 meters away.}\\
+		\textit{I can see Søren on the map. I pull up the friend-list, I can see that he is approx. 22 meters away.}\\
 		
 	\item \textbf{Turn broadcast off}\\
 		{[}E has the app open from start{]}\\
-		\textit{I orient myself around in the app. I pull up the friend-list. Pull it down again. I'm pressing the icon in the upper-right corner. Pressing on the sound-icon... a few times. \\I don't know.}
+		\textit{I Explore the app a bit. I pull up the friend-list. Pull it down again. I'm pressing the icon in the upper-right corner, what does it do?, i press the sound-icon... a few times. \\I don't know.}
 		
 \end{enumerate}
 
