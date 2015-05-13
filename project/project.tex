@@ -102,7 +102,7 @@ Many of us has tried to go shopping, been to a conference or a concert, where yo
 
 This leaves us with the following problem definition: You don’t know when a friend is nearby but you would like to know in certain situations. \\
 
-This problem can be solved by a personal app, that allows you to  broadcasts your location to your friends and your friends location to you which enables you to quickly contact them when you are close to each other.\\
+This problem can be solved by a personal app, that allows you to  broadcasts your location to your friends and your friends location to you, which enables you to quickly contact them when you are close to each other.\\
 
 In this report we will describe the process of developing a prototype solution to solve this problem.
 We start with related works to describe how our app differs from other similar solutions in the market. 
@@ -110,15 +110,15 @@ We analyse our problem further and then describe our design for the app. We eval
 Finally we go through our results and discuss them. Last, some remarks for possible future work on the app and a conclusion. 
 
 \section{Analysis}
-As the problem is, that you don’t know if a friend is nearby, the immediate solution would be to continuously broadcast your your location to your friends.
-However we have to factor in privacy and avoid giving the users the feeling of being spied on, people will probably not use a solution that allows everyone to see their location at all times.\\
+As the problem is, that you don’t know if a friend is nearby, the immediate solution would be to continuously broadcast your location to your friends.
+However we have to factor in privacy and avoid giving the users the feeling of being spied on. People will probably not use a solution that allows everyone to see their location at all times.\\
 Also we figured the user should be able to disable broadcasts temporarily, because there are times when you don't want to advise your location, like going to the doctors or on a date where you’d rather be incognito. 
 
 \section{Design}
-Our design methods is divided into two overall parts: a low-fi prototype which is is developed based on an initial user story map and done with mock-ups, and a hi-fi prototype, an Android app. The hi-fi prototype is based on the low-fi prototype. \\
+Our design methods is divided into two overall parts: a lo-fi prototype which is is developed based on an initial user story map and done with mock-ups, and a hi-fi prototype, an Android app. The hi-fi prototype is based on the lo-fi prototype. 
 
-\subsection{Low-fi prototype}
-We wanted to create a fixed-path prototype, which allowed for interaction by users early as explained in \cite{prototyping}. We used an online wireframe mockup tool\cite{ninja}, this allowed us to quickly sketch out designs for validation. \\
+\subsection{Lo-fi prototype}
+We wanted to create a fixed-path prototype, which allowed for interaction by users early as explained in \cite{prototyping}. We used an online wireframe mockup tool\cite{ninja}, which allowed us to quickly sketch out designs for validation. \\
 
 
 We wanted the following features for our first prototype: 
@@ -126,52 +126,50 @@ We wanted the following features for our first prototype:
   \item A map to see where our friends are 
 	\item A list with those friends to give the user a better overview over these friends. 
 	\item A text-field which told the user how many friends that’s near him
-	\item Markers in form of profile image from a social network
 	\item An icon in the list, to show which network the friend is from
 	\item Distance to each of the friends
 	\item When (and maybe what) the friend has made an update on the particular social network.
 	\item A button to toggle the broadcast on and off\\ 
 \end{itemize}
 
-Because our number of features were relatively modest, we tried to minimize the number of touches and taps you'd have to do to get to a wanted feature. These features are sketched in figure 1.
+Because our number of features were relatively modest, we tried to minimize the number of touches and taps you'd have to do to get to a wanted feature. These features are sketched in figure \ref{fig:lo-fi-fixed-panel-simple-marker}.
 
-We found out through feedback that calling and texting a friend in-app as well as navigating to him was a wanted feature, this can be seen in figure 2. 
+We found out through feedback that calling and texting a friend in-app as well as navigating to him was a wanted feature. Also markers in form of profile image from a social network would help the user to visually find a friend quicker. This can be seen in figure \ref{fig:lo-fi-w.navigation}. 
 
-In the early prototypes the friend list was always visible (non-slide) for accessing it quickly, but after a quick \& dirty evaluation (see evaluation), we changed it to a slide up panel. This was to increase the size of the map for the user, which is very important when the "screen real estate" is limited, this design can be seen in figure 3.
+In the early prototypes the friend list was always visible (non-slide) (figure \ref{fig:lo-fi-fixed-panel}) for accessing it quickly, but after a quick \& dirty evaluation (see evaluation), we changed it to a slide up panel. This was to increase the size of the map for the user, which is very important when the "screen real estate" is limited. This design can be seen in figure \ref{fig:lo-fi-panel-collapsed}.
 
 \subsection{Hi-fi prototype}
 
-As the hi-fi prototype is based on the low-fi, we implemented the design from the last low-fi prototype. 
+As the hi-fi prototype is based on the lo-fi, we implemented the design from the last lo-fi prototype. 
 
 We decided that our hi-fi prototype should be more vertical slice than the lo-fi, and thus focus on the primary feature of showing friends on a map, instead of including non-essential features. 
 
 From a quick \& dirty and talk aloud evaluation, we made the following changes and additions:
 \textbf{What we changed:}\begin{itemize}
 \item Button to toggle broadcast on and off\\
-We found out, that people didn’t understand the first broadcast icon tried to convey (top-left icon on figure 1), so we found another icon based on suggestions from evaluation. \\
+We found out, that people didn’t understand the first broadcast icon tried to convey (top-left icon on figure \ref{fig:lo-fi-panel-collapsed}), so we found another icon based on suggestions from evaluation. \\
 
 \textbf{What we removed:}
 \item Updates from network\\
 We removed this to make out prototype more vertical and because it was in general a little out of our scope. It was a nice feature but nothing more. \\
 
 \item Text-field\\
-We removed the text-field which told the user how many friend there was near him. The user can manage to count some few friend, and the other case with many friend, we found a possible solution using visualization (See section ). \\
+We removed the text-field which told the user how many friend there was near him. The user can manage to count some few friend, and the other case with many friend, we found a possible solution using visualization (See section \ref{future-work}). \\
 
 \item Navigation\\
 We decided to remove in-app navigation, the feature which shows a proposed path when touching a marker. The reason for this was simply because it would be too timeconsuming to implement.
 
 \end{itemize}
 
-After further development and quick \& dirty, we changed the button to toggle the broadcast on and off and added a nudge button. We also removed updates from social networks. See figure 2 and hi-fi. 
-
-The result can be viewed on figure 4. 
+After further development and quick \& dirty, we changed the button to toggle the broadcast on and off and added a nudge button. \\
+See the result on figure \ref{fig:hi-fi app friendlist expanded} and \ref{fig:hi-fi app friendlist collapsed}. 
 
 \section{Implementation}
 Our implementation is divided into two parts: the already mentioned app and a backend server. The backend is composed of a python webserver and a RabbitMQ server\cite{rabbitmq}. \\
 We will in the following section describe these two parts and details regarding them. 
 
 \subsection{Android app}
-Our activity has several functions, which are for communicating with the backend message-queue and common Android functionality. A table of these function and a short description, can be found in [ref] \\
+Our activity has several functions, which are for communicating with the backend message-queue and common Android functionality. See the sourcecode starting from page \pageref{source-code}. \\
 There are a couple of non-trivial functions, which we will describe in a bit more detail below.\\
 
 \underline{drawMarkerBitmap}\\
@@ -276,7 +274,7 @@ We found the app met some of the criteria of the heuristics. Although we found o
 We would like to have used at least five evaluators for the heuristic evaluation as a larger number of evaluators finds more usability problems as J. Nielsen and R. Molic (1990) found.\cite{heuristics}\\
 Due to our "improvised" backend, for calling and texting a friend, the app makes the assumption that the friend is located in the phone book with the same name it receives from the backend.\\
 As mentioned in the backend section we cannot set the radius ourselves right now as it's based decimal representations on the latitude and longitudes of the users, this limitation can be corrected comparing the last known location of the sender in the backend and only relay the message if it's within a predefined range we can set.
-\section{Future work}
+\section{Future work} \label{future-work}
 From the feedback we received future work can be spent on taking the solution in several interesting directions.\\
 The solution could filter based on interests rather than friends, so an example could be if you're into skating or playing soccer, you can be notified when people who identify themselves as either type are present at the local soccerfield or skatepark.\\
 By integrating with social networks the solution could rank friends by communication and visualize that rank by a different color on the markers as right now only a single color is used.\\
@@ -515,7 +513,7 @@ We haven’t any help or documentation for the user at this moment. It would be 
 
 \newgeometry{left=1.5cm, right=1.5cm}
 
-\subsection*{Sourcecode}
+\subsection*{Sourcecode} \label{source-code}
 \lstset{numbers=left,
 tabsize=1, numbersep=10pt,
   title=\lstname }
