@@ -73,7 +73,8 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
             holder.name = (TextView) view.findViewById(R.id.friend_name);
             holder.profileImage = (ImageView) view.findViewById(R.id.friend_image);
             holder.distance = (TextView) view.findViewById(R.id.friend_distance);
-            holder.socialNetworkImage = (ImageView) view.findViewById(R.id.friend_social_network_image);
+            holder.socialNetworkImage =
+                    (ImageView) view.findViewById(R.id.friend_social_network_image);
             holder.toolbar = (TableRow) view.findViewById(R.id.toolbar_row);
             holder.toolbar.setTag(position);
             holder.phoneButton = (ImageView) view.findViewById(R.id.phone_button);
@@ -97,9 +98,12 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
         {
             Friend f = (Friend) list.get(position);
             holder.name.setText(f.getName());
-            holder.distance.setText(String.format("Approx. "+"%.2f",f.getDistance())+"m. away");
+            holder.distance.setText(String.format("Approx. "+"%.2f",f.
+                    getDistance())+"m. away");
 
-            holder.profileImage.setImageResource(res.getIdentifier("com.example.syre.friendbump:drawable/person_placeholder",null,null));
+            holder.profileImage.setImageResource(res
+                    .getIdentifier("com.example.syre.friendbump:" +
+                            "drawable/person_placeholder",null,null));
         }
         return view;
     }
@@ -111,35 +115,45 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
         {
         case R.id.chat_button:
             try {
-                String number = getNumber(list.get(position).toString());  // The number to send SMS to
+                String number =
+                        getNumber(list.get(position).toString()); // The number to send SMS to
                 if(!number.equals("NULL")) {
-                    activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", number, "")));
+                    activity.startActivity(new Intent(Intent.ACTION_VIEW,
+                            Uri.fromParts("sms", number, "")));
                 }
                 else
-                    Toast.makeText(activity.getApplicationContext(), "Number not found. Can't send a sms!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity.getApplicationContext(),
+                            "Number not found. Can't send a sms!",
+                            Toast.LENGTH_SHORT).show();
             }
             catch (Error error){
-                Toast.makeText(activity.getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity.getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
             }
             break;
 
         case R.id.nudge_button:
-            ((MainActivity)activity).sendNudgeMessage((Friend) list.get(position));//mainActivity.
+            ((MainActivity)activity).
+                    sendNudgeMessage((Friend) list.get(position));//mainActivity.
             break;
         case R.id.phone_button:
             String number = getNumber(list.get(position).toString());
             if(!number.equals("NULL")) {
                 try {
                     Intent callIntent = new Intent(Intent.ACTION_CALL);
-                    callIntent.setData(Uri.parse("tel:" + getNumber(list.get(position).toString())));
+                    callIntent.setData(Uri.parse("tel:" +
+                            getNumber(list.get(position).toString())));
                     activity.startActivity(callIntent);
                 } catch (ActivityNotFoundException activityException) {
-                    Toast.makeText(activity.getApplicationContext(), "Error!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity.getApplicationContext(),
+                            "Error!", Toast.LENGTH_SHORT).show();
                     Log.e("Calling a Phone Number", "Call failed", activityException);
                 }
             }
             else
-                Toast.makeText(activity.getApplicationContext(), "Number not found. Can't make the call!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity.getApplicationContext(),
+                        "Number not found. Can't make the call!",
+                        Toast.LENGTH_SHORT).show();
             break;
         default:
             break;
@@ -148,13 +162,17 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
     }
     public String getNumber(String qName) {
         Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
-        String[] projection = new String[]{ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+        String[] projection =
+                new String[]{ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
                 ContactsContract.CommonDataKinds.Phone.NUMBER};
 
-        Cursor people = activity.getContentResolver().query(uri, projection, null, null, null);
+        Cursor people = activity.getContentResolver()
+                .query(uri, projection, null, null, null);
 
-        int indexName = people.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-        int indexNumber = people.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+        int indexName = people.getColumnIndex(ContactsContract
+                .CommonDataKinds.Phone.DISPLAY_NAME);
+        int indexNumber = people.getColumnIndex(ContactsContract
+                .CommonDataKinds.Phone.NUMBER);
         String resultNumber = "NULL";
         people.moveToFirst();
         do {
@@ -191,14 +209,16 @@ public class FriendListAdapter extends BaseAdapter implements View.OnClickListen
             final TableRow toolbar = (TableRow)parent.findViewById(R.id.toolbar_row);
             if (toolbar.isShown())
             {
-                Animation out = AnimationUtils.makeOutAnimation(activity.getApplicationContext(), true);
+                Animation out = AnimationUtils.makeOutAnimation(activity
+                        .getApplicationContext(), true);
                 toolbar.startAnimation(out);
                 toolbar.setVisibility(View.GONE);
 
             }
             else
             {
-                Animation in = AnimationUtils.makeInAnimation(activity.getApplicationContext(), true);
+                Animation in = AnimationUtils.makeInAnimation(activity
+                        .getApplicationContext(), true);
                 toolbar.startAnimation(in);
                 toolbar.setVisibility(View.VISIBLE);
                 int position = (int)toolbar.getTag();
