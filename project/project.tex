@@ -268,16 +268,16 @@ We found the app met some of the criteria of the heuristics. Although we found o
 \item Better feedback with toasts and a visual indicator for connectivity
 \item Other icons for certain buttons (already mentioned in Think aloud evaluation)
 \item Compliance with design guidelines for the Android platform
-\item Accelerators on the markers for showing options for a given friend.
+\item Accelerators on the markers for quickly showing options for a given friend.
 \item Help to recover from error is needed and help with the use of the app in general.
 \end{itemize}
 \section{Discussion}
-We would like to have used at least five evaluators for the heuristic evaluation as a larger number of evaluators finds more usability problems as J. Nielsen and R. Molic (1990) found.\cite{heuristics}
-Due to our "improvised" backend, for calling and texting a friend, the app makes the assumption that the friend is located in the phone book with the same name it receives from the backend.
+We would like to have used at least five evaluators for the heuristic evaluation as a larger number of evaluators finds more usability problems as J. Nielsen and R. Molic (1990) found.\cite{heuristics}\\
+Due to our "improvised" backend, for calling and texting a friend, the app makes the assumption that the friend is located in the phone book with the same name it receives from the backend.\\
 As mentioned in the backend section we cannot set the radius ourselves right now as it's based decimal representations on the latitude and longitudes of the users, this limitation can be corrected comparing the last known location of the sender in the backend and only relay the message if it's within a predefined range we can set.
 \section{Future work}
 \section{Conclusions}
-
+We iteratively developed a solution for solving the problem of not being aware of when a friend is nearby. We developed a user story mapping and made a lo-fi prototype based on it. After several iterations of lo-fi prototyping we developed a hi-fi prototype as a proof of concept. We continuously validated the prototypes with feedback from quick \& dirty sessions, think-aloud evaluations and at the end a summative heuristic evaluation using the refined Nielsen heuristics\cite{nielsenheuristics}. From the heuristic evaluation we found a number of usability issues which can be worked on. 
 \begin{thebibliography}{4}
 
 \bibitem{prototyping} M. Beaudouin-Lafon, W. Mackay: Prototyping Tools and Techniques
