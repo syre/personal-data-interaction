@@ -34,6 +34,7 @@
 \usepackage{xcolor}
 \usepackage{textcomp}
 \usepackage{geometry}
+\usepackage{pdflscape}
 
 \usepackage{selinput}
 \SelectInputMappings{   % Semi-automatic determination
@@ -453,6 +454,16 @@ We haven’t any help or documentation for the user at this moment. It would be 
 \end{figure}
 
 
+\begin{landscape}
+\newgeometry{left=5cm, right=5cm} %, right=0cm, bottom=0cm, top=0cm
+\begin{figure}
+\centering
+\caption{User story map}
+\includegraphics[trim= 0cm 10cm 0cm 0cm, clip=true]{figures/user_story_mapping}
+\label{fig:user_story_mapping}
+\end{figure}
+\restoregeometry
+\end{landscape}
 
 \newgeometry{left=1.5cm, right=1.5cm}
 
