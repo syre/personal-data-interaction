@@ -33,6 +33,7 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{textcomp}
+\usepackage{geometry}
 
 \usepackage{selinput}
 \SelectInputMappings{   % Semi-automatic determination
@@ -186,13 +187,13 @@ The function is used to create an action to a notification, so the user can call
 The code is strong inspired of the code from \cite{number}.\\
 
 
-To give a sense on how some of the functions work together, we have made some sequence diagrams, to show the flow. These diagrams is [ref]\\ 
+To give a sense on how some of the functions work together, we have made some sequence diagrams, to show the flow. These diagrams is figure \ref{fig:sq-onLocation} and \ref{fig:sq-nudge}.\\ 
 
 For the app we used the following libraries: Paho MQTT\cite{paho}, Sothee Sliding up panel\cite{slidinguppanel}.
 
 
 \subsection{Backend (RabbitMQ and Flask)}
-The Python web server is running a simple Flask[ref] script which can be queried with an email and then returns a list of predetermined friends in JSON format, we decided to use these tools because they allowed us to quickly set up a “mock” backend for the app to communicate with. While testing the app among a number of users, we simply modified the script to return a number of their chosen friends based on their email.\\
+The Python web server is running a simple Flask\cite{flask} script which can be queried with an email and then returns a list of predetermined friends in JSON format, we decided to use these tools because they allowed us to quickly set up a “mock” backend for the app to communicate with. While testing the app among a number of users, we simply modified the script to return a number of their chosen friends based on their email.\\
 
 The RabbitMQ is responsible for acting as a message queue for relaying the messages between devices running the app. The protocol used for the messages is MQTT, which was chosen because it’s lightweight in terms of code footprint and network bandwidth. The message queue use the notion of “topics”, so each message is broadcast on a topic, which in our case is the email of the user and the latitude and longitude of their location reduced to 2 decimal places. This reduces the number of updates received by the app since you do not receive an update from a friend if your location is not the same as theirs to 2 decimal places. In hindsight this could also be implemented server-side where the server compared the last location with all friends, and only relayed it if they were within radius of each other.
 
@@ -278,7 +279,8 @@ As mentioned in the backend section we cannot set the radius ourselves right now
 \section{Future work}
 From the feedback we received future work can be spent on taking the solution in several interesting directions.\\
 The solution could filter based on interests rather than friends, so an example could be if you're into skating or playing soccer, you can be notified when people who identify themselves as either type are present at the local soccerfield or skatepark.\\
-By integrating with social networks the solution could rank friends by communication and visualize that rank by a different color on the markers as right now only a single color is used.
+By integrating with social networks the solution could rank friends by communication and visualize that rank by a different color on the markers as right now only a single color is used.\\
+We also need a solution when there is many friends in one place - se figure \ref{fig:before-visualization}. Our solution as a lo-fi is, to group friends that are clustered. This could be done with K-means algorithm. Then, visualize these clusters as ovals in different sizes and colors, with the number of friends written on it - see figure \ref{fig:after-visualization}. 
 \section{Conclusions}
 We iteratively developed a solution for solving the problem of not being aware of when a friend is nearby. We developed a user story mapping and made a lo-fi prototype based on it. After several iterations of lo-fi prototyping we developed a hi-fi prototype as a proof of concept. We continuously validated the prototypes with feedback from quick \& dirty sessions, think-aloud evaluations and at the end a summative heuristic evaluation using the refined Nielsen heuristics\cite{nielsenheuristics}. From the heuristic evaluation we found a number of usability issues which can be worked on. We have laid the foundation and developed a proof-of-concept app which can be taken in several interesting directions as mentioned in the Future work section.
 \begin{thebibliography}{4}
@@ -292,6 +294,7 @@ We iteratively developed a solution for solving the problem of not being aware o
 \bibitem{rabbitmq} RabbitMQ - Message Queue Server: URL \url{http://www.rabbitmq.com/}
 \bibitem{heuristics}Nielsen, J., and R. Molich. “Heuristic Evaluation of User Interfaces.” SIGCHI Bulletin (1990): 249–256. Print.
 \bibitem{number} Search for number in phonebook by name: URL \url{http://stackoverflow.com/questions/18201108/getting-number-and-names-of-contacts-in-android}
+\bibitem{flask} Flask microframework: URL \url{http://flask.pocoo.org/}
 % bibliography examples:
 
 %\bibitem{proceeding2} Foster, I., Kesselman, C., Nick, J., Tuecke, S.: The Physiology of the
@@ -349,7 +352,7 @@ The evaluator is from now on denoted 'E'. \\
 \end{enumerate}
 
 \subsection*{Heuristic evaluation} \label{heuristic}
-In the last iteration we have evaluated the app using the Nielsen heuristics[ref].
+In the last iteration we have evaluated the app using the Nielsen heuristics\cite{nielsenheuristics}.
 
 We have tested the interface independently using two evaluators, below is a summary of the issues found.\\
 
@@ -397,30 +400,89 @@ We haven’t any help or documentation for the user at this moment. It would be 
 \centering
 \caption{lo-fi prototype iteration 1}
 \includegraphics[width=0.6\textwidth]{figures/lo-fi-4}
+\label{fig:lo-fi-fixed-panel-simple-marker}
 \end{figure}
 
 \begin{figure}
 \centering
 \caption{lo-fi prototype iteration 2}
 \includegraphics[width=0.6\textwidth]{figures/lo-fi-3}
+\label{fig:lo-fi-fixed-panel}
 \end{figure}
 
 \begin{figure}
 \centering
 \caption{lo-fi prototype iteration 3, panel collapsed}
 \includegraphics[width=0.6\textwidth]{figures/lo-fi-2}
+\label{fig:lo-fi-panel-collapsed}
 \end{figure}
 
 \begin{figure}
 \centering
-\caption{lo-fi prototype iteration 3, panel expanded}
+\caption{lo-fi prototype iteration 3 w. navigation, panel expanded}
 \includegraphics[width=0.6\textwidth]{figures/lo-fi-1}
+\label{fig:lo-fi-w.navigation}
 \end{figure}
 
 
+\begin{figure}
+\centering
+\caption{lo-fi prototype iteration 3 w. navigation, panel expanded}
+\includegraphics[width=0.6\textwidth]{figures/lo-fi-1}
+\label{fig:lo-fi-w.navigation}
+\end{figure}
+
+\begin{figure}
+\centering
+\caption{Case before visualization, panel collapsed}
+\includegraphics[width=0.6\textwidth]{figures/lo-fi-5}
+\label{fig:before-visualization}
+\end{figure}
+
+\begin{figure}
+\centering
+\caption{final hi-fi prototype, panel expanded}
+\includegraphics[width=0.6\textwidth]{figures/hi-fi-friendlist-expanded}
+\label{fig:hi-fi friendlist expanded}
+\end{figure}
+
+\begin{figure}
+\centering
+\caption{final hi-fi prototype, panel collapsed}
+\includegraphics[width=0.6\textwidth]{figures/hi-fi-friendlist-collapsed}
+\label{fig:hi-fi friendlist collapsed}
+\end{figure}
+
+\begin{figure}
+\centering
+\caption{Case after visualization, panel collapsed}
+\includegraphics[width=0.6\textwidth]{figures/lo-fi-6}
+\label{fig:after-visualization}
+\end{figure}
+
+\begin{figure}
+\centering
+\caption{Sequence diagram over onLocationChanged}
+\includegraphics[scale=0.5]{figures/sq-1}
+\label{fig:sq-onLocation}
+\end{figure}
+
+\begin{figure}
+\centering
+\caption{Sequence diagram over send Nudge}
+\includegraphics[scale=0.5]{figures/sq-2}
+\label{fig:sq-nudge}
+\end{figure}
+
+
+
+\newgeometry{left=1.5cm, right=1.5cm}
+
 \subsection*{Sourcecode}
 \lstset{numbers=left,
-tabsize=2, numbersep=10pt,
+tabsize=1, numbersep=10pt,
   title=\lstname }
 \lstinputlisting[language=Java]{FriendBump/mobile/src/main/java/com/example/syre/friendbump/MainActivity.java}
+
+\restoregeometry
 \end{document}
