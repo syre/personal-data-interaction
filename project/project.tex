@@ -85,10 +85,8 @@
 
 
 \begin{abstract}
-The abstract should summarize the contents of the paper and should
-contain at least 70 and at most 150 words. It should be written using the
-\emph{abstract} environment.
-\keywords{geolocation·android·prototyping·app·evaluation}
+This paper explain the developing of an app from the initial design phase, through a working prototype. Throughout the paper will there be referred to multiple figures in the appendix, which will help to understand the design. Using known prototyping- and evaluation tools, the app is beeing evaluated on different design stages. In the end there is a discussion of the result and some remarks on future development. 
+\keywords{geolocation·android·prototyping·app·evaluation·data interaction}
 \end{abstract}
 
 
@@ -275,7 +273,8 @@ We would like to have used at least five evaluators for the heuristic evaluation
 Due to our "improvised" backend, for calling and texting a friend, the app makes the assumption that the friend is located in the phone book with the same name it receives from the backend.\\
 
 As mentioned in the backend section we cannot set the radius ourselves right now as it's based decimal representations on the latitude and longitudes of the users, this limitation can be corrected comparing the last known location of the sender in the backend and only relay the message if it's within a predefined range we can set.\\
-Notifications right now happen every time a friend is within radius and the app is in the background, this is of course not ideal for situations where a sudden influx of friends happen. Notifications could also annoy the user when a friend is constantly going in and out of their radius. We realize notifications are hard to get right but propose the following restrictions on notifications: Only one notification per person per day, If a number of users are in a new area, the notifications will be batched into one, listing all of their names.
+Notifications right now happen every time a friend is within radius and the app is in the background, this is of course not ideal for situations where a sudden influx of friends happen. Notifications could also annoy the user when a friend is constantly going in and out of their radius. We realize notifications are hard to get right but propose the following restrictions on notifications: Only one notification per person per day, If a number of users are in a new area, the notifications will be batched into one, listing all of their names.\\
+In the next section we have a possible solution to a visualization problem, when a lot of people is at the same place. A similar problem is if there are multiple friends with the same name. How do we distinguish between these friends? The profile-image could help, but if we let the user alter the names, the user have more control of the list. The user could give friends recognizable names or nicknames. 
 \section{Future work}\label{future-work}
 From the feedback we received future work can be spent on taking the solution in several interesting directions.\\
 The solution could filter based on interests rather than friends, so an example could be if you're into skating or playing soccer, you can be notified when people who identify themselves as either type are present at the local soccerfield or skatepark.\\
