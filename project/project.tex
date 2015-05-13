@@ -111,11 +111,12 @@ Finally we go through our results and discuss them. Last, some remarks for possi
 
 \section{Analysis}
 As the problem is, that you don’t know if a friend is nearby, the immediate solution would be to continuously broadcast your location to your friends.
-However we have to factor in privacy and avoid giving the users the feeling of being spied on. People will probably not use a solution that allows everyone to see their location at all times.\\
-Also we figured the user should be able to disable broadcasts temporarily, because there are times when you don't want to advise your location, like going to the doctors or on a date where you’d rather be incognito. 
+However we have to factor in privacy and avoid giving the users the feeling of being spied on. People will probably not use a solution that allows everyone to see their location at all times. The location should only be broadcast if friends are within a certain radius.\\
+Also we figured the user should be able to disable broadcasts temporarily, because there are times when you don't want to advise your location, like going to the doctors or on a date where you’d rather be incognito.
+The solution would have to work in an outdoors context while on foot, smartwatch support could contribute to this. The watch is more convenient if you're out shopping or performing another activity without your hands being free, as being notified is much easier in that setting.
 
 \section{Design}
-Our design methods is divided into two overall parts: a lo-fi prototype which is is developed based on an initial user story map and done with mock-ups, and a hi-fi prototype, an Android app. The hi-fi prototype is based on the lo-fi prototype. 
+Our design methods is divided into two overall parts: a lo-fi prototype which is is developed based on an initial user story map and done with mock-ups, and a hi-fi prototype, an Android app with Android Wear notifications. The hi-fi prototype is based on the lo-fi prototype. 
 
 \subsection{Lo-fi prototype}
 We wanted to create a fixed-path prototype, which allowed for interaction by users early as explained in \cite{prototyping}. We used an online wireframe mockup tool\cite{ninja}, which allowed us to quickly sketch out designs for validation. \\
@@ -164,6 +165,8 @@ We decided to remove in-app navigation, the feature which shows a proposed path 
 After further development and quick \& dirty, we changed the button to toggle the broadcast on and off and added a nudge button. \\
 See the result on figure \ref{fig:hi-fi app friendlist expanded} and \ref{fig:hi-fi app friendlist collapsed}. 
 
+Part of our hi-fi prototype was also Android Wear support, we added notifications and options to SMS and call a friend as seen on figure \ref{fig:hi-fi watch notification collapsed}, \ref{fig:hi-fi watch notification expanded}, \ref{fig:hi-fi watch sms} and \ref{fig:hi-fi watch call}
+
 \section{Implementation}
 Our implementation is divided into two parts: the already mentioned app and a backend server. The backend is composed of a python webserver and a RabbitMQ server\cite{rabbitmq}. \\
 We will in the following section describe these two parts and details regarding them. 
@@ -176,7 +179,7 @@ There are a couple of non-trivial functions, which we will describe in a bit mor
 This function creates a bitmap object containing the initials of the person on a round and red background, for example Anders Rahbek turns into AR.\\
 
 This is used to show an unique marker for a friend, thus the function is been called from “updateMarker” function. \\
-The function drawing the bitmap to the marker is taken from Stack Overflow\cite{bitmapstackoverflow}
+The function drawing the bitmap to the marker is based on this code snippet from Stack Overflow\cite{bitmapstackoverflow}
 
 \underline{getNumber}\\
 The getNumber function, tries to find a telephone number based on a name. It iterate through the mobiles phonebook and return the number if it finds the name, null otherwise. \\
@@ -312,7 +315,7 @@ We iteratively developed a solution for solving the problem of not being aware o
 \subsection*{Transcript of summative think aloud evaluation}\label{transcript}
 The following \textit{in italic} is the transcript of the recordings of what the evaluator has "thought". The question/task that the observer has given the evaluator, is the following bulletpoints. 
 
-It's worth mentioned that the evaluator were used to use  an iPhone and not Android. \\
+It's worth mentioning that the evaluator were used to use an iPhone and not Android. \\
 
 The evaluator is from now on denoted 'E'. \\
 \begin{enumerate}
