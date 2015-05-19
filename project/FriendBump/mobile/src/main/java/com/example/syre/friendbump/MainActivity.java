@@ -28,6 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -89,6 +90,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     String clientEmail;
     Location lastLocation = null;
     ProgressBar loadingSpinner;
+    LinearLayout overlay;
     private static boolean isInForeground;
     private String friendNotificationContentText = "";
     private String friendNotificationTitle = "";
@@ -123,7 +125,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendMapView = (MapView) findViewById(R.id.friendMapView);
         toggleBroadcastingButton = (ImageButton) findViewById(R.id.toggleBroadcastingButton);
         friendMapView.onCreate(savedInstanceState);
-
+        overlay = (LinearLayout) findViewById(R.id.spinnerOverlay);
         friendListView = (ListView) findViewById(R.id.friendListView);
         TextView listEmptyText = (TextView) findViewById(R.id.friendListEmptyText);
         friendListView.setEmptyView(listEmptyText);
@@ -687,12 +689,14 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
                         {
                             loadingSpinner.setVisibility(View.VISIBLE);
+                            overlay.setVisibility(View.VISIBLE);
                         }
 
                         else
 
                         {
                             loadingSpinner.setVisibility(View.INVISIBLE);
+                            overlay.setVisibility(View.INVISIBLE);
                         }
                     }
                 });

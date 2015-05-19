@@ -14,6 +14,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/friendMapView"/>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:id="@+id/spinnerOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#99000000"
+            android:clickable="false">
+        </LinearLayout>
         <ImageButton
             android:id="@+id/toggleBroadcastingButton"
             android:layout_alignParentTop="true"
