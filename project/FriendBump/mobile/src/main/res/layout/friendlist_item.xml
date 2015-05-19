@@ -17,6 +17,7 @@
         <ImageView
             android:layout_width="70dp"
             android:layout_height="70dp"
+            android:layout_marginLeft="10dp"
             android:id="@+id/friend_image"
             android:src="@drawable/person_placeholder"
             android:contentDescription="Profile picture of Friend">
@@ -33,7 +34,7 @@
             android:id="@+id/friend_name"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:layout_marginTop="4dip"
+            android:layout_marginTop="25dip"
             android:text="Blabla"/>
         </TableRow>
         <TableRow>
@@ -61,7 +62,9 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:orientation="horizontal"
-        android:visibility="gone">
+        android:visibility="gone"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp">
         <ImageView
             android:id="@+id/phone_button"
             android:layout_width="30dp"
