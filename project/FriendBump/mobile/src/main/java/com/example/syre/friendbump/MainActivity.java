@@ -26,8 +26,10 @@ import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -86,6 +88,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     MemoryPersistence persistence;
     String clientEmail;
     Location lastLocation = null;
+    ProgressBar loadingSpinner;
     private static boolean isInForeground;
     private String friendNotificationContentText = "";
     private String friendNotificationTitle = "";
@@ -122,7 +125,10 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         friendMapView.onCreate(savedInstanceState);
 
         friendListView = (ListView) findViewById(R.id.friendListView);
-
+        TextView listEmptyText = (TextView) findViewById(R.id.friendListEmptyText);
+        friendListView.setEmptyView(listEmptyText);
+        loadingSpinner = (ProgressBar) findViewById(R.id.loadingSpinner);
+        loadingSpinner.getIndeterminateDrawable().setColorFilter(0x5FFF0000, android.graphics.PorterDuff.Mode.MULTIPLY);
         valuesList = new ArrayList<>(areaFriendHashMap.values());
         friendListAdapter = new FriendListAdapter(this, valuesList, getResources(),
                 friendListView);
@@ -136,8 +142,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 .build();
         broadcastingEnabled = true;
         persistence = new MemoryPersistence();
-        TextView listEmptyText = (TextView) findViewById(R.id.friendListEmptyText);
-        friendListView.setEmptyView(listEmptyText);
+
         // run mqtt connection separate from ui thread to avoid ui hanging
         final MqttCallback currentActivity = this;
         Thread connectThread = new Thread() {
@@ -459,6 +464,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     @Override
     public void onConnected(Bundle bundle) {
         Log.d("MainActivity", "device connected!");
+        loadingSpinner.setVisibility(View.GONE);
         LocationRequest locationrequest = new LocationRequest();
         locationrequest.setInterval(10000);
         locationrequest.setFastestInterval(5000);
@@ -477,6 +483,9 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
 
     public void toggleBroadcasting(View v) {
+        final AlphaAnimation buttonClick = new AlphaAnimation(0.4f, 1f);
+        buttonClick.setDuration(100);
+        v.startAnimation(buttonClick);
         if (broadcastingEnabled) {
             toggleBroadcastingButton.setBackgroundResource(R.drawable.navigation_off);
         } else {
@@ -488,6 +497,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     @Override
     public void connectionLost(Throwable throwable) {
         Log.d("connectionLost", "connectionLost!!");
+        loadingSpinner.setVisibility(View.VISIBLE);
         while (!mqttClient.isConnected()) {
             try {
                 mqttClient.connect();
@@ -502,6 +512,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
             }
         }
+        loadingSpinner.setVisibility(View.GONE);
     }
 
     private void parseCommand(JSONObject json_obj) {

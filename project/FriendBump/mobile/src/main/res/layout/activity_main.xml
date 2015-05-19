@@ -14,6 +14,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/friendMapView"/>
+        <ProgressBar
+            android:id="@+id/loadingSpinner"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:indeterminate="true"
+            android:layout_centerInParent="true"/>
         <ImageButton
             android:id="@+id/toggleBroadcastingButton"
             android:layout_alignParentTop="true"
@@ -24,6 +30,7 @@
             android:layout_height="57dp"
             android:layout_marginLeft="4dp"
             android:layout_marginTop="2dp"/>
+
     </RelativeLayout>
     <LinearLayout
         android:layout_width="match_parent"
