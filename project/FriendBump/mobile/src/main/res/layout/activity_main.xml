@@ -29,15 +29,21 @@
         android:layout_width="match_parent"
         android:layout_height="350dp"
         android:orientation="vertical">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:src="@drawable/friendlist_arrow"
+            android:layout_gravity="top"/>
     <ListView
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="15dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/friendListView"/>
         <TextView xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/friendListEmptyText"
             android:layout_width="match_parent"
-            android:layout_marginTop="25dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
             android:gravity="center"
