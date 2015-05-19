@@ -142,7 +142,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 .build();
         broadcastingEnabled = true;
         persistence = new MemoryPersistence();
-
+        enableSpinner(true);
         // run mqtt connection separate from ui thread to avoid ui hanging
         final MqttCallback currentActivity = this;
         Thread connectThread = new Thread() {
@@ -159,6 +159,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     try {
 
                         mqttClient.connect();
+
                     } catch (MqttException except) {
                         Log.d("MainActivity mqtt:", except.getMessage());
                         Toast.makeText(getApplicationContext(),
@@ -166,9 +167,15 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                                 except.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        enableSpinner(false);
+                    }
+                });
             }
-        };
 
+        };
         connectThread.start();
     }
 
@@ -368,9 +375,18 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         msg.setQos(0);
         try {
             mqttClient.publish(topic, msg);
-        } catch (MqttException except) {
+        }
+        catch (MqttException except) {
             Log.d("MainActivity", "MQTT: could not send location message: " +
                     except.getMessage() + " (" + except.getReasonCode() + ")");
+            if (except.getReasonCode() == MqttException.REASON_CODE_CLIENT_NOT_CONNECTED)
+                try {
+                    mqttClient.connect();
+                }
+                catch(MqttException connectExcept)
+                {
+                }
+
         }
     }
 
@@ -464,7 +480,6 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     @Override
     public void onConnected(Bundle bundle) {
         Log.d("MainActivity", "device connected!");
-        loadingSpinner.setVisibility(View.GONE);
         LocationRequest locationrequest = new LocationRequest();
         locationrequest.setInterval(10000);
         locationrequest.setFastestInterval(5000);
@@ -497,7 +512,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
     @Override
     public void connectionLost(Throwable throwable) {
         Log.d("connectionLost", "connectionLost!!");
-        loadingSpinner.setVisibility(View.VISIBLE);
+        enableSpinner(true);
         while (!mqttClient.isConnected()) {
             try {
                 mqttClient.connect();
@@ -512,7 +527,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
             }
         }
-        loadingSpinner.setVisibility(View.GONE);
+        enableSpinner(false);
     }
 
     private void parseCommand(JSONObject json_obj) {
@@ -663,7 +678,25 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
         }
 
     }
+    void enableSpinner(final boolean on)
+    {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(on)
 
+                        {
+                            loadingSpinner.setVisibility(View.VISIBLE);
+                        }
+
+                        else
+
+                        {
+                            loadingSpinner.setVisibility(View.INVISIBLE);
+                        }
+                    }
+                });
+    }
 
     @Override
     public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
