@@ -58,7 +58,8 @@
             android:layout_width="match_parent"
             android:layout_height="25dp"
             android:src="@drawable/friendlist_arrow"
-            android:layout_gravity="top"/>
+            android:layout_gravity="top"
+            android:background="#2289e3"/>
     <ListView
         android:layout_marginTop="15dp"
         android:layout_width="match_parent"
