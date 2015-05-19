@@ -17,18 +17,32 @@
         <ImageButton
             android:id="@+id/toggleBroadcastingButton"
             android:layout_alignParentTop="true"
-            android:background="@mipmap/broadcast_enabled"
+            android:background="@drawable/navigation_on"
+            android:layout_gravity="left"
             android:onClick="toggleBroadcasting"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"/>
     </RelativeLayout>
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="350dp">
+        android:layout_height="350dp"
+        android:orientation="vertical">
     <ListView
         android:layout_marginTop="40dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/friendListView"/>
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/friendListEmptyText"
+            android:layout_width="match_parent"
+            android:layout_marginTop="25dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:gravity="center"
+            android:text="You have no friends nearby"
+            android:textColor="#000000"
+            android:visibility="gone"/>
     </LinearLayout>
 </com.sothree.slidinguppanel.SlidingUpPanelLayout>

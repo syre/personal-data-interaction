@@ -28,6 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -135,7 +136,8 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                 .build();
         broadcastingEnabled = true;
         persistence = new MemoryPersistence();
-
+        TextView listEmptyText = (TextView) findViewById(R.id.friendListEmptyText);
+        friendListView.setEmptyView(listEmptyText);
         // run mqtt connection separate from ui thread to avoid ui hanging
         final MqttCallback currentActivity = this;
         Thread connectThread = new Thread() {
@@ -476,9 +478,9 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     public void toggleBroadcasting(View v) {
         if (broadcastingEnabled) {
-            toggleBroadcastingButton.setBackgroundResource(R.mipmap.broadcast_disabled);
+            toggleBroadcastingButton.setBackgroundResource(R.drawable.navigation_off);
         } else {
-            toggleBroadcastingButton.setBackgroundResource(R.mipmap.broadcast_enabled);
+            toggleBroadcastingButton.setBackgroundResource(R.drawable.navigation_on);
         }
         broadcastingEnabled = !broadcastingEnabled;
     }
@@ -685,7 +687,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                     PendingIntent.getActivity(this, 0, resultIntent, 0);
             NotificationCompat.Builder mBuilder =
                     new NotificationCompat.Builder(this)
-                            .setSmallIcon(R.mipmap.broadcast_disabled)
+                            .setSmallIcon(R.drawable.navigation_on)
                             .setContentIntent(viewPendingIntent);
 
             if (nudgeNotificationContentText == "") {
@@ -750,7 +752,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
                         PendingIntent.getActivity(this, 0, resultIntent, 0);
                 NotificationCompat.Builder mBuilder =
                         new NotificationCompat.Builder(this)
-                                .setSmallIcon(R.mipmap.broadcast_disabled)
+                                .setSmallIcon(R.drawable.navigation_on)
                                 .setContentIntent(viewPendingIntent);
 
                 if (friendNotificationContentText == "") {
