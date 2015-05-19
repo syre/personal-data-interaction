@@ -291,7 +291,7 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
 
     }
 
-    private double roundtoDecimals(int decimals, double value) {
+    private String roundtoDecimals(int decimals, double value) {
         String valueString = String.valueOf(value);
         String splitString = "";
         if (valueString.contains("."))
@@ -300,12 +300,9 @@ public class MainActivity extends Activity implements OnMapReadyCallback,
             splitString = ",";
 
         int indexOfDot = valueString.indexOf(splitString);
-        int dec = Integer.parseInt(valueString.substring(0, indexOfDot));
-        int frac = Integer.parseInt(valueString.substring(indexOfDot + 1,
-                indexOfDot + 1 + decimals));
-        double newValue = Double.parseDouble(String.valueOf(dec) + "." +
-                String.valueOf(frac));
-        return newValue;
+        String result = valueString.substring(0, indexOfDot)+"."+
+                valueString.substring(indexOfDot + 1, indexOfDot + 1 + decimals);
+        return result;
 
     }
 
